@@ -1,0 +1,16 @@
+---
+description: Python backend and local reminders (SQLite)
+globs: ric/**/*.py, **/*.py
+alwaysApply: false
+---
+
+# Backend / reminders
+
+- Stack: Python 3 + SQLite. Keep the MVP CLI (`python -m ric ...`) working.
+- Store data locally in `ric/data/` (e.g. `ric.db`). Never send reminder data to cloud APIs.
+- Reminder flow must work offline: create, list, trigger, confirm (`ok`), snooze (`adiar`).
+- Types include at least: medicamento, consulta, tarefa (extend carefully).
+- Do not couple reminder scheduling/triggers to Ollama or any LLM call.
+- Prefer clear module boundaries: models/DB, scheduling, CLI. Avoid giant scripts.
+- Fail safe: bad LLM output must not block or corrupt reminder state.
+- Keep Windows-friendly docs/commands when touching user-facing steps.

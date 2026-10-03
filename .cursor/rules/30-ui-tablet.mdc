@@ -1,0 +1,17 @@
+---
+description: Companion face / tablet UI conventions
+globs: **/*.{html,css,js,tsx,ts,jsx,vue}, **/static/**/*, **/templates/**/*, **/frontend/**/*
+alwaysApply: false
+---
+
+# UI / tablet
+
+- Thin client: face, chat, reminder list/buttons. Heavy logic stays on the local brain (PC/NUC/Pi).
+- Audience: mainly older adults — large text, high contrast, few steps, obvious buttons.
+- First viewport: calm companion feel; avoid dashboard clutter.
+- Show reminders clearly (due / confirm / snooze). Never hide critical alerts behind chat-only UX.
+- Works on older tablets/browsers when possible; avoid heavy frameworks unless justified.
+- Offline-friendly UI for essentials; do not require cloud assets for core flows.
+- Prefer local/system fonts over CDN font loading for the MVP UI.
+- Launch via `py -m ric ui` (stdlib server in `ric/web_server.py`, assets in `ric/web/`).
+- No medical diagnosis UI. Labels like “lembrete” / “registo”, not “tratamento prescrito”.

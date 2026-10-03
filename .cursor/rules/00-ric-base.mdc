@@ -1,0 +1,17 @@
+---
+description: Core RIC/PAP rules for every agent and model
+alwaysApply: true
+---
+
+# RIC — base rules
+
+- Reply in **European Portuguese** (pt-PT). Keep rule files and code comments concise; prefer English identifiers in code.
+- Read `CONTEXTO-PAP.md` before large changes. Update it when decisions change.
+- Scope: school PAP MVP. Prefer simple, maintainable solutions over enterprise patterns.
+- Priorities: interaction + privacy + hardware reuse. Locomotion/arms are later extras, not the critical path.
+- Reminders = reliable local backend. LLM = conversation/company. Reminders must work without LLM and without internet.
+- Never diagnose disease or prescribe medication. Reminders and logging only.
+- Local-first: no sensitive data to cloud by default. Cloud LLM only if explicit and optional.
+- Prefer reused hardware; justify any new purchase in docs.
+- Do not invent features outside CONTEXTO scope without asking Pedro.
+- Code docs: keep detailed per-file explanations in `docs/codigo/` in sync when code changes (see rule `50-explicacoes-codigo`).

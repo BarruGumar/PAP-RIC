@@ -1,0 +1,16 @@
+---
+description: PAP documentation and CONTEXTO maintenance
+globs: **/*.md, docs/**/*, CONTEXTO-PAP.md
+alwaysApply: false
+---
+
+# Documentation (PAP)
+
+- Write docs in European Portuguese unless Pedro asks otherwise.
+- Keep `CONTEXTO-PAP.md` as the source of truth for goals, scope, and decisions.
+- Document architecture, tests, privacy/ethics, costs, limits, and future work.
+- Prefer short checklists and tables over long prose.
+- Record hardware reuse inventory and justify new purchases.
+- For LLM study: comparison table (quality, latency, privacy, hardware fit).
+- Align claims with real MVP status — no fake “done” features.
+- Per-file code explanations live in `docs/codigo/` (index: `README.md`). Keep them updated with the code.

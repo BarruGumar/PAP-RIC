@@ -1,0 +1,15 @@
+---
+description: Keep detailed per-file code explanations in docs/codigo/
+globs: **/*.py, docs/codigo/**/*
+alwaysApply: false
+---
+
+# Code explanations (`docs/codigo/`)
+
+- Every meaningful source file must have a detailed explanation in `docs/codigo/` (European Portuguese).
+- Index: `docs/codigo/README.md` — update the table when adding/removing modules.
+- Naming: mirror the source (e.g. `ric/db.py` → `docs/codigo/ric_db.md`, `main.py` → `docs/codigo/main.md`).
+- When you **create or change** code behavior, update the matching explanation in the same task.
+- Each explanation should cover: purpose, how it fits the architecture, important functions/classes, data flow, and PAP/privacy notes when relevant.
+- Prefer clear sectioned detail over vague summaries. Include small examples/commands when useful.
+- Do not leave docs claiming features that the code does not have.

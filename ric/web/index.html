@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RIC — Companheiro</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div class="atmosphere" aria-hidden="true"></div>
+
+  <main class="shell">
+    <header class="brand">
+      <p class="brand-name">RIC</p>
+      <h1>Fala comigo</h1>
+      <p class="lead">Diz o que queres lembrar. Eu agendo e aviso-te à hora.</p>
+      <p id="llm-estado" class="llm-estado" role="status">A verificar a LLM local…</p>
+    </header>
+
+    <section class="chat" aria-labelledby="chat-titulo">
+      <h2 id="chat-titulo">Conversa</h2>
+      <div id="chat-log" class="chat-log" aria-live="polite">
+        <div class="bubble assistant">
+          Olá. Podes dizer, por exemplo: “Lembra-me de beber água às 16:30”.
+        </div>
+      </div>
+      <form id="form-chat" class="chat-form">
+        <label class="sr-only" for="chat-input">Mensagem para o RIC</label>
+        <input id="chat-input" type="text" maxlength="400" required
+               placeholder="Escreve aqui…" autocomplete="off" />
+        <button type="submit" id="btn-enviar" class="btn btn-primary">Enviar</button>
+      </form>
+      <p id="chat-msg" class="msg" role="status" hidden></p>
+    </section>
+
+    <section class="lista" aria-labelledby="lista-titulo">
+      <div class="lista-head">
+        <h2 id="lista-titulo">Lembretes</h2>
+        <p id="relogio" class="relogio" aria-live="polite"></p>
+      </div>
+      <ul id="lembretes" class="lembretes"></ul>
+      <p id="lista-vazia" class="vazia" hidden>Ainda não há lembretes. Fala com o RIC ou agenda manualmente.</p>
+    </section>
+
+    <details class="manual">
+      <summary>Agendar manualmente (sem conversa)</summary>
+      <form id="form-agendar" class="form">
+        <label>
+          O que queres lembrar?
+          <input id="titulo" name="titulo" type="text" required maxlength="120"
+                 placeholder="Ex.: Tomar medicamento" autocomplete="off" />
+        </label>
+        <div class="row">
+          <label>
+            Hora
+            <input id="hora" name="hora" type="time" required />
+          </label>
+          <label>
+            Tipo
+            <select id="tipo" name="tipo">
+              <option value="medicamento">Medicamento</option>
+              <option value="consulta">Consulta</option>
+              <option value="tarefa" selected>Tarefa</option>
+              <option value="outro">Outro</option>
+            </select>
+          </label>
+        </div>
+        <button type="submit" class="btn btn-primary">Agendar lembrete</button>
+        <p id="form-msg" class="msg" role="status" hidden></p>
+      </form>
+    </details>
+  </main>
+
+  <div id="overlay" class="overlay" hidden>
+    <div class="alerta" role="alertdialog" aria-modal="true" aria-labelledby="alerta-titulo">
+      <p class="alerta-kicker">É a hora</p>
+      <h2 id="alerta-titulo"></h2>
+      <p id="alerta-frase" class="alerta-frase"></p>
+      <p id="alerta-meta" class="alerta-meta"></p>
+      <div class="alerta-acoes">
+        <button type="button" id="btn-ok" class="btn btn-primary">Já fiz</button>
+        <button type="button" id="btn-adiar" class="btn btn-secondary">Adiar 10 min</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
