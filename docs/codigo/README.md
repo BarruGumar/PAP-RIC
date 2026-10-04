@@ -14,6 +14,8 @@ Esta pasta explica **cada ficheiro de código** do projeto, ao pormenor, para a 
 | `ric/web_server.py` | [ric_web_server.md](ric_web_server.md) |
 | `ric/web/` (HTML/CSS/JS) | [ric_web_ui.md](ric_web_ui.md) |
 | `ric/llm.py` | [ric_llm.md](ric_llm.md) |
+| `ric/music.py` + `ric/musica/` | [ric_music.md](ric_music.md) |
+| `ric/voice.py` | [ric_voice.md](ric_voice.md) |
 
 ## Regra do projeto
 
@@ -29,8 +31,9 @@ py -m ric <comando>
       (entrada)      (comandos)     (SQLite)         (dados locais)
                           │
                           └─ ui → ric/web_server.py → browser (ric/web/)
-                                        │
-                                        └─ chat/frase → ric/llm.py → Ollama (qwen2.5:3b)
+                                        │              + watchdog lembretes
+                                        ├─ chat/frase → ric/llm.py → Ollama
+                                        └─ voz → ric/voice.py (TTS local)
 ```
 
 `main.py` é só um atalho opcional para o mesmo `cli`.

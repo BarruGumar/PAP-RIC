@@ -2,13 +2,14 @@
 
 ## Para que serve
 
-É o **cérebro de dados** dos lembretes:
+É o **cérebro de dados** do RIC (SQLite local):
 
-- cria a base SQLite local;
-- adiciona, lista, confirma e adia lembretes;
-- descobre quais lembretes já estão “devidos” (chegou a hora).
+- lembretes (criar por HH:MM ou por instante `adicionar_em`, listar, confirmar, adiar, devidos);
+- **perfil** (preferências: nome, gostos…);
+- **conversas** (histórico de chat + resumo quando cresce);
+- **confirmações** (histórico simples de “já fiz”).
 
-**Importante para a PAP:** isto funciona **offline**, sem LLM e sem internet. A privacidade e a fiabilidade dos avisos dependem desta camada.
+**Importante para a PAP:** funciona **offline**, sem LLM e sem internet.
 
 ---
 
@@ -80,7 +81,9 @@ O `_` no início significa “função interna” (uso dentro do módulo).
 
 ## `init_db()`
 
-Cria a tabela `lembretes` se ainda não existir:
+Cria as tabelas se ainda não existirem:
+
+### `lembretes`
 
 | Coluna | Função |
 |---|---|
@@ -91,6 +94,18 @@ Cria a tabela `lembretes` se ainda não existir:
 | `estado` | Ciclo de vida do aviso |
 | `proximo_em` | Quando deve voltar a alertar |
 | `criado_em` | Quando foi criado |
+
+### `perfil`
+
+Chave/valor (`nome`, `genero_favorito`, …) com `atualizado_em`.
+
+### `conversas`
+
+Mensagens `user` / `assistant` / `system_resumo` para persistir o chat.
+
+### `confirmacoes`
+
+Registo opcional de ações `confirmar` / `adiar` (histórico simples para a PAP).
 
 `CREATE TABLE IF NOT EXISTS` = seguro correr várias vezes.
 
@@ -134,18 +149,10 @@ Usa `?` nos SQL (parâmetros) para evitar injeção SQL.
 
 ---
 
-## `confirmar(lembrete_id)`
+## `confirmar(lembrete_id)` / `adiar(...)`
 
-- Marca estado como `confirmado` (“já tomei” / “já fiz”).
-- Não apaga o registo: fica histórico simples para a PAP.
-
----
-
-## `adiar(lembrete_id, minutos=10)`
-
-- Põe estado `adiado`.
-- Atualiza `proximo_em` para “agora + N minutos”.
-- O `run` poderá voltar a alertar quando chegar essa hora.
+- Marca estado `confirmado` ou `adiado` (com novo `proximo_em`).
+- Regista também em `confirmacoes`.
 
 ---
 
@@ -178,6 +185,20 @@ Devolve lembretes em que:
 ## `_row_to_lembrete(row)`
 
 Converte uma linha SQLite (`sqlite3.Row`) num objeto `Lembrete` Python.
+
+---
+
+## Perfil e conversas
+
+| Função | Papel |
+|---|---|
+| `guardar_preferencia(chave, valor)` | UPSERT em `perfil` |
+| `obter_perfil()` / `perfil_texto()` | Ler preferências (texto para o prompt LLM) |
+| `adicionar_mensagem(role, conteudo)` | Guardar mensagem no chat |
+| `listar_mensagens(limite)` | Últimas N mensagens (UI) |
+| `historico_para_llm(limite)` | Formato `{role, content}` para o Ollama |
+| `limpar_conversas()` | Apagar histórico |
+| `_podar_conversas()` | Mantém tamanho; cria `system_resumo` se crescer |
 
 ---
 

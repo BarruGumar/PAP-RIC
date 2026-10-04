@@ -9,7 +9,8 @@ alwaysApply: false
 - Default local model: `qwen2.5:3b` via Ollama. Alternatives only if hardware needs it (`1.5b` weaker PC, `7b` stronger PC).
 - Use LLM for chat, companion tone, reminder phrasing, and *requesting* schedule actions via tools.
 - Backend owns scheduling truth: validate/execute in `ric/db.py`; never trust the model as the database.
-- Chat entrypoint: `ric/llm.py` + `POST /api/chat` (Ollama tools → agendar/listar/ok/adiar).
+- Chat entrypoint: `ric/llm.py` + `POST /api/chat` (tools → lembretes + música local).
+- Music is offline-only from `ric/musica/{genero}/file`; never invent tracks not on disk.
 - No medical advice prompts. Refuse diagnosis/prescription framing; stay supportive companion.
 - Keep prompts short. Prefer local inference; cloud only as optional explicit fallback.
 - Log model name + key latency notes when comparing models (PAP research).

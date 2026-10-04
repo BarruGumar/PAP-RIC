@@ -6,5 +6,11 @@ venv/
 .env
 ric/data/*.db
 ric/data/*.db-*
+# Áudio pessoal (mantém demos .wav e README no git)
+ric/musica/**/*.mp3
+ric/musica/**/*.flac
+ric/musica/**/*.m4a
+ric/musica/**/*.aac
+ric/musica/**/*.ogg
 .DS_Store
 Thumbs.db

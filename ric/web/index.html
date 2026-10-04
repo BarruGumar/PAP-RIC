@@ -7,69 +7,89 @@
   <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
-  <div class="atmosphere" aria-hidden="true"></div>
-
-  <main class="shell">
-    <header class="brand">
-      <p class="brand-name">RIC</p>
-      <h1>Fala comigo</h1>
-      <p class="lead">Diz o que queres lembrar. Eu agendo e aviso-te à hora.</p>
-      <p id="llm-estado" class="llm-estado" role="status">A verificar a LLM local…</p>
-    </header>
-
-    <section class="chat" aria-labelledby="chat-titulo">
-      <h2 id="chat-titulo">Conversa</h2>
-      <div id="chat-log" class="chat-log" aria-live="polite">
-        <div class="bubble assistant">
-          Olá. Podes dizer, por exemplo: “Lembra-me de beber água às 16:30”.
+  <div class="app">
+    <aside class="sidebar" aria-label="Painel lateral">
+      <div class="sidebar-brand">
+        <div class="face-wrap" aria-hidden="true">
+          <div id="ric-face" class="face listening" data-state="listening">
+            <div class="face-eyes">
+              <span class="eye"></span>
+              <span class="eye"></span>
+            </div>
+            <div class="face-mouth"></div>
+          </div>
         </div>
+        <p class="brand-name">RIC</p>
+        <p class="brand-tag">Companheiro local</p>
+        <p id="llm-estado" class="llm-estado" role="status">A verificar LLM…</p>
+        <p id="perfil-linha" class="perfil-linha" hidden></p>
       </div>
-      <form id="form-chat" class="chat-form">
-        <label class="sr-only" for="chat-input">Mensagem para o RIC</label>
-        <input id="chat-input" type="text" maxlength="400" required
-               placeholder="Escreve aqui…" autocomplete="off" />
-        <button type="submit" id="btn-enviar" class="btn btn-primary">Enviar</button>
-      </form>
-      <p id="chat-msg" class="msg" role="status" hidden></p>
-    </section>
 
-    <section class="lista" aria-labelledby="lista-titulo">
-      <div class="lista-head">
-        <h2 id="lista-titulo">Lembretes</h2>
-        <p id="relogio" class="relogio" aria-live="polite"></p>
-      </div>
-      <ul id="lembretes" class="lembretes"></ul>
-      <p id="lista-vazia" class="vazia" hidden>Ainda não há lembretes. Fala com o RIC ou agenda manualmente.</p>
-    </section>
+      <section class="side-block" aria-labelledby="tit-lembretes">
+        <div class="side-head">
+          <h2 id="tit-lembretes">Lembretes</h2>
+          <span id="relogio" class="relogio" aria-live="polite"></span>
+        </div>
+        <ul id="lembretes" class="side-list"></ul>
+        <p id="lista-vazia" class="vazia" hidden>Sem lembretes.</p>
+      </section>
 
-    <details class="manual">
-      <summary>Agendar manualmente (sem conversa)</summary>
-      <form id="form-agendar" class="form">
-        <label>
-          O que queres lembrar?
-          <input id="titulo" name="titulo" type="text" required maxlength="120"
-                 placeholder="Ex.: Tomar medicamento" autocomplete="off" />
+      <section class="side-block" aria-labelledby="tit-musicas">
+        <div class="side-head">
+          <h2 id="tit-musicas">Músicas</h2>
+        </div>
+        <div id="generos" class="chips" role="group" aria-label="Géneros musicais"></div>
+        <ul id="musicas" class="side-list"></ul>
+        <p id="musica-vazia" class="vazia" hidden>Pasta vazia. Vê `ric/musica/`.</p>
+      </section>
+
+      <div class="player" aria-label="Leitor de música">
+        <p id="now-playing" class="now-playing">Nada a tocar</p>
+        <p id="player-pos" class="player-pos">00:00 / 00:00</p>
+        <div class="player-actions">
+          <button type="button" id="btn-pausar" class="btn-mini" aria-label="Pausar música">Pausar</button>
+          <button type="button" id="btn-continuar" class="btn-mini primary" aria-label="Continuar música">Continuar</button>
+          <button type="button" id="btn-reiniciar" class="btn-mini" aria-label="Reiniciar do começo">Do começo</button>
+        </div>
+        <label class="volume-row" for="volume">
+          <span>Volume</span>
+          <input id="volume" type="range" min="0" max="100" value="70" aria-valuemin="0" aria-valuemax="100" />
+          <span id="volume-label">70%</span>
         </label>
-        <div class="row">
-          <label>
-            Hora
-            <input id="hora" name="hora" type="time" required />
-          </label>
-          <label>
-            Tipo
-            <select id="tipo" name="tipo">
-              <option value="medicamento">Medicamento</option>
-              <option value="consulta">Consulta</option>
-              <option value="tarefa" selected>Tarefa</option>
-              <option value="outro">Outro</option>
+        <audio id="audio" controls preload="metadata"></audio>
+      </div>
+    </aside>
+
+    <main class="chat-pane">
+      <header class="chat-top">
+        <p class="hero-brand">RIC</p>
+        <h1>Estou aqui contigo</h1>
+        <p class="lead">Agenda lembretes, pede uma história ou música — tudo no teu PC, sem cloud.</p>
+      </header>
+
+      <div id="chat-log" class="chat-log" aria-live="polite" aria-relevant="additions"></div>
+
+      <form id="form-chat" class="composer">
+        <label class="sr-only" for="chat-input">Mensagem</label>
+        <textarea id="chat-input" rows="1" maxlength="500" required
+                  placeholder="Escreve ou diz algo…"
+                  aria-label="Mensagem para o RIC"></textarea>
+        <div class="composer-actions">
+          <label class="stt-lang-wrap" for="stt-lang">
+            <span class="sr-only">Idioma do microfone</span>
+            <select id="stt-lang" class="stt-lang" aria-label="Idioma do ditado" title="O Chrome reconhece melhor pt-BR">
+              <option value="pt-BR" selected>Ditado: PT-BR</option>
+              <option value="pt-PT">Ditado: PT-PT</option>
             </select>
           </label>
+          <button type="button" id="btn-falar" class="btn btn-secondary" aria-label="Falar (ditado)">Falar</button>
+          <button type="submit" id="btn-enviar" class="btn btn-primary">Enviar</button>
         </div>
-        <button type="submit" class="btn btn-primary">Agendar lembrete</button>
-        <p id="form-msg" class="msg" role="status" hidden></p>
       </form>
-    </details>
-  </main>
+      <p id="chat-msg" class="msg" role="status" hidden></p>
+      <p id="stt-nota" class="stt-nota" hidden></p>
+    </main>
+  </div>
 
   <div id="overlay" class="overlay" hidden>
     <div class="alerta" role="alertdialog" aria-modal="true" aria-labelledby="alerta-titulo">
@@ -78,8 +98,8 @@
       <p id="alerta-frase" class="alerta-frase"></p>
       <p id="alerta-meta" class="alerta-meta"></p>
       <div class="alerta-acoes">
-        <button type="button" id="btn-ok" class="btn btn-primary">Já fiz</button>
-        <button type="button" id="btn-adiar" class="btn btn-secondary">Adiar 10 min</button>
+        <button type="button" id="btn-ok" class="btn btn-primary btn-lg">Já fiz</button>
+        <button type="button" id="btn-adiar" class="btn btn-secondary btn-lg">Adiar 10 min</button>
       </div>
     </div>
   </div>

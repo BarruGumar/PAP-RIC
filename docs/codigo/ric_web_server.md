@@ -2,7 +2,7 @@
 
 ## Para que serve
 
-Serve a **interface web local** dos lembretes no browser:
+Serve a **interface web local** do RIC no browser:
 
 ```powershell
 py -m ric ui
@@ -10,54 +10,56 @@ py -m ric ui
 
 Abre `http://127.0.0.1:8787/` e permite:
 
-- agendar lembretes;
-- ver a lista;
-- confirmar (`Já fiz`) ou adiar;
-- receber aviso quando chega a hora.
+- conversar (Ollama, se disponível);
+- agendar / confirmar / adiar lembretes;
+- tocar músicas offline;
+- carregar perfil e histórico de chat;
+- receber aviso quando chega a hora (UI + **watchdog** no servidor).
 
-Usa só a **biblioteca padrão** do Python (`http.server`) — sem Flask/FastAPI instalados.
+Usa só a **biblioteca padrão** do Python (`http.server`) — sem Flask/FastAPI.
 
-## Ideia importante
+## Watchdog de lembretes
 
-- A UI é um **cliente fino**.
-- A verdade dos dados continua em `ric/db.py` + SQLite.
-- Não precisa de internet nem de LLM.
+Ao arrancar `servir()`:
 
-## Peças principais
+1. `iniciar_watchdog()` cria uma **thread daemon**;
+2. a cada ~5 s chama `db.devidos()`;
+3. marca `disparado`, imprime `[RIC watchdog]…`, faz `voice.beep()` e `voice.falar(...)`.
 
-### Constantes
+Isto é a **rede de segurança**: mesmo se o JavaScript falhar ou o overlay não abrir, o processo Python avisa.  
+A UI continua a fazer polling para o overlay visual.
 
-- `WEB_DIR` → pasta `ric/web/` (HTML/CSS/JS)
-- `HOST` / `PORT` → `127.0.0.1:8787` (só neste PC)
-
-### API JSON
+## API JSON
 
 | Método | Rota | Função |
 |---|---|---|
 | GET | `/api/lembretes` | Lista todos |
 | GET | `/api/devidos` | Lembretes cuja hora já chegou |
 | GET | `/api/tipos` | Tipos válidos |
-| POST | `/api/lembretes` | Cria (`titulo`, `hora`, `tipo`) |
+| POST | `/api/lembretes` | Cria |
 | POST | `/api/lembretes/{id}/ok` | Confirma |
-| POST | `/api/lembretes/{id}/adiar` | Adia (`minutos`) |
-| POST | `/api/lembretes/{id}/disparar` | Marca como disparado |
-| GET | `/api/llm` | Estado do Ollama/modelo |
-| POST | `/api/chat` | Conversa + ações (agendar/ok/adiar) via LLM |
-| POST | `/api/lembretes/{id}/frase` | Frase amigável do aviso (LLM, com fallback) |
+| POST | `/api/lembretes/{id}/adiar` | Adia |
+| POST | `/api/lembretes/{id}/disparar` | Marca disparado |
+| POST | `/api/lembretes/{id}/frase` | Frase amigável (LLM + fallback) |
+| GET | `/api/llm` | Estado Ollama + info de voz |
+| POST | `/api/chat` | Conversa + tools |
+| GET | `/api/perfil` | Preferências guardadas |
+| POST | `/api/perfil` | Guardar preferência (`chave`, `valor`) |
+| GET | `/api/conversas` | Histórico de chat |
+| POST | `/api/conversas/limpar` | Apagar histórico |
+| POST | `/api/voz/falar` | TTS local (`texto`) |
+| GET | `/api/musica` | Géneros + faixas |
+| GET | `/api/musica/{id}/stream` | Stream áudio |
+| POST | `/api/musica/tocar` | Escolher faixa |
 
-### Ficheiros estáticos
+## Degradação sem Ollama
 
-`GET /`, `/index.html`, `/style.css`, `/app.js` → lidos de `ric/web/`.
+Se Ollama estiver em baixo, `POST /api/chat` devolve 503, mas lembretes, música, perfil e watchdog **continuam**.
 
-Há proteção contra `..` no caminho (path traversal).
+## `servir()`
 
-### `servir()`
-
-1. Garante a base (`init_db`)
-2. Arranca `ThreadingHTTPServer`
-3. Abre o browser (opcional)
-4. Fica a servir até `Ctrl+C`
-
-## Relação com a UI
-
-O JavaScript (`ric/web/app.js`) faz pedidos a estas rotas de poucos em poucos segundos para atualizar a lista e mostrar o overlay de aviso.
+1. `db.init_db()` + pastas de música  
+2. Arranca watchdog  
+3. `ThreadingHTTPServer`  
+4. Abre browser (opcional)  
+5. `Ctrl+C` → para watchdog e fecha servidor  
