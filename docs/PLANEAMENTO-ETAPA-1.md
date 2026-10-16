@@ -128,6 +128,8 @@ O modo de voz do ChatGPT é a referência de experiência. A tecnologia não ent
 - um modelo leve, Vosk com modelo de português;
 - um modelo mais pesado, Whisper em local, se o PC ainda tiver folga com o Ollama a correr.
 
+O Qwen com entrada de áudio (Qwen2-Audio, Qwen2.5-Omni, Qwen3-Omni) foi visto em 2026-10-16 e fica de fora desta etapa. Não corre no Ollama, pede GPU e o português de Portugal não está medido. O registo está em [`docs/TABELA-LLMS.md`](TABELA-LLMS.md).
+
 Fica a via que perceber frases em português de Portugal, com o Ollama ligado e sem Internet. Se nenhuma for estável, o 1.º relatório diz a falha. O texto e o botão de falar ficam como apoio.
 
 A resposta curta, a voz única e o não interromper a meio continuam proposta, como na secção 6.

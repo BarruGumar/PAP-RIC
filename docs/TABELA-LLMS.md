@@ -35,6 +35,20 @@ Preencher medições reais no PC do Pedro antes da defesa.
 5. Avaliar Prompt D (clareza e tom).
 6. Registar falhas (tool não chamada, inventar música, etc.).
 
+## Modelos Qwen com entrada de áudio (2026-10-16)
+
+O Pedro encontrou modelos Qwen que recebem áudio, não só texto. Existem três linhas. Nenhuma substitui o `qwen2.5:3b` nesta PAP.
+
+| Modelo | O que aceita | O que devolve | Onde corre | Porque fica de fora |
+|---|---|---|---|---|
+| Qwen2-Audio-7B | Áudio e texto. Frases curtas, até cerca de 30 s | Texto | Transformers ou Nexa. O Ollama do RIC não recebe o áudio | Cerca de 16 GB de VRAM em FP16. A versão quantizada existe, mas noutro programa |
+| Qwen2.5-Omni-3B e 7B | Texto, imagem, áudio e vídeo | Texto e fala | Transformers ou vLLM. O 3B em BF16 parte de cerca de 18 GB para um vídeo curto. Há relatos de áudio por volta de 12 GB | Os testes oficiais de reconhecimento são inglês, chinês, cantonês e francês. Num estudo de 2026 sobre português do Brasil, o Omni-3B errou mais do que o Whisper |
+| Qwen3-Omni-30B-A3B | Texto, imagem, áudio e vídeo. A lista de 19 línguas faladas inclui português | Texto e fala, também em português | Transformers ou vLLM. A ficha oficial pede cerca de 79 GB de GPU no modelo Instruct | Não cabe num PC reaproveitado. A API DashScope envia o áudio para a nuvem da Alibaba |
+
+O Ollama, em outubro de 2026, continua sem entrada de áudio para estes modelos. O pedido está em aberto no projeto (ollama/ollama#12376). O RIC fala com o Ollama por texto, em `http://127.0.0.1:11434`.
+
+Ouvir fica nas duas vias já previstas: Vosk, ou Whisper local se o PC ainda tiver folga com o `qwen2.5:3b` ligado. Um Qwen de áudio só volta a ser candidato se aparecer uma GPU e um teste curto em português de Portugal perceber melhor as frases do que o Whisper, no mesmo PC.
+
 ## Conclusões (rascunho)
 
 1. Modelo principal: `qwen2.5:3b` — já validado como “suficientemente bom”.

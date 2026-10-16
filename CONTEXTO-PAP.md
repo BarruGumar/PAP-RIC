@@ -4,7 +4,7 @@
 > **Colocar em:** `C:\Users\pedro\OneDrive\Documentos\PAP\CONTEXTO-PAP.md`
 > Atualizar sempre que houver decisões importantes.
 
-**Última atualização:** 2026-10-09 (planeamento em `docs/PLANEAMENTO.md`; rascunho do Anexo I; calendário das etapas na secção 12; orçamento e tablet)  
+**Última atualização:** 2026-10-16 (Qwen com entrada de áudio fica de fora do protótipo; o texto continua no `qwen2.5:3b`)  
 **Aluno:** Pedro Albuquerque  
 **Curso:** Profissional de Técnico/a de Informática — Sistemas (turma 3-TIS)  
 **Orientador:** Gil Ribeiro  
@@ -203,6 +203,7 @@ Pessoa  ↔  Tablet/ecrã (rosto, chat, botões)
 | Prioridade | Interação primeiro; locomoção depois |
 | Foco desta PAP | Protótipo do RIC e funcionalidades testáveis. Recolha escolar, TAS/TIS e utentes ficam como visão futura |
 | LLM local principal a testar/usar | **`qwen2.5:3b` via Ollama** (Pedro já testou e achou suficientemente boa) |
+| Qwen com entrada de áudio | Investigado em 2026-10-16. Qwen2-Audio, Qwen2.5-Omni e Qwen3-Omni ouvem áudio. Ficam de fora: não correm no Ollama do protótipo, pedem GPU e o português de Portugal não está medido. Ouvir continua a ser Vosk ou Whisper. Nota em `docs/TABELA-LLMS.md` |
 | Comparação opcional | `llama3.2:3b` / `qwen2.5:1.5b` se PC fraco / `qwen2.5:7b` se PC forte |
 | Cloud | Opcional, não obrigatória |
 | Servidor UI | **stdlib** `http.server` (sem FastAPI/Docker nesta fase) |
