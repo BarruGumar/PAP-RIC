@@ -36,6 +36,6 @@ Deve funcionar offline nas funções essenciais.
 
 ## O que o protótipo já faz hoje
 
-Confirmado no código e no `CONTEXTO-PAP.md`: chat local, TTS no Windows por SAPI e STT no browser. São ainda frágeis.
+Confirmado no código e no `CONTEXTO-PAP.md`: chat local, TTS no Windows por SAPI e STT no browser. São ainda frágeis. O STT do browser envia o áudio à Google e sai na etapa 1. A análise do orientador (Piper tugão, faster-whisper, Kokoro) está em [`docs/FEEDBACK-ORIENTADOR.md`](../FEEDBACK-ORIENTADOR.md).
 
 Um Qwen que ouve áudio (Qwen2-Audio, Qwen2.5-Omni, Qwen3-Omni) foi investigado em 2026-10-16. Não entra no protótipo. A nota está em [`docs/TABELA-LLMS.md`](../TABELA-LLMS.md).

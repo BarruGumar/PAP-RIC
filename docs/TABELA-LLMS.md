@@ -24,7 +24,18 @@ Preencher medições reais no PC do Pedro antes da defesa.
 | RAM aproximada | ~3–4 GB | ~3–4 GB | ~2 GB | ~6–8 GB |
 | Privacidade | Local | Local | Local | Local |
 | Adequação ao hardware atual | Principal | Opcional | Se 3B for lento | Só se PC aguentar |
-| Notas | Já testado pelo Pedro — “suficientemente boa” | Comparação PAP | Fallback fraco | Melhor qualidade, mais pesado |
+| Notas | Já testado pelo Pedro — “suficientemente boa” | Comparação PAP | Fallback fraco. É o tamanho que o AI HAT+ 2 publica | Melhor qualidade, mais pesado |
+
+## AMALIA-9B (pedido do orientador, 2026-10-18)
+
+Modelo de texto para português de Portugal. Licença Apache-2.0. Publicado a 1 de julho de 2026. Não ouve nem fala.
+
+| Variante no Ollama | Tamanho | Quando |
+|---|---|---|
+| `teex/amalia:q4_K_M` | 5,6 GB | A testar num PC com 16 GB, ao lado do faster-whisper `small` |
+| `teex/amalia:q8_0` | 9,7 GB | Só se o Q4 falhar por qualidade e ainda sobrar RAM |
+
+Critério para passar a modelo principal: nos prompts A a D desta tabela, fala mais claro em português de Portugal do que o `qwen2.5:3b` e a ferramenta de agendar é chamada. O estudo completo está em [`FEEDBACK-ORIENTADOR.md`](FEEDBACK-ORIENTADOR.md).
 
 ## Protocolo de teste (repetir 3× por modelo)
 
