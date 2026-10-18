@@ -1,7 +1,7 @@
 # CONTEXTO DO PROJETO — RIC (PAP)
 
 > Ficheiro de contexto para qualquer modelo de IA (Cursor, ChatGPT, Claude, etc.).
-> **Colocar em:** `C:\Users\pedro\OneDrive\Documentos\PAP\CONTEXTO-PAP.md`
+> Este ficheiro fica na raiz do repositório.
 > Atualizar sempre que houver decisões importantes.
 
 **Última atualização:** 2026-10-18 (roteiro da audição de voz em `docs/ROTEIRO-VOZ.md`; resultado ainda por medir no PC)  
@@ -366,9 +366,9 @@ Locomoção, sensores, cloud opcional e braço. Meteorologia e notícias entram 
 
 ---
 
-## 17. Pasta local do aluno
+## 17. Pasta do projeto
 
-`C:\Users\pedro\OneDrive\Documentos\PAP`
+A pasta do projeto é a raiz deste repositório, onde estão `CONTEXTO-PAP.md`, `ric/` e `docs/`. Os comandos correm aí.
 
 Ficheiros importantes:
 - `CONTEXTO-PAP.md` ← este ficheiro

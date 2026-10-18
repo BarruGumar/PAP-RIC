@@ -4,10 +4,11 @@ Objetivo: mostrar companheiro local, privacidade, lembretes fiáveis e música o
 
 ## Antes de começar (2 min de preparação)
 
+Na pasta do projeto (a raiz do repositório):
+
 ```powershell
-cd C:\Users\pedro\OneDrive\Documentos\PAP
 ollama serve
-# noutro terminal:
+# noutro terminal, na mesma pasta:
 py -m ric ui
 ```
 

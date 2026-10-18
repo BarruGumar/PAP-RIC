@@ -4,9 +4,7 @@
 **Onde corre:** no PC do Pedro, em Windows. Neste repositório não se liga ainda o Piper nem o Whisper ao RIC.  
 **Resultado:** por medir. As tabelas no fim ficam vazias até esta audição.
 
-Pasta de trabalho, fora do git:
-
-`C:\Users\pedro\OneDrive\Documentos\PAP\voz-teste`
+Pasta de trabalho, dentro do projeto e fora do git: `voz-teste`
 
 A primeira descarga precisa de Internet. A audição e o reconhecimento fazem-se depois com a rede desligada. O `qwen2.5:3b` fica aberto no Ollama durante o reconhecimento, para ver se os dois cabem.
 
@@ -20,11 +18,11 @@ Segunda frase, para ver se a hora é lida à portuguesa:
 
 ## 1. Preparar a pasta
 
-No PowerShell:
+Na pasta do projeto (a raiz do repositório), no PowerShell:
 
 ```powershell
-New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\OneDrive\Documentos\PAP\voz-teste" | Out-Null
-Set-Location "$env:USERPROFILE\OneDrive\Documentos\PAP\voz-teste"
+New-Item -ItemType Directory -Force -Path .\voz-teste | Out-Null
+Set-Location .\voz-teste
 py -3.11 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 py -m pip install -U pip
