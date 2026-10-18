@@ -4,7 +4,7 @@
 > **Colocar em:** `C:\Users\pedro\OneDrive\Documentos\PAP\CONTEXTO-PAP.md`
 > Atualizar sempre que houver decisões importantes.
 
-**Última atualização:** 2026-10-18 (análise do feedback do orientador em `docs/FEEDBACK-ORIENTADOR.md`)  
+**Última atualização:** 2026-10-18 (roteiro da audição de voz em `docs/ROTEIRO-VOZ.md`; resultado ainda por medir no PC)  
 **Aluno:** Pedro Albuquerque  
 **Curso:** Profissional de Técnico/a de Informática — Sistemas (turma 3-TIS)  
 **Orientador:** Gil Ribeiro  
@@ -208,7 +208,7 @@ Pessoa  ↔  Tablet/ecrã (rosto, chat, botões)
 | Cloud | Opcional, não obrigatória |
 | Servidor UI | **stdlib** `http.server` (sem FastAPI/Docker nesta fase) |
 | Memória | SQLite: tabelas `perfil` + `conversas` (+ `confirmacoes`) |
-| Voz | Forma principal de uso. O navegador (Chrome) envia o áudio à Google: é o estado do protótipo, não a solução da PAP. A falar, a primeira voz a ligar é Piper `pt_PT-tugão-medium`. O Kokoro oficial é pt-BR. A ouvir, testa-se faster-whisper `small`, local. Análise: `docs/FEEDBACK-ORIENTADOR.md` |
+| Voz | Forma principal de uso. O navegador (Chrome) envia o áudio à Google: é o estado do protótipo, não a solução da PAP. Audição por fazer no PC: Piper tugão contra `tts-eu-pt`, e faster-whisper `small`. Roteiro: `docs/ROTEIRO-VOZ.md`. Resultado: por medir. Análise: `docs/FEEDBACK-ORIENTADOR.md` |
 | SO preferido em PC reciclado | Linux (quando for formatar) |
 | Braço/garra | Futuro; se existir, via Arduino (não precisa Raspberry só por isso) |
 | Medir pressão | Lembrete/registo — não diagnóstico médico |

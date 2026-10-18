@@ -22,15 +22,15 @@ Duas candidatas, com papéis diferentes.
 
 Existe um afinamento de 2026 para português europeu, o pacote `tts-eu-pt` (Apache-2.0, CPU, cerca de 82 milhões de parâmetros). Lê horas e números à portuguesa: `16:54` sai «dezasseis e cinquenta e quatro». Isso interessa aos lembretes. É uma voz só, de comunidade, e ainda não tem teste formal de audição. Ouve-se ao lado do tugão. Fica a que se perceber melhor numa frase de aviso («são dezasseis horas, hora do comprimido»).
 
+O passo a passo está em [`ROTEIRO-VOZ.md`](ROTEIRO-VOZ.md). Resultado da audição, em 2026-10-18: por medir no PC do Pedro. Sem essa audição, o RIC continua a falar pelo SAPI.
+
 ## 3. Reconhecimento (STT)
 
 O `faster-whisper` é a via Whisper que a etapa 1 já previa, na implementação mais leve (CTranslate2, `pip install faster-whisper`). O modelo `small` em int8 usa cerca de 1,5 GB de RAM. Não distingue por si português de Portugal de português do Brasil: o teste é que o faz.
 
-Teste combinado, com o Ollama ligado e a rede desligada:
+Teste combinado, com o Ollama ligado e a rede desligada na corrida que conta. A descarga do modelo faz-se antes, com Internet. As dez frases estão em [`ROTEIRO-VOZ.md`](ROTEIRO-VOZ.md).
 
-1. Dez frases de lembrete, incluindo «terça às 10» e «dezasseis horas».
-2. Ver se o texto chega certo ao chat.
-3. Se o PC não aguentar o `small` ao lado do modelo de conversa, desce-se para `base` ou usa-se o Vosk.
+Resultado em 2026-10-18: por medir. Modelo usado: _______________. Frases certas: ____ / 10. O texto transcrito cola-se na tabela do roteiro e resume-se em [`TABELA-LLMS.md`](TABELA-LLMS.md). Se o `small` não couber com o `qwen2.5:3b` aberto, o teste repete-se com `base`.
 
 O Qwen com entrada de áudio continua de fora. A nota está em `docs/TABELA-LLMS.md`.
 

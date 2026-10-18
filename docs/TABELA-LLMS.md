@@ -37,6 +37,31 @@ Modelo de texto para português de Portugal. Licença Apache-2.0. Publicado a 1 
 
 Critério para passar a modelo principal: nos prompts A a D desta tabela, fala mais claro em português de Portugal do que o `qwen2.5:3b` e a ferramenta de agendar é chamada. O estudo completo está em [`FEEDBACK-ORIENTADOR.md`](FEEDBACK-ORIENTADOR.md).
 
+## Voz — audição no PC (2026-10-18)
+
+O roteiro está em [`ROTEIRO-VOZ.md`](ROTEIRO-VOZ.md). Corre no PC do Pedro. O Piper e o Whisper ainda não entram no `ric/`.
+
+| | Piper tugão | tts-eu-pt |
+|---|---|---|
+| A hora do comprimido percebe-se? | por medir | por medir |
+| «16:54» soa a português de Portugal? | por medir | por medir |
+| Notas | | |
+| Fico com esta voz? | | |
+
+Voz escolhida: por medir.  
+Data da audição: _______________  
+PC e RAM: _______________
+
+Reconhecimento com faster-whisper, Ollama aberto e rede desligada na corrida que conta.
+
+| | |
+|---|---|
+| Modelo Whisper | por medir (`small`, ou `base` se o `small` não couber) |
+| Ollama aberto | por medir |
+| Frases certas | ____ / 10 |
+
+As dez frases e o sítio para colar o texto transcrito estão no roteiro. Esta tabela fica assim até essa audição.
+
 ## Protocolo de teste (repetir 3× por modelo)
 
 1. Arrancar Ollama com o modelo a testar.
