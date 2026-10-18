@@ -4,7 +4,7 @@
 **Onde corre:** no PC do Pedro, em Windows. Neste repositório não se liga ainda o Piper nem o Whisper ao RIC.  
 **Resultado:** por medir. As tabelas no fim ficam vazias até esta audição.
 
-Na raiz do projeto não há áudios. Há o atalho `testar-voz.bat`. Um duplo clique cria a pasta `voz-teste` (não entra no git), descarrega o Piper tugão e abre dois wav. O resto deste roteiro é o mesmo teste, comando a comando, mais o Kokoro e o faster-whisper.
+No PC a pasta do projeto é `C:\Users\pedro\Desktop\PAP`. Aí está o atalho `testar-voz.bat`. Um duplo clique cria a pasta `voz-teste` (não entra no git), descarrega o Piper tugão e abre dois wav. O resto deste roteiro é o mesmo teste, comando a comando, mais o Kokoro e o faster-whisper.
 
 A primeira descarga precisa de Internet. A audição e o reconhecimento fazem-se depois com a rede desligada. O `qwen2.5:3b` fica aberto no Ollama durante o reconhecimento, para ver se os dois cabem.
 
@@ -18,7 +18,7 @@ Segunda frase, para ver se a hora é lida à portuguesa:
 
 ## 1. Preparar a pasta
 
-Na pasta do projeto (a raiz do repositório), no PowerShell:
+Na pasta `C:\Users\pedro\Desktop\PAP`, no PowerShell:
 
 ```powershell
 New-Item -ItemType Directory -Force -Path .\voz-teste | Out-Null

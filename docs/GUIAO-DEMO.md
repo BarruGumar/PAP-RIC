@@ -4,7 +4,7 @@ Objetivo: mostrar companheiro local, privacidade, lembretes fiáveis e música o
 
 ## Antes de começar (2 min de preparação)
 
-Na pasta do projeto (a raiz do repositório):
+Na pasta do projeto, `C:\Users\pedro\Desktop\PAP`:
 
 ```powershell
 ollama serve

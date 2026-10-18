@@ -4,7 +4,7 @@ Testes manuais curtos antes de uma demo. Tempo estimado: 10–15 minutos.
 
 ## Preparação
 
-Na pasta do projeto (a raiz do repositório):
+Na pasta do projeto, `C:\Users\pedro\Desktop\PAP`:
 
 ```powershell
 # Parar UI antiga (Ctrl+C) e reiniciar:
