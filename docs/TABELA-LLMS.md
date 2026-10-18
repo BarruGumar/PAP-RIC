@@ -24,7 +24,43 @@ Preencher medições reais no PC do Pedro antes da defesa.
 | RAM aproximada | ~3–4 GB | ~3–4 GB | ~2 GB | ~6–8 GB |
 | Privacidade | Local | Local | Local | Local |
 | Adequação ao hardware atual | Principal | Opcional | Se 3B for lento | Só se PC aguentar |
-| Notas | Já testado pelo Pedro — “suficientemente boa” | Comparação PAP | Fallback fraco | Melhor qualidade, mais pesado |
+| Notas | Já testado pelo Pedro — “suficientemente boa” | Comparação PAP | Fallback fraco. É o tamanho que o AI HAT+ 2 publica | Melhor qualidade, mais pesado |
+
+## AMALIA-9B (pedido do orientador, 2026-10-18)
+
+Modelo de texto para português de Portugal. Licença Apache-2.0. Publicado a 1 de julho de 2026. Não ouve nem fala.
+
+| Variante no Ollama | Tamanho | Quando |
+|---|---|---|
+| `teex/amalia:q4_K_M` | 5,6 GB | A testar num PC com 16 GB, ao lado do faster-whisper `small` |
+| `teex/amalia:q8_0` | 9,7 GB | Só se o Q4 falhar por qualidade e ainda sobrar RAM |
+
+Critério para passar a modelo principal: nos prompts A a D desta tabela, fala mais claro em português de Portugal do que o `qwen2.5:3b` e a ferramenta de agendar é chamada. O estudo completo está em [`FEEDBACK-ORIENTADOR.md`](FEEDBACK-ORIENTADOR.md).
+
+## Voz — audição no PC (2026-10-18)
+
+O roteiro está em [`ROTEIRO-VOZ.md`](ROTEIRO-VOZ.md). Corre no PC do Pedro. O Piper e o Whisper ainda não entram no `ric/`.
+
+| | Piper tugão | tts-eu-pt |
+|---|---|---|
+| A hora do comprimido percebe-se? | por medir | por medir |
+| «16:54» soa a português de Portugal? | por medir | por medir |
+| Notas | | |
+| Fico com esta voz? | | |
+
+Voz escolhida: por medir.  
+Data da audição: _______________  
+PC e RAM: _______________
+
+Reconhecimento com faster-whisper, Ollama aberto e rede desligada na corrida que conta.
+
+| | |
+|---|---|
+| Modelo Whisper | por medir (`small`, ou `base` se o `small` não couber) |
+| Ollama aberto | por medir |
+| Frases certas | ____ / 10 |
+
+As dez frases e o sítio para colar o texto transcrito estão no roteiro. Esta tabela fica assim até essa audição.
 
 ## Protocolo de teste (repetir 3× por modelo)
 
@@ -34,6 +70,20 @@ Preencher medições reais no PC do Pedro antes da defesa.
 4. Cronometrar Prompt C.
 5. Avaliar Prompt D (clareza e tom).
 6. Registar falhas (tool não chamada, inventar música, etc.).
+
+## Modelos Qwen com entrada de áudio (2026-10-16)
+
+O Pedro encontrou modelos Qwen que recebem áudio, não só texto. Existem três linhas. Nenhuma substitui o `qwen2.5:3b` nesta PAP.
+
+| Modelo | O que aceita | O que devolve | Onde corre | Porque fica de fora |
+|---|---|---|---|---|
+| Qwen2-Audio-7B | Áudio e texto. Frases curtas, até cerca de 30 s | Texto | Transformers ou Nexa. O Ollama do RIC não recebe o áudio | Cerca de 16 GB de VRAM em FP16. A versão quantizada existe, mas noutro programa |
+| Qwen2.5-Omni-3B e 7B | Texto, imagem, áudio e vídeo | Texto e fala | Transformers ou vLLM. O 3B em BF16 parte de cerca de 18 GB para um vídeo curto. Há relatos de áudio por volta de 12 GB | Os testes oficiais de reconhecimento são inglês, chinês, cantonês e francês. Num estudo de 2026 sobre português do Brasil, o Omni-3B errou mais do que o Whisper |
+| Qwen3-Omni-30B-A3B | Texto, imagem, áudio e vídeo. A lista de 19 línguas faladas inclui português | Texto e fala, também em português | Transformers ou vLLM. A ficha oficial pede cerca de 79 GB de GPU no modelo Instruct | Não cabe num PC reaproveitado. A API DashScope envia o áudio para a nuvem da Alibaba |
+
+O Ollama, em outubro de 2026, continua sem entrada de áudio para estes modelos. O pedido está em aberto no projeto (ollama/ollama#12376). O RIC fala com o Ollama por texto, em `http://127.0.0.1:11434`.
+
+Ouvir fica nas duas vias já previstas: Vosk, ou Whisper local se o PC ainda tiver folga com o `qwen2.5:3b` ligado. Um Qwen de áudio só volta a ser candidato se aparecer uma GPU e um teste curto em português de Portugal perceber melhor as frases do que o Whisper, no mesmo PC.
 
 ## Conclusões (rascunho)
 

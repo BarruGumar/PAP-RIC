@@ -3,7 +3,7 @@
 ## Requisitos
 
 - Python 3.10+ — neste PC usa o launcher: `py --version`
-- Pasta do projeto: `C:\Users\pedro\OneDrive\Documentos\PAP`
+- Pasta do projeto: `C:\Users\pedro\Desktop\PAP`
 
 > Se `python` abrir a Microsoft Store, usa sempre `py` (ou `py -3`).
 

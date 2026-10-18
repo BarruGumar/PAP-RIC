@@ -4,8 +4,9 @@ Testes manuais curtos antes de uma demo. Tempo estimado: 10–15 minutos.
 
 ## Preparação
 
+Na pasta do projeto, `C:\Users\pedro\Desktop\PAP`:
+
 ```powershell
-cd C:\Users\pedro\OneDrive\Documentos\PAP
 # Parar UI antiga (Ctrl+C) e reiniciar:
 py -m ric ui
 ```

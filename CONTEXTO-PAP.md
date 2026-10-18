@@ -1,10 +1,10 @@
 # CONTEXTO DO PROJETO — RIC (PAP)
 
 > Ficheiro de contexto para qualquer modelo de IA (Cursor, ChatGPT, Claude, etc.).
-> **Colocar em:** `C:\Users\pedro\OneDrive\Documentos\PAP\CONTEXTO-PAP.md`
+> No PC do Pedro a pasta do projeto é `C:\Users\pedro\Desktop\PAP`.
 > Atualizar sempre que houver decisões importantes.
 
-**Última atualização:** 2026-10-09 (planeamento em `docs/PLANEAMENTO.md`; rascunho do Anexo I; calendário das etapas na secção 12; orçamento e tablet)  
+**Última atualização:** 2026-10-18 (pasta do projeto no PC: `C:\Users\pedro\Desktop\PAP`)  
 **Aluno:** Pedro Albuquerque  
 **Curso:** Profissional de Técnico/a de Informática — Sistemas (turma 3-TIS)  
 **Orientador:** Gil Ribeiro  
@@ -203,11 +203,12 @@ Pessoa  ↔  Tablet/ecrã (rosto, chat, botões)
 | Prioridade | Interação primeiro; locomoção depois |
 | Foco desta PAP | Protótipo do RIC e funcionalidades testáveis. Recolha escolar, TAS/TIS e utentes ficam como visão futura |
 | LLM local principal a testar/usar | **`qwen2.5:3b` via Ollama** (Pedro já testou e achou suficientemente boa) |
-| Comparação opcional | `llama3.2:3b` / `qwen2.5:1.5b` se PC fraco / `qwen2.5:7b` se PC forte |
+| Qwen com entrada de áudio | Investigado em 2026-10-16. Qwen2-Audio, Qwen2.5-Omni e Qwen3-Omni ouvem áudio. Ficam de fora: não correm no Ollama do protótipo, pedem GPU e o português de Portugal não está medido. Ouvir continua a ser Vosk ou Whisper. Nota em `docs/TABELA-LLMS.md` |
+| Comparação opcional | `llama3.2:3b` / `qwen2.5:1.5b` se PC fraco / `qwen2.5:7b` se PC forte. A AMALIA-9B (pt-PT, Q4 no Ollama) entra no teste a pedido do orientador. Só substitui o Qwen se agendar e couber no PC. Ver `docs/FEEDBACK-ORIENTADOR.md` |
 | Cloud | Opcional, não obrigatória |
 | Servidor UI | **stdlib** `http.server` (sem FastAPI/Docker nesta fase) |
 | Memória | SQLite: tabelas `perfil` + `conversas` (+ `confirmacoes`) |
-| Voz | Forma principal de uso (TTS e STT), por literacia digital. Fala natural em português de Portugal: o RIC interpreta a intenção, sem lista de comandos. Protótipo: TTS Windows SAPI; STT via Web Speech API no browser. Botões e texto são apoio. Ficha: `docs/metas/conversacao-e-voz.md` |
+| Voz | Forma principal de uso. O navegador (Chrome) envia o áudio à Google: é o estado do protótipo, não a solução da PAP. Audição por fazer no PC: Piper tugão contra `tts-eu-pt`, e faster-whisper `small`. Roteiro: `docs/ROTEIRO-VOZ.md`. Resultado: por medir. Análise: `docs/FEEDBACK-ORIENTADOR.md` |
 | SO preferido em PC reciclado | Linux (quando for formatar) |
 | Braço/garra | Futuro; se existir, via Arduino (não precisa Raspberry só por isso) |
 | Medir pressão | Lembrete/registo — não diagnóstico médico |
@@ -365,9 +366,9 @@ Locomoção, sensores, cloud opcional e braço. Meteorologia e notícias entram 
 
 ---
 
-## 17. Pasta local do aluno
+## 17. Pasta do projeto
 
-`C:\Users\pedro\OneDrive\Documentos\PAP`
+No PC do Pedro a pasta do projeto é `C:\Users\pedro\Desktop\PAP`. Aí estão `CONTEXTO-PAP.md`, `ric/`, `docs/` e `testar-voz.bat`. Os comandos correm nessa pasta.
 
 Ficheiros importantes:
 - `CONTEXTO-PAP.md` ← este ficheiro

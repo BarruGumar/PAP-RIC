@@ -3,6 +3,7 @@ __pycache__/
 *.egg-info/
 .venv/
 venv/
+voz-teste/
 .env
 ric/data/*.db
 ric/data/*.db-*

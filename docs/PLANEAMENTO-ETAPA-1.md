@@ -121,12 +121,11 @@ Tudo fica no PC. Nada sai para a nuvem.
 
 O modo de voz do ChatGPT é a referência de experiência. A tecnologia não entra: essa voz é um sintetizador na nuvem. Em janeiro o RIC fala offline, com uma voz compreensível em português de Portugal.
 
-**Falar.** O SAPI já funciona. O estudo vê que vozes de português de Portugal estão no Windows e se uma voz offline melhor se ouve melhor — por exemplo Piper, se houver voz pt-PT e o PC aguentar com o Ollama ligado. Trocar de voz ao longo da conversa fica fora desta etapa.
+**Falar.** O SAPI já funciona e é voz de sistema. A primeira voz a ligar é o Piper `pt_PT-tugão-medium` (português de Portugal, local, cerca de 63 MB). O Kokoro-82M oficial fala português do Brasil. O afinamento `tts-eu-pt` ouve-se ao lado do tugão numa frase com hora. Fica a voz que se perceber melhor. Trocar de voz ao longo da conversa fica fora desta etapa.
 
-**Ouvir.** O reconhecimento do browser deixa de ser a solução. Envia áudio para fora. No PC do Pedro comparam-se duas vias locais:
+**Ouvir.** O reconhecimento do browser deixa de ser a solução. No Chrome o áudio segue para a Google. A via a testar é o faster-whisper, modelo `small`, em int8, no próprio PC (cerca de 1,5 GB de RAM). Se não couber com o Ollama ligado, desce-se para `base` ou usa-se o Vosk.
 
-- um modelo leve, Vosk com modelo de português;
-- um modelo mais pesado, Whisper em local, se o PC ainda tiver folga com o Ollama a correr.
+O Qwen com entrada de áudio (Qwen2-Audio, Qwen2.5-Omni, Qwen3-Omni) foi visto em 2026-10-16 e fica de fora desta etapa. Não corre no Ollama, pede GPU e o português de Portugal não está medido. O registo está em [`docs/TABELA-LLMS.md`](TABELA-LLMS.md).
 
 Fica a via que perceber frases em português de Portugal, com o Ollama ligado e sem Internet. Se nenhuma for estável, o 1.º relatório diz a falha. O texto e o botão de falar ficam como apoio.
 
