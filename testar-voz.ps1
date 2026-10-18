@@ -13,22 +13,67 @@ $destino = Join-Path $raiz "voz-teste"
 New-Item -ItemType Directory -Force -Path $destino | Out-Null
 Set-Location $destino
 
-$pyLaunch = $null
-foreach ($versao in @("-3.12", "-3.11", "-3.10", "-3")) {
-    & py $versao -c "import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)" 2>$null
+# "py -3.12" escreve no erro quando essa versão não existe. Com Stop, o script morria aí.
+$oldNative = $null
+if (Test-Path variable:PSNativeCommandUseErrorActionPreference) {
+    $oldNative = $PSNativeCommandUseErrorActionPreference
+    $PSNativeCommandUseErrorActionPreference = $false
+}
+$ErrorActionPreference = "Continue"
+
+$pyCmd = $null
+$tentativas = New-Object System.Collections.Generic.List[object]
+foreach ($item in @(
+    @("py", "-3"),
+    @("py"),
+    @("py", "-3.13"),
+    @("py", "-3.12"),
+    @("py", "-3.11"),
+    @("py", "-3.10"),
+    @("python"),
+    @("python3")
+)) {
+    $tentativas.Add($item)
+}
+foreach ($dir in @(
+    "$env:LOCALAPPDATA\Programs\Python",
+    "$env:ProgramFiles\Python"
+)) {
+    if (-not (Test-Path $dir)) { continue }
+    foreach ($sub in (Get-ChildItem $dir -Directory -ErrorAction SilentlyContinue)) {
+        $exe = Join-Path $sub.FullName "python.exe"
+        if (Test-Path $exe) { $tentativas.Add(@($exe)) }
+    }
+}
+
+foreach ($t in $tentativas) {
+    $exe = $t[0]
+    $resto = @()
+    if ($t.Count -gt 1) { $resto = $t[1..($t.Count - 1)] }
+    & $exe @resto -c "import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)" 1>$null 2>$null
     if ($LASTEXITCODE -eq 0) {
-        $pyLaunch = $versao
+        $pyCmd = $t
         break
     }
 }
-if (-not $pyLaunch) {
-    Write-Error "Precisas de Python 3.10 ou mais recente. No PowerShell, py --version."
+
+$ErrorActionPreference = "Stop"
+if ($null -ne $oldNative) { $PSNativeCommandUseErrorActionPreference = $oldNative }
+
+if (-not $pyCmd) {
+    Write-Error "Não encontrei Python 3.10 ou mais recente. Instala em https://www.python.org/downloads/ e marca Add python.exe to PATH. Depois corre outra vez."
 }
 
 $python = Join-Path $destino ".venv\Scripts\python.exe"
 if (-not (Test-Path $python)) {
     Write-Host "A criar o ambiente em voz-teste..."
-    & py $pyLaunch -m venv (Join-Path $destino ".venv")
+    $exe = $pyCmd[0]
+    $resto = @()
+    if ($pyCmd.Count -gt 1) { $resto = $pyCmd[1..($pyCmd.Count - 1)] }
+    & $exe @resto -m venv (Join-Path $destino ".venv")
+    if (-not (Test-Path $python)) {
+        Write-Error "O ambiente voz-teste não foi criado."
+    }
 }
 
 Write-Host "A instalar o Piper..."
