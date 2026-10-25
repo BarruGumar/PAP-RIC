@@ -9,6 +9,7 @@ alwaysApply: true
 - Read `CONTEXTO-PAP.md` before large changes. Update it when decisions change.
 - System design source of truth for the rewrite: `docs/ARQUITETURA.md` (2026-10-25). Schedule: `docs/PLANEAMENTO.md` (P1-crono).
 - PAP hardware default: recycled PC + touch screen on the same machine; UI on localhost (no Wi-Fi required for core).
+- Target OS on the RIC machine: lightweight Linux (systemd + browser kiosk). Windows is optional for the student's dev PC only; runtime/demo target is Linux.
 - Scope: school PAP MVP. Prefer simple, maintainable solutions over enterprise patterns.
 - Priorities: interaction + privacy + hardware reuse. Locomotion/arms are later extras, not the critical path.
 - Reminders = reliable local backend. LLM = conversation/company. Reminders must work without LLM and without internet.

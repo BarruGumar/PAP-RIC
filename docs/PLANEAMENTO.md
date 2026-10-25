@@ -25,7 +25,7 @@ O mesmo processo vale para cada meta, quando chegar a vez dela.
 | Até | O que se faz |
 |---|---|
 | 23/10/2026 | Planificação (Anexo I). Datas escolares provisórias — ver contexto |
-| 08/01/2027 (etapa 1) | **Reescrita da arquitetura** + máquina de estados + rosto (HTML/JS localhost) + wake-word («RIC») + STT/TTS locais (Whisper + Piper) + lembretes fiáveis (interrupção, confirmar/adiar) + Ollama tools básicos. Ver também [`PLANEAMENTO-ETAPA-1.md`](PLANEAMENTO-ETAPA-1.md) (atualizar face às decisões de 2026-10-25) |
+| 08/01/2027 (etapa 1) | **Reescrita da arquitetura** + preparar/instalar **Linux leve** no PC do RIC (quando o hardware estiver disponível) + máquina de estados + rosto (HTML/JS localhost) + wake-word («RIC») + STT/TTS locais (Whisper + Piper) + lembretes fiáveis (interrupção, confirmar/adiar) + Ollama tools básicos. Ver também [`PLANEAMENTO-ETAPA-1.md`](PLANEAMENTO-ETAPA-1.md) (atualizar face às decisões de 2026-10-25) |
 | 26/03/2027 (etapa 2) | Música local (browser + API) + histórias (biblioteca + TTS) + perfil/memória SQLite + modo cuidador (PIN) + lembretes de medicação só pelo cuidador |
 | 21/05/2027 (etapa 3) | Notificador Telegram para críticos sem confirmação (D1+D3) + polimento voz/rosto + testes + docs/ética. **Stretch se sobrar:** agenda rica, livros, meteo, história gerada por LLM |
 | 18/06/2027 | Relatório final |

@@ -4,7 +4,7 @@
 > **Colocar em:** `C:\Users\pedro\Desktop\PAP\CONTEXTO-PAP.md`
 > Atualizar sempre que houver decisões importantes.
 
-**Última atualização:** 2026-10-25 (arquitetura completa acordada: `docs/ARQUITETURA.md`; planeamento P1-crono; ecrã tactile localhost; reescrita do código)  
+**Última atualização:** 2026-10-25 (arquitetura + P1-crono; SO alvo Linux leve no PC do RIC; Windows só dev opcional; ecrã tactile localhost)  
 **Aluno:** Pedro Albuquerque  
 **Curso:** Profissional de Técnico/a de Informática — Sistemas (turma 3-TIS)  
 **Orientador:** Gil Ribeiro  
@@ -208,7 +208,10 @@ Pessoa  ↔  Ecrã tactile no PC (rosto; texto/botões só quando necessário)
 | Prioridade | Interação primeiro; locomoção depois |
 | Foco desta PAP | Protótipo do RIC. Recolha escolar, TAS/TIS e utentes = visão futura |
 | Hardware UI | PC reciclado + **ecrã tactile** no mesmo PC (não tablet remoto na PAP) |
+| SO do protótipo / demo | **Linux leve** (Mint XFCE, Lubuntu ou Debian leve); validar tactile em live USB |
+| SO de desenvolvimento | Windows (ou outro) opcional no PC do aluno; alvo de execução = Linux do RIC |
 | Rede UI↔cérebro | `127.0.0.1` — funciona sem Wi‑Fi e sem Internet |
+| Arranque no RIC | `systemd` + browser em kiosk no localhost |
 | Offline-first | Núcleo local; Internet só Telegram (críticos) e stretch (meteo) |
 | LLM local | **`qwen2.5:3b` via Ollama** + tools |
 | Comparação opcional | `llama3.2:3b` / `qwen2.5:1.5b` se PC fraco / `qwen2.5:7b` se PC forte |
@@ -227,24 +230,25 @@ Pessoa  ↔  Ecrã tactile no PC (rosto; texto/botões só quando necessário)
 
 ## 10. Hardware a explorar
 
-**Padrão PAP (2026-10-25):** PC/laptop reciclado + ecrã **tactile** ligado ao PC + microfone/colunas. Tudo no mesmo equipamento; UI em localhost.
+**Padrão PAP (2026-10-25):** PC/laptop reciclado com **Linux leve** + ecrã **tactile** ligado ao PC + microfone/colunas. Tudo no mesmo equipamento; UI em localhost. Windows não é o SO da demonstração.
 
 Ordem de interesse para o «cérebro» (LLM local):
 
-1. **PC reaproveitado** com RAM suficiente para Ollama 3B + Whisper pequeno  
+1. **PC reaproveitado** com Linux leve e RAM suficiente para Ollama 3B + Whisper pequeno  
 2. **Intel NUC / mini-PC usado** (ideal ≥ 16 GB RAM)  
 3. **Raspberry Pi 5 + AI HAT** — só se o PC falhar e houver justificação  
 4. **Arduino** — fora desta PAP (locomoção)  
 
 Tablet separado **não** é o ecrã principal desta PAP (evita depender de Wi‑Fi local).
 
-Inventário: `docs/INVENTARIO-HARDWARE.md` · Orçamento: `docs/ORCAMENTO.md`
+Inventário: `docs/INVENTARIO-HARDWARE.md` · Orçamento: `docs/ORCAMENTO.md` · Arquitetura/SO: `docs/ARQUITETURA.md`
 
 ---
 
 ## 11. Software / stack
 
 ### Direção (reescrita)
+- **Linux leve** no PC do RIC (`systemd` + browser kiosk)
 - Python 3 + SQLite + servidor HTTP local (rosto + API + eventos)
 - Ollama + Qwen2.5 3B + tools
 - openWakeWord + Whisper (STT) + Piper (TTS)
@@ -302,9 +306,11 @@ BackOffice e canal próprio de monitorização **não** entram como produto nest
 - [x] Conceito, nome, visão futura vs PAP
 - [x] Arquitetura completa acordada (`docs/ARQUITETURA.md`)
 - [x] Planeamento P1-crono (`docs/PLANEAMENTO.md`)
+- [x] SO alvo: Linux leve no PC do RIC; Windows só desenvolvimento opcional
 - [x] Ollama + `qwen2.5:3b` testados
 - [x] Protótipo legado em `ric/` (a arquivar; não é a base final)
 - [x] Experiências de voz Piper em `voz-teste/`
+- [ ] Instalar/validar Linux + tactile no PC do protótipo
 - [ ] Arquivar legado e arrancar reescrita (etapa 1)
 - [ ] Wake-word + Whisper + Piper integrados no processo único
 - [ ] Rosto kiosk + máquina de estados

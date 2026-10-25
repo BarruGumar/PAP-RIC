@@ -27,9 +27,13 @@ O código legado em `ric/` será **arquivado** e o sistema **reescrito** segundo
 | Interação | **Voz primeiro**; ecrã = rosto/estados; texto e botões só quando necessário |
 | Ativação | Palavra-chave **«RIC»** + janela de comando; botão como fallback |
 | Hardware | PC/laptop reciclado + **ecrã tactile** ligado ao PC + microfone/colunas |
+| SO alvo (demo / protótipo) | **Linux leve** (ex. Linux Mint XFCE, Lubuntu ou Debian + ambiente leve) |
+| SO de desenvolvimento | Windows (ou outro) **opcional** no PC de trabalho do aluno; o código deve correr no Linux do RIC |
 | Ligação rosto ↔ cérebro | Browser em kiosk em `http://127.0.0.1:…` — **sem Internet e sem Wi‑Fi** |
 | Rede | Offline-first: núcleo local; Internet só para extras acordados |
 | Privacidade | LLM e dados no dispositivo; sem diagnóstico nem prescrição |
+
+**Porquê Linux no equipamento do RIC:** menos overhead de RAM/CPU no PC reciclado; melhor encaixe com Ollama, Whisper, Piper e openWakeWord; arranque automático simples (`systemd` + Chromium/Firefox em kiosk). Validar o ecrã tactile com live USB antes de formatar.
 
 **Internet (só o acordado):**
 
@@ -99,7 +103,7 @@ Um perfil de idoso por instalação. Cuidador = PIN + contactos, não segundo ut
 
 ### 5.1 Topologia
 
-**Um único processo** Python («RIC»). O browser em ecrã cheio é só cliente localhost.
+**Um único processo** Python («RIC») no **Linux** do PC do protótipo. O browser em ecrã cheio (kiosk) é só cliente localhost. No arranque: serviço `systemd` sobe o RIC e o browser em `http://127.0.0.1:…`.
 
 ```
 [Ecrã tactile + browser kiosk]
@@ -112,9 +116,9 @@ Um perfil de idoso por instalação. Cuidador = PIN + contactos, não segundo ut
    Telegram (críticos D1+D3)
 ```
 
-### 5.2 Porque Python
+### 5.2 Porque Python + Linux
 
-O gargalo é o modelo LLM e o STT, não a linguagem do servidor. Python encaixa Ollama, Whisper, Piper e openWakeWord com menos tempo de aluno até julho. «Otimizado» = fiabilidade + prazo + PC reciclado.
+O gargalo é o modelo LLM e o STT, não a linguagem do servidor. Python encaixa Ollama, Whisper, Piper e openWakeWord com menos tempo de aluno até julho. O Linux leve no PC do RIC maximiza RAM/CPU para esses motores. «Otimizado» = fiabilidade + prazo + PC reciclado. Windows não é o SO da demo; pode usar-se só para editar código e documentar.
 
 ### 5.3 Módulos (domínio)
 
@@ -151,7 +155,7 @@ Arquivar o `ric/` atual (ex. `arquivo/ric-legado` ou branch). Implementação no
 
 | Etapa | Até | Foco |
 |---|---|---|
-| 1 | 08/01/2027 | Arquitetura nova + estados + rosto + wake-word + STT/TTS + lembretes fiáveis + Ollama tools básicos |
+| 1 | 08/01/2027 | Arquitetura nova + (quando possível) Linux no PC do RIC + estados + rosto + wake-word + STT/TTS + lembretes fiáveis + Ollama tools básicos |
 | 2 | 26/03/2027 | Música + histórias (biblioteca) + perfil/memória + modo cuidador PIN + medicação só cuidador |
 | 3 | 21/05/2027 | Notificador Telegram (D1+D3) + polish voz/rosto + testes + docs/ética; stretch se sobrar |
 | Final | 18/06–09/07/2027 | Relatório e defesa |
