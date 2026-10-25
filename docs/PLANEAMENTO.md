@@ -4,11 +4,11 @@
 **Turma:** 3-TIS  
 **Orientador:** Gil Ribeiro  
 **Trabalho:** RIC — Robô Interativo Companheiro  
-**Atualizado:** 2026-10-25
+**Atualizado:** 2026-10-25 (após grelha nível 5)
 
-Um aluno, fora das aulas. A voz é a forma principal de uso; o ecrã mostra o rosto e só revela texto/botões quando necessário.
+Um aluno, fora das aulas. A voz é a forma principal de uso; o ecrã mostra o rosto e só revela texto/botões quando necessário. SO alvo do protótipo: **Linux Mint XFCE**.
 
-As fichas em [`docs/metas/`](metas/README.md) dizem o que cada função é. A arquitetura acordada está em [`docs/ARQUITETURA.md`](ARQUITETURA.md). Este ficheiro diz **como e quando**.
+As fichas em [`docs/metas/`](metas/README.md) dizem o que cada função é. A arquitetura (incl. detalhe ops §6) está em [`docs/ARQUITETURA.md`](ARQUITETURA.md). Este ficheiro diz **como e quando**.
 
 ## Processo
 
@@ -25,9 +25,9 @@ O mesmo processo vale para cada meta, quando chegar a vez dela.
 | Até | O que se faz |
 |---|---|
 | 23/10/2026 | Planificação (Anexo I). Datas escolares provisórias — ver contexto |
-| 08/01/2027 (etapa 1) | **Reescrita da arquitetura** + preparar/instalar **Linux leve** no PC do RIC (quando o hardware estiver disponível) + máquina de estados + rosto (HTML/JS localhost) + wake-word («RIC») + STT/TTS locais (Whisper + Piper) + lembretes fiáveis (interrupção, confirmar/adiar) + Ollama tools básicos. Ver também [`PLANEAMENTO-ETAPA-1.md`](PLANEAMENTO-ETAPA-1.md) (atualizar face às decisões de 2026-10-25) |
-| 26/03/2027 (etapa 2) | Música local (browser + API) + histórias (biblioteca + TTS) + perfil/memória SQLite + modo cuidador (PIN) + lembretes de medicação só pelo cuidador |
-| 21/05/2027 (etapa 3) | Notificador Telegram para críticos sem confirmação (D1+D3) + polimento voz/rosto + testes + docs/ética. **Stretch se sobrar:** agenda rica, livros, meteo, história gerada por LLM |
+| 08/01/2027 (etapa 1) | **Reescrita** + **Mint XFCE** no PC do RIC (quando possível) + 1.ª fatia **lembretes+API `:8787`+UI** → depois estados/rosto + wake-word + Whisper/Piper + Ollama tools básicos. Ver [`PLANEAMENTO-ETAPA-1.md`](PLANEAMENTO-ETAPA-1.md) (ainda descreve o legado; prevalece este P1-crono) |
+| 26/03/2027 (etapa 2) | Música (pastas + `catalogo.json`) + histórias (txt/meta ± áudio) + gostos/memória (80+resumo) + cuidador PIN (hash + bloqueio + sessão) + medicação só cuidador |
+| 21/05/2027 (etapa 3) | Telegram D1+D3 (conteúdo mínimo) + polish voz/rosto/kiosk + testes + docs/ética. **Stretch se sobrar:** agenda, livros, meteo, história LLM, duck barge-in |
 | 18/06/2027 | Relatório final |
 | 09/07/2027 | Defesa |
 
@@ -50,5 +50,13 @@ O BackOffice e o canal próprio de monitorização remota **não** entram nestas
 | [`docs/metas/`](metas/README.md) | O que cada função é |
 | [`docs/ARQUITETURA.md`](ARQUITETURA.md) | Sistema informático acordado |
 | `docs/PLANEAMENTO.md` | Como e quando (este ficheiro) |
-| `arquivo/` (a criar) + novo `ric/` | Legado arquivado; código novo |
+| `archive/legacy/` + novo `ric/` | Legado arquivado; app Python (API+UI no mesmo processo) |
 | [`CONTEXTO-PAP.md`](../CONTEXTO-PAP.md) | Fonte de verdade do projeto |
+
+### Ordem de código (dentro das etapas)
+
+1. API + SQLite lembretes + UI mínima  
+2. Voz (wake → STT → LLM → TTS)  
+3. Telegram / música / histórias  
+
+Ver [`ARQUITETURA.md`](ARQUITETURA.md) §6.11.

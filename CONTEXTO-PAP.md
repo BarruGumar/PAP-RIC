@@ -4,7 +4,7 @@
 > **Colocar em:** `C:\Users\pedro\Desktop\PAP\CONTEXTO-PAP.md`
 > Atualizar sempre que houver decisões importantes.
 
-**Última atualização:** 2026-10-25 (arquitetura + P1-crono; SO alvo Linux leve no PC do RIC; Windows só dev opcional; ecrã tactile localhost)  
+**Última atualização:** 2026-10-25 (arquitetura níveis 0–5; Mint XFCE; detalhe ops em `docs/ARQUITETURA.md`)  
 **Aluno:** Pedro Albuquerque  
 **Curso:** Profissional de Técnico/a de Informática — Sistemas (turma 3-TIS)  
 **Orientador:** Gil Ribeiro  
@@ -171,29 +171,30 @@ Critérios do que já se consegue demonstrar. As metas da secção 4 que estão 
 Documento completo: [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md).
 
 ```
-Pessoa  ↔  Ecrã tactile no PC (rosto; texto/botões só quando necessário)
-                 ↕  localhost (REST + WebSocket/SSE) — sem Internet
-        Um processo RIC (Python)
-        - core (estados/eventos) + reminders + db (SQLite)
-        - voice: openWakeWord («RIC») + Whisper (STT) + Piper (TTS)
-        - llm: Ollama qwen2.5:3b + tools
-        - music (API → player no browser) + stories (biblioteca local)
-        - caregiver (PIN) + notify (Telegram agora; canal próprio no projeto final)
+Pessoa  ↔  Ecrã tactile kiosk (rosto; texto/botões só quando necessário)
+                 ↕  http://127.0.0.1:8787  REST /api/v1 + WS /ws
+        Um processo RIC (Python) — systemd ric.service
+        /home/ric/ric-app  +  /home/ric/ric-data
+        - core + reminders + db (SQLite: lembretes, gostos, 80 msgs+resumo, PIN hash)
+        - voice: openWakeWord («RIC») + Whisper + Piper PT (+ fallback TTS)
+        - llm: Ollama qwen2.5:3b + tools P1 (ler lembretes, música, história, gosto)
+        - music (pastas + catalogo.json) + stories (txt/meta ± áudio)
+        - caregiver (PIN + sessão timeout) + notify (Telegram D1+D3)
                  ⇣ (só críticos sem confirmação, se houver net)
-        Telegram → cuidador
+        Telegram → cuidador (conteúdo mínimo)
 ```
 
 ### Divisão de responsabilidades
 | Camada | Função |
 |---|---|
 | **core + reminders** | Estados, prioridades, lembretes fiáveis (sem LLM) |
-| **LLM local** | Conversa, tools (agendar/música/perfil); histórias geradas = stretch |
-| **voice** | Wake-word, STT, TTS locais |
-| **web** | Rosto + UI mínima em HTML/CSS/JS (kiosk) |
-| **notify** | Avisos remotos; impl. PAP = Telegram; futuro = canal próprio |
+| **LLM local** | Conversa + tools P1; meds só cuidador; histórias geradas = stretch |
+| **voice** | Wake-word, STT, TTS locais; barge-in em conversa |
+| **web** | Rosto (incl. music/story) + UI kiosk bloqueada |
+| **notify** | Telegram na PAP (scheduler, não tool livre do LLM); canal próprio depois |
 | **Arduino / locomoção** | Fora desta PAP |
 
-**Regra de ouro:** lembretes e o núcleo offline **não dependem** da LLM nem da Internet. O código atual em `ric/` será arquivado e reescrito segundo `docs/ARQUITETURA.md`.
+**Regra de ouro:** lembretes e o núcleo offline **não dependem** da LLM nem da Internet. Legado → `archive/legacy/`; código novo em `ric/` segundo `docs/ARQUITETURA.md`.
 
 ---
 
@@ -207,30 +208,41 @@ Pessoa  ↔  Ecrã tactile no PC (rosto; texto/botões só quando necessário)
 | Utilizadores | Idoso (principal); cuidador (PIN local + aviso em falha crítica) |
 | Prioridade | Interação primeiro; locomoção depois |
 | Foco desta PAP | Protótipo do RIC. Recolha escolar, TAS/TIS e utentes = visão futura |
-| Hardware UI | PC reciclado + **ecrã tactile** no mesmo PC (não tablet remoto na PAP) |
-| SO do protótipo / demo | **Linux leve** (Mint XFCE, Lubuntu ou Debian leve); validar tactile em live USB |
-| SO de desenvolvimento | Windows (ou outro) opcional no PC do aluno; alvo de execução = Linux do RIC |
-| Rede UI↔cérebro | `127.0.0.1` — funciona sem Wi‑Fi e sem Internet |
-| Arranque no RIC | `systemd` + browser em kiosk no localhost |
-| Offline-first | Núcleo local; Internet só Telegram (críticos) e stretch (meteo) |
-| LLM local | **`qwen2.5:3b` via Ollama** + tools |
-| Comparação opcional | `llama3.2:3b` / `qwen2.5:1.5b` se PC fraco / `qwen2.5:7b` se PC forte |
-| Cloud LLM | Não no núcleo; opcional no máximo como ideia futura |
-| Processo | Um processo Python; módulos por domínio |
-| UI | HTML/CSS/JS simples (sem React nesta PAP) |
-| Memória | SQLite: `perfil` + `conversas` + `confirmacoes` + lembretes |
-| Voz alvo | Wake-word openWakeWord («RIC»); STT Whisper local; TTS Piper; botão fallback |
-| Lembretes críticos | Só cuidador cria; se sem confirmação após N avisos → Telegram (D1+D3) |
+| Hardware UI | PC reciclado + **ecrã tactile** HDMI/DP no mesmo PC |
+| SO do protótipo / demo | **Linux Mint XFCE**; validar tactile em live USB |
+| SO de desenvolvimento | Windows (ou outro) opcional; alvo de execução = Linux do RIC |
+| Disco na máquina RIC | `/home/ric/ric-app/` + `/home/ric/ric-data/` |
+| Rede UI↔cérebro | `http://127.0.0.1:8787` — REST `/api/v1` + WS `/ws` |
+| Arranque | `ric.service` (systemd user) + kiosk XFCE **separado**; saída só com PIN |
+| Offline-first | Núcleo local; Internet só funções opcionais (Telegram críticos, meteo, …) |
+| LLM local | **`qwen2.5:3b` via Ollama**; timeout 8–12 s; core sobe sem Ollama |
+| Tools LLM P1 | Ler lembretes, música, história, guardar gosto; **não** meds; Telegram ≠ tool |
+| Cloud LLM | Não no núcleo |
+| Processo | Um processo Python; UI estática servida pelo mesmo processo |
+| UI Idle | Rosto + relógio + próximo lembrete; mais info sob procura |
+| Rosto | idle, listening, thinking, speaking, alert, music, story |
+| Memória | SQLite: lembretes (schema A) + gostos + 80 msgs + 1 resumo + confirmações |
+| Voz | openWakeWord «RIC»; janela 6–8 s; barge-in corta TTS (não alertas); Whisper + Piper PT |
+| Música | Pastas por género + `catalogo.json` ao arrancar |
+| Histórias | `historias/*.txt` + meta; áudio opcional se existir |
+| Lembretes | Default 3× ~2 min (cuidador altera); pausa/retoma música; críticos → Telegram |
+| Cuidador | PIN 4–6 + hash + bloqueio após ~5 falhas; sessão 2–5 min + aviso 30 s |
+| Telegram | Título + sem confirmação + hora; sem chat/áudio/GPS |
+| Logs | Técnicos por defeito; `RIC_DEBUG=1` para frases; áudio não gravado |
+| Backup | Diário local ~7 dias; cloud só depois com consentimento |
+| Config | `.env` + `config.example.env`; PIN hash no SQLite |
 | Ética | Não diagnostica nem aconselha doses |
-| Código | Arquivar legado; reescrever limpo (`docs/ARQUITETURA.md`) |
+| Código | Legado → `archive/legacy/`; app nova `ric/`; 1.º fatia = lembretes+API+UI |
 | Braço/garra / locomoção | Fora desta PAP |
 | Medir pressão | Lembrete/registo — não diagnóstico médico |
+
+Detalhe completo nível 5: [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md) secção 6.
 
 ---
 
 ## 10. Hardware a explorar
 
-**Padrão PAP (2026-10-25):** PC/laptop reciclado com **Linux leve** + ecrã **tactile** ligado ao PC + microfone/colunas. Tudo no mesmo equipamento; UI em localhost. Windows não é o SO da demonstração.
+**Padrão PAP (2026-10-25):** PC/laptop reciclado com **Linux Mint XFCE** + ecrã **tactile** (HDMI/DP) + microfone/colunas. Tudo no mesmo equipamento; UI em `127.0.0.1:8787`. Windows não é o SO da demonstração.
 
 Ordem de interesse para o «cérebro» (LLM local):
 
@@ -248,22 +260,21 @@ Inventário: `docs/INVENTARIO-HARDWARE.md` · Orçamento: `docs/ORCAMENTO.md` ·
 ## 11. Software / stack
 
 ### Direção (reescrita)
-- **Linux leve** no PC do RIC (`systemd` + browser kiosk)
-- Python 3 + SQLite + servidor HTTP local (rosto + API + eventos)
-- Ollama + Qwen2.5 3B + tools
-- openWakeWord + Whisper (STT) + Piper (TTS)
-- UI: HTML/CSS/JS kiosk em `127.0.0.1`
-- Módulo `notify` (Telegram na PAP)
+- **Linux Mint XFCE** (`ric.service` + kiosk XFCE separado)
+- Python 3 + SQLite + HTTP em `:8787` (rosto + REST + WS) — um processo
+- Ollama + Qwen2.5 3B + tools P1
+- openWakeWord + Whisper + Piper PT (+ fallback TTS sistema)
+- UI: HTML/CSS/JS kiosk bloqueado
+- `notify` Telegram (scheduler D1+D3)
 - Arquitetura: [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md)
 
 ### Legado no repositório (a arquivar)
-- `ric/` atual — referência; não é a estrutura final
+- `ric/` atual → `archive/legacy/` (referência)
 - `voz-teste/` — experiências Piper
-- Comandos antigos (`py -m ric ui`, etc.) até à migração
 - Docs de código em `docs/codigo/` — atualizar quando o código novo existir
 
 ### Não nesta PAP
-- React/Next como UI principal, FastAPI/Docker obrigatórios, cloud LLM no núcleo, microsserviços, ROS
+- React/Next como UI principal, Docker obrigatório, cloud LLM no núcleo, microsserviços, ROS
 
 ---
 
@@ -288,9 +299,9 @@ Quando o regulamento 2026/27 for aprovado, estas datas podem mudar.
 | Até | Foco |
 |---|---|
 | 23/10/2026 | Planificação (Anexo I) |
-| Etapa 1 (08/01/2027) | Arquitetura nova + estados + rosto + wake-word + STT/TTS + lembretes + Ollama tools básicos |
-| Etapa 2 (26/03/2027) | Música + histórias (biblioteca) + perfil/memória + modo cuidador PIN + medicação só cuidador |
-| Etapa 3 (21/05/2027) | Telegram (críticos D1+D3) + polish + testes + docs/ética; stretch (agenda, livros, meteo, história LLM) se sobrar |
+| Etapa 1 (08/01/2027) | Reescrita + Mint XFCE + 1.ª fatia lembretes/API/UI → voz + Ollama tools |
+| Etapa 2 (26/03/2027) | Música + histórias + gostos/memória + PIN cuidador + meds só cuidador |
+| Etapa 3 (21/05/2027) | Telegram D1+D3 + polish + testes + docs/ética; stretch se sobrar |
 | 18/06/2027 | Relatório |
 | 09/07/2027 | Defesa |
 
@@ -304,17 +315,17 @@ BackOffice e canal próprio de monitorização **não** entram como produto nest
 ## 13. Estado atual (2026-10-25)
 
 - [x] Conceito, nome, visão futura vs PAP
-- [x] Arquitetura completa acordada (`docs/ARQUITETURA.md`)
+- [x] Arquitetura níveis 0–5 acordada (`docs/ARQUITETURA.md`)
 - [x] Planeamento P1-crono (`docs/PLANEAMENTO.md`)
-- [x] SO alvo: Linux leve no PC do RIC; Windows só desenvolvimento opcional
+- [x] SO alvo: **Mint XFCE**; Windows só desenvolvimento opcional
+- [x] Detalhe ops: API 8787, schema, voz, kiosk, PIN, tools, backup, ordem de fatias
 - [x] Ollama + `qwen2.5:3b` testados
 - [x] Protótipo legado em `ric/` (a arquivar; não é a base final)
 - [x] Experiências de voz Piper em `voz-teste/`
-- [ ] Instalar/validar Linux + tactile no PC do protótipo
-- [ ] Arquivar legado e arrancar reescrita (etapa 1)
-- [ ] Wake-word + Whisper + Piper integrados no processo único
-- [ ] Rosto kiosk + máquina de estados
-- [ ] Modo cuidador PIN + notificador Telegram
+- [ ] Instalar/validar Mint XFCE + tactile no PC do protótipo
+- [ ] Arquivar legado (`archive/legacy/`) e arrancar reescrita
+- [ ] 1.ª fatia: API + SQLite lembretes + UI mínima
+- [ ] Depois: voz → Telegram/música/histórias
 - [ ] Inventário físico + medições LLM reais
 - [ ] Anexo I no formulário da escola (se ainda pendente)
 
@@ -322,9 +333,9 @@ BackOffice e canal próprio de monitorização **não** entram como produto nest
 
 ## 14. Próximo passo
 
-1. Seguir [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md) e [`docs/PLANEAMENTO.md`](docs/PLANEAMENTO.md)  
-2. Arquivar `ric/` legado e criar esqueleto dos módulos (`core`, `db`, `voice`, …)  
-3. Etapa 1: estados + rosto localhost + wake-word + STT/TTS + lembretes + Ollama tools  
+1. Seguir [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md) (§6) e [`docs/PLANEAMENTO.md`](docs/PLANEAMENTO.md)  
+2. Arquivar `ric/` → `archive/legacy/` e criar esqueleto novo  
+3. 1.ª fatia: lembretes + API `:8787` + UI mínima; depois voz; depois extras  
 4. Atualizar fichas em `docs/metas/` quando o comportamento real mudar  
 5. Relatório PAP (ética, custos, limitações, melhorias)
 
@@ -360,5 +371,5 @@ Ficheiros importantes:
 - `CONTEXTO-PAP.md` ← este ficheiro
 - `docs/ARQUITETURA.md` ← sistema informático acordado
 - `docs/PLANEAMENTO.md` ← calendário P1-crono
-- `ric/` ← legado a arquivar; código novo segundo a arquitetura
+- `ric/` ← legado a mover para `archive/legacy/`; código novo segundo a arquitetura
 - `docs/` (metas, guias, checklist, demo, inventário, tabela LLM, `docs/codigo/`)
