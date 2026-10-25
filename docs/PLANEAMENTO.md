@@ -4,11 +4,11 @@
 **Turma:** 3-TIS  
 **Orientador:** Gil Ribeiro  
 **Trabalho:** RIC — Robô Interativo Companheiro  
-**Data:** 2026-10-09
+**Atualizado:** 2026-10-25
 
-Um aluno, fora das aulas. A voz (TTS e STT) é a forma principal de uso. Botões grandes e texto ficam como apoio.
+Um aluno, fora das aulas. A voz é a forma principal de uso; o ecrã mostra o rosto e só revela texto/botões quando necessário.
 
-As fichas em [`docs/metas/`](metas/README.md) dizem o que cada função é. Este ficheiro diz como e quando. O código fica em `ric/`.
+As fichas em [`docs/metas/`](metas/README.md) dizem o que cada função é. A arquitetura acordada está em [`docs/ARQUITETURA.md`](ARQUITETURA.md). Este ficheiro diz **como e quando**.
 
 ## Processo
 
@@ -16,33 +16,39 @@ O mesmo processo vale para cada meta, quando chegar a vez dela.
 
 1. Fechar só os pontos «ainda por descrever» dessa meta.
 2. Definir o mínimo que se demonstra nessa etapa.
-3. Fazer a função a falar e a ouvir, em português de Portugal. Botões e texto ficam como apoio.
-4. O que tem de funcionar sem Internet (lembretes, agenda, música local, histórias guardadas, leitura do que está no robô) não depende da nuvem.
-5. Registar o que ficou de fora e o que o protótipo já faz, na ficha e no contexto.
+3. Fazer a função a falar e a ouvir, em português de Portugal. Rosto no ecrã tactile; botões/texto como apoio.
+4. O núcleo (lembretes, voz, música local, histórias guardadas, perfil) **não depende da Internet**.
+5. Registar o que ficou de fora e o que o protótipo já faz, na ficha e no [`CONTEXTO-PAP.md`](../CONTEXTO-PAP.md).
 
-## Tempo
-
-Hoje é 9 de outubro de 2026. Até 23/10/2026 só há planificação: não se implementa funcionalidade nova.
+## Tempo (P1-crono)
 
 | Até | O que se faz |
 |---|---|
-| 23/10/2026 | Só a planificação, para aprovarem o projeto |
-| 08/01/2027 (etapa 1) | Voz estável e o que já existe: conversação por voz; lembretes pedidos em fala livre e avisados em voz; cantar música da biblioteca local; a história curta já existente mais um pequeno conjunto de histórias guardadas. O pormenor está em [`docs/PLANEAMENTO-ETAPA-1.md`](PLANEAMENTO-ETAPA-1.md) |
-| 26/03/2027 (etapa 2) | Agenda (dia, consulta, compromisso, e a lembrança sai daí) e leitura de livros em voz, com música de ambiente. Livros de domínio público ou com autorização. Vozes diferentes por personagem só se a leitura simples já estiver estável |
-| 21/05/2027 (etapa 3) | Recomendações a partir dos gostos e do que está no robô; meteorologia do dia e da semana; notícias atuais. A previsão guardada para quando cai a Internet fica se a meteorologia em direto já funcionar. Testes, privacidade e limites |
-| 18/06/2027 | Relatório |
+| 23/10/2026 | Planificação (Anexo I). Datas escolares provisórias — ver contexto |
+| 08/01/2027 (etapa 1) | **Reescrita da arquitetura** + máquina de estados + rosto (HTML/JS localhost) + wake-word («RIC») + STT/TTS locais (Whisper + Piper) + lembretes fiáveis (interrupção, confirmar/adiar) + Ollama tools básicos. Ver também [`PLANEAMENTO-ETAPA-1.md`](PLANEAMENTO-ETAPA-1.md) (atualizar face às decisões de 2026-10-25) |
+| 26/03/2027 (etapa 2) | Música local (browser + API) + histórias (biblioteca + TTS) + perfil/memória SQLite + modo cuidador (PIN) + lembretes de medicação só pelo cuidador |
+| 21/05/2027 (etapa 3) | Notificador Telegram para críticos sem confirmação (D1+D3) + polimento voz/rosto + testes + docs/ética. **Stretch se sobrar:** agenda rica, livros, meteo, história gerada por LLM |
+| 18/06/2027 | Relatório final |
 | 09/07/2027 | Defesa |
 
-### O que fica de fora destas etapas
+### Must / stretch / fora (resumo)
 
-O BackOffice não entra nestas etapas. O foco é o RIC. Um protótipo de envio de dados, se sobrar tempo depois de maio, fica como extra. A estrutura do BackOffice não se desenha agora.
+Ver tabela completa em [`ARQUITETURA.md`](ARQUITETURA.md) secção 3.
 
-Criar histórias novas na hora e a busca automática de músicas no BackOffice são ideias a explorar, não trabalho calendarizado.
+- **Must:** companheiro por voz (rosto, wake-word, STT/TTS), lembretes, música, histórias locais, memória mínima, cuidador local, aviso Telegram em falha de crítico.
+- **Stretch:** agenda rica, livros, meteo, história LLM.
+- **Fora desta PAP:** BackOffice, notícias completas, locomoção, diagnóstico; canal de comunicação próprio = visão do projeto final (módulo `notify` preparado para trocar a implementação).
+
+### O que fica de fora do calendário obrigatório
+
+O BackOffice e o canal próprio de monitorização remota **não** entram nestas etapas como produto. O Telegram na PAP é o aviso mínimo de falha crítica; a arquitetura isola `notify` para substituir depois.
 
 ## Estrutura do trabalho
 
 | Onde | Para quê |
 |---|---|
 | [`docs/metas/`](metas/README.md) | O que cada função é |
+| [`docs/ARQUITETURA.md`](ARQUITETURA.md) | Sistema informático acordado |
 | `docs/PLANEAMENTO.md` | Como e quando (este ficheiro) |
-| `ric/` | Código do protótipo |
+| `arquivo/` (a criar) + novo `ric/` | Legado arquivado; código novo |
+| [`CONTEXTO-PAP.md`](../CONTEXTO-PAP.md) | Fonte de verdade do projeto |

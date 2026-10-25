@@ -1,7 +1,8 @@
 # Etapa 1 — análise e síntese do sistema
 
 **Até:** 08/01/2027 (1.º relatório intercalar)  
-**Data:** 2026-10-09
+**Data:** 2026-10-09  
+**Atualização:** 2026-10-25 — as decisões de arquitetura em [`ARQUITETURA.md`](ARQUITETURA.md) e o calendário **P1-crono** em [`PLANEAMENTO.md`](PLANEAMENTO.md) **prevalecem** sobre o detalhe abaixo (escrito para o protótipo legado). Na etapa 1 o foco passa a ser: reescrita + estados + rosto localhost + wake-word + Whisper/Piper + lembretes + Ollama tools básicos (música/histórias bibliotecárias deslocam-se sobretudo para a etapa 2).
 
 Análise do sistema que a etapa 1 demonstra em janeiro. O calendário geral continua em [`docs/PLANEAMENTO.md`](PLANEAMENTO.md).
 
