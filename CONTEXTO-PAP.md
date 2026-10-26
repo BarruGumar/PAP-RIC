@@ -323,9 +323,11 @@ BackOffice e canal próprio de monitorização **não** entram como produto nest
 - [x] Protótipo legado em `ric/` (a arquivar; não é a base final)
 - [x] Experiências de voz Piper em `voz-teste/`
 - [ ] Instalar/validar Mint XFCE + tactile no PC do protótipo
-- [ ] Arquivar legado (`archive/legacy/`) e arrancar reescrita
-- [ ] 1.ª fatia: API + SQLite lembretes + UI mínima
-- [ ] Depois: voz → Telegram/música/histórias
+- [x] Arquivar legado (`archive/legacy/`) e reescrita iniciada
+- [x] 1.ª fatia: API `:8787` + WS `/ws` + SQLite lembretes + UI Idle (regra 2A)
+- [x] Voz TTS: Piper (+ SAPI/espeak fallback) nos alertas; wake/STT ainda stub
+- [ ] Wake-word + Whisper + Ollama tools
+- [ ] PIN cuidador → Telegram/música/histórias
 - [ ] Inventário físico + medições LLM reais
 - [ ] Anexo I no formulário da escola (se ainda pendente)
 

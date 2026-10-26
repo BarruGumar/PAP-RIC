@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>RIC</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <main class="screen" id="app">
+    <header class="top">
+      <p class="brand" aria-label="RIC">RIC</p>
+      <p class="clock" id="clock" aria-live="polite">--:--</p>
+    </header>
+
+    <section class="face-wrap" aria-live="polite">
+      <div id="face" class="face state-idle" role="img" aria-label="Estado: idle"></div>
+      <p id="state-label" class="state-label">À espera</p>
+    </section>
+
+    <section class="next" aria-label="Próximo lembrete">
+      <p class="next-label">Próximo</p>
+      <p id="next-reminder" class="next-value">Nenhum lembrete</p>
+    </section>
+
+    <section id="alert-panel" class="alert-panel hidden" aria-live="assertive">
+      <p id="alert-title" class="alert-title">Lembrete</p>
+      <div class="alert-actions">
+        <button type="button" id="btn-confirm" class="btn btn-primary" aria-label="Já fiz">Já fiz</button>
+        <button type="button" id="btn-snooze" class="btn" aria-label="Adiar 10 minutos">Adiar</button>
+      </div>
+    </section>
+
+    <section class="create" aria-label="Novo lembrete simples">
+      <details>
+        <summary>Adicionar rotina (não medicamento)</summary>
+        <form id="form-create" class="form">
+          <label>
+            Título
+            <input id="input-titulo" name="titulo" type="text" required maxlength="120" autocomplete="off" />
+          </label>
+          <label>
+            Hora
+            <input id="input-hora" name="hora" type="time" required />
+          </label>
+          <button type="submit" class="btn">Guardar</button>
+          <p id="form-msg" class="form-msg" role="status"></p>
+        </form>
+      </details>
+    </section>
+  </main>
+  <audio id="tts-player" preload="auto"></audio>
+  <script src="/app.js"></script>
+</body>
+</html>

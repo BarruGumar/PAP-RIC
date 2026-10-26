@@ -4,13 +4,26 @@ __pycache__/
 .venv/
 venv/
 .env
-ric/data/*.db
-ric/data/*.db-*
-# Áudio pessoal (mantém demos .wav e README no git)
-ric/musica/**/*.mp3
-ric/musica/**/*.flac
-ric/musica/**/*.m4a
-ric/musica/**/*.aac
-ric/musica/**/*.ogg
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Runtime data (dev e máquina RIC)
+ric-data/
+*.db
+*.db-*
+
+# Áudio pessoal (legado e futuro)
+archive/legacy/ric/musica/**/*.mp3
+archive/legacy/ric/musica/**/*.flac
+archive/legacy/ric/musica/**/*.m4a
+archive/legacy/ric/musica/**/*.aac
+archive/legacy/ric/musica/**/*.ogg
+ric-data/musica/**/*.mp3
+ric-data/musica/**/*.flac
+ric-data/musica/**/*.m4a
+ric-data/musica/**/*.aac
+ric-data/musica/**/*.ogg
+
 .DS_Store
 Thumbs.db

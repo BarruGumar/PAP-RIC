@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import urllib.error
 import urllib.request
@@ -11,7 +12,7 @@ from ric import db
 from ric import music
 
 OLLAMA_URL = "http://127.0.0.1:11434"
-DEFAULT_MODEL = "qwen2.5:3b"
+DEFAULT_MODEL = os.environ.get("RIC_MODEL", "qwen2.5:3b").strip() or "qwen2.5:3b"
 TIMEOUT_S = 120
 
 _NUM_PALAVRAS = {

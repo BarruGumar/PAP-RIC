@@ -1,19 +1,35 @@
-# Explicação: `ric/voice.py`
+# `ric/voice/`
 
-## Para que serve
+## TTS (`tts.py`)
 
-Camada de **voz local** do RIC:
+Ordem: **Piper** (modelo PT tugão) → **SAPI** (Windows) → **espeak** (Linux).
 
-- `beep()` — som curto de alerta (Windows `winsound` ou bell)
-- `falar(texto)` — TTS sem cloud (SAPI via PowerShell; opcional `pyttsx3`)
-- `estado()` — o que está disponível neste PC
+Síntese: API `PiperVoice` → WAV PCM em `ric-data/tts/alert.wav`.
 
-## Onde é usada
+**Reprodução na UI:** o browser toca o WAV (`audio_base64` no evento WS `/ws` ou `GET /api/v1/tts/alert.wav`). Evita o áudio partido/ininteligível do playback nativo no Windows.
 
-1. **Watchdog** em `ric/web_server.py` — quando um lembrete vence, faz beep + fala mesmo se o browser falhar  
-2. **UI** — `POST /api/voz/falar` quando o overlay mostra a frase do aviso  
-3. **STT** — não está em Python; o botão **Falar** usa Web Speech API no browser (`app.js`)
+CLI/`speak()` ainda pode tocar localmente (SoundPlayer / SAPI) como fallback.
 
-## Degradação
+Alertas: `Atenção. {título}.` · fala ~15% mais lenta · noise do JSON do modelo.
 
-Se TTS falhar, o RIC continua: overlay visual + beep/lista. A voz é atalho, não requisito.
+```text
+py -m pip install piper-tts
+# ou: .\testar-voz.ps1  (cria voz-teste\.venv com Piper + modelo)
+```
+
+**Default guardado:** `ric-data/vozes/pt_PT-tugao-medium.onnx` (não substituir).  
+**Testar outras:** meter `.onnx` em `ric-data/vozes/extras/` e:
+
+```text
+py -m ric voices
+py -m ric say "Atenção, é a hora de beber água." --model extras/OUTRA.onnx
+```
+
+Para a UI usar outra voz só temporariamente: `RIC_PIPER_MODEL=...` no `.env`; para voltar, remove essa linha.
+
+Reinicia `py -m ric ui` depois de instalar. Confirma em `/api/v1/health` → `voice.engine` deve ser `"piper"`.
+
+## Stubs
+
+- `wake.py` — openWakeWord «RIC» (próxima fatia)
+- `stt.py` — Whisper local (próxima fatia)

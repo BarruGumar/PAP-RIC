@@ -31,7 +31,16 @@ py -m ric ui
 
 Abre o browser em `http://127.0.0.1:8787/`.
 
-1. Confirma que o Ollama está a correr (modelo `qwen2.5:3b`) — opcional  
+Para testar com o `qwen2.5:7b` (já descarregado no Ollama), no **mesmo** terminal:
+
+```powershell
+$env:RIC_MODEL = "qwen2.5:7b"
+py -m ric ui
+```
+
+Sem `$env:RIC_MODEL`, o RIC usa `qwen2.5:3b`.
+
+1. Confirma que o Ollama está a correr — opcional  
 2. Na conversa podes usar linguagem natural, por exemplo:
    - `Lembra-me de beber água às 16:45`
    - `Me lembra de beber água daqui 1 minuto`

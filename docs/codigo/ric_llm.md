@@ -16,7 +16,7 @@ A verdade dos horários e preferências continua na SQLite (`ric/db.py`).
 ## Dependências
 
 - Ollama em `http://127.0.0.1:11434`
-- Modelo: `qwen2.5:3b`
+- Modelo: `qwen2.5:3b` por defeito; override com a variável de ambiente `RIC_MODEL` (ex.: `qwen2.5:7b`)
 - Sem pip extra (usa `urllib`)
 
 ## Funções principais
