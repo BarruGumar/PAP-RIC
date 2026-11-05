@@ -91,7 +91,7 @@ O rosto no ecrã **só espelha** o estado atual (ver §6.2).
 ### 4.5 Música e voz
 
 - Música: pastas por género em `musica/`; `catalogo.json` gerado ao arrancar; player `audio` no browser via API.
-- TTS: **Piper PT** (voz fixa); fallback TTS de sistema se Piper falhar (lembretes nunca mudos).
+- TTS: **Piper PT tugão medium** (default actual); fallback TTS de sistema se Piper falhar (lembretes nunca mudos). **Backlog:** A/B com tugão *quality* (ou qualidade superior) em casa — ver [`PLANEAMENTO.md`](PLANEAMENTO.md).
 - STT: Whisper local (small/base ou faster-whisper).
 - Wake-word: openWakeWord (modelo «RIC») + botão fallback.
 

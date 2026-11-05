@@ -17,7 +17,10 @@ py -m pip install piper-tts
 # ou: .\testar-voz.ps1  (cria voz-teste\.venv com Piper + modelo)
 ```
 
-**Default guardado:** `ric-data/vozes/pt_PT-tugao-medium.onnx` (não substituir).  
+**Default guardado:** `ric-data/vozes/pt_PT-tugao-medium.onnx` (não substituir por agora).  
+
+**Backlog (em casa):** o Pedro encontrou **tugão quality** (qualidade superior) na página do Piper. Descarregar para `extras/`, comparar com medium via `say`, e só então decidir se muda o default. Ver [`docs/PLANEAMENTO.md`](../PLANEAMENTO.md).
+
 **Testar outras:** meter `.onnx` em `ric-data/vozes/extras/` e:
 
 ```text

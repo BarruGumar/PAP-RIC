@@ -325,7 +325,8 @@ BackOffice e canal próprio de monitorização **não** entram como produto nest
 - [ ] Instalar/validar Mint XFCE + tactile no PC do protótipo
 - [x] Arquivar legado (`archive/legacy/`) e reescrita iniciada
 - [x] 1.ª fatia: API `:8787` + WS `/ws` + SQLite lembretes + UI Idle (regra 2A)
-- [x] Voz TTS: Piper (+ SAPI/espeak fallback) nos alertas; wake/STT ainda stub
+- [x] Voz TTS: Piper tugão **medium** (+ SAPI/espeak fallback) nos alertas; wake/STT ainda stub
+- [ ] Em casa: A/B Piper **tugão quality** vs medium (sem trocar default até decidir)
 - [ ] Wake-word + Whisper + Ollama tools
 - [ ] PIN cuidador → Telegram/música/histórias
 - [ ] Inventário físico + medições LLM reais

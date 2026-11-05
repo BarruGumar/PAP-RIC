@@ -4,7 +4,7 @@
 **Turma:** 3-TIS  
 **Orientador:** Gil Ribeiro  
 **Trabalho:** RIC — Robô Interativo Companheiro  
-**Atualizado:** 2026-10-25 (após grelha nível 5)
+**Atualizado:** 2026-10-27 (nota TTS: experimentar tugão quality em casa)
 
 Um aluno, fora das aulas. A voz é a forma principal de uso; o ecrã mostra o rosto e só revela texto/botões quando necessário. SO alvo do protótipo: **Linux Mint XFCE**.
 
@@ -60,3 +60,10 @@ O BackOffice e o canal próprio de monitorização remota **não** entram nestas
 3. Telegram / música / histórias  
 
 Ver [`ARQUITETURA.md`](ARQUITETURA.md) §6.11.
+
+### Backlog de voz (quando o Pedro estiver em casa)
+
+- **Agora (não mudar):** default TTS = Piper **tugão medium** (`pt_PT-tugao-medium.onnx`).
+- **A testar:** variante **tugão quality** (ou qualidade superior) que o Pedro viu na página do Piper — descarregar para `ric-data/vozes/extras/`, ouvir lado a lado com `py -m ric say "…" --model extras/…`, e só depois decidir se passa a default.
+- Critérios: naturalidade em pt-PT, latência no PC reciclado, tamanho do modelo.
+- Até essa decisão, **não substituir** o medium na UI / `ric-data/vozes/`.
