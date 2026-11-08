@@ -73,7 +73,7 @@ Cantar música (reproduzir da biblioteca local), leitura de livros e recomendaç
 
 | Meta | Estado no protótipo |
 |---|---|
-| Conversação e voz | Ficha: [`docs/metas/conversacao-e-voz.md`](docs/metas/conversacao-e-voz.md). Fala natural em português de Portugal, como com uma pessoa: o RIC interpreta a intenção e não depende de uma lista de comandos. Protótipo: chat local; TTS Windows SAPI; STT no browser. Ainda frágeis |
+| Conversação e voz | Ficha: [`docs/metas/conversacao-e-voz.md`](docs/metas/conversacao-e-voz.md). Fala natural em português de Portugal, como com uma pessoa: o RIC interpreta a intenção e não depende de uma lista de comandos. Protótipo novo (`ric/`): Piper TTS nos alertas; botão **Falar** → STT local (faster-whisper); wake-word openWakeWord «RIC» ainda por modelo; LLM a seguir |
 | Lembretes | Ficha: [`docs/metas/lembretes.md`](docs/metas/lembretes.md). Ideal (não feito): na entrega já vêm os lembretes importantes, personalizados à pessoa; os auxiliares de saúde alteram-nos pelo BackOffice. Protótipo: criar, disparar, confirmar e adiar. Não dependem da LLM nem da Internet |
 | Gestão de agenda | Ficha: [`docs/metas/gestao-de-agenda.md`](docs/metas/gestao-de-agenda.md). Ideal (não feito): o RIC tem acesso ao tempo e à agenda da pessoa, anota o que ela quiser (consultas, compromissos) e lembra. Hoje só há lembretes com hora, não uma agenda |
 | Reprodução de músicas | Cantar música é o nome desta meta: reproduzir da biblioteca local. Ficha: [`docs/metas/reproducao-e-canto.md`](docs/metas/reproducao-e-canto.md). Ideal (nuvem não feita): grande biblioteca local de vários géneros, gerida e atualizada pela nuvem, baseada no gosto do utente. Protótipo: biblioteca offline por géneros em `ric/musica/` (pausa, continua, recomeço, volume). A busca automática no BackOffice é ideia por avaliar, não está feita |
@@ -325,7 +325,8 @@ BackOffice e canal próprio de monitorização **não** entram como produto nest
 - [ ] Instalar/validar Mint XFCE + tactile no PC do protótipo
 - [x] Arquivar legado (`archive/legacy/`) e reescrita iniciada
 - [x] 1.ª fatia: API `:8787` + WS `/ws` + SQLite lembretes + UI Idle (regra 2A)
-- [x] Voz TTS: Piper tugão **medium** (+ SAPI/espeak fallback) nos alertas; wake/STT ainda stub
+- [x] Voz TTS: Piper tugão **medium** (+ SAPI/espeak fallback) nos alertas
+- [x] Voz wake→STT: botão Falar + `VoiceSession` + API `/voice/*` + faster-whisper opcional (openWakeWord «RIC» + Ollama = seguinte)
 - [ ] Em casa: A/B Piper **tugão quality** vs medium (sem trocar default até decidir)
 - [ ] Wake-word + Whisper + Ollama tools
 - [ ] PIN cuidador → Telegram/música/histórias

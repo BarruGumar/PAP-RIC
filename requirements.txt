@@ -1,0 +1,12 @@
+# Runtime opcional — o núcleo (lembretes/API/UI) corre só com stdlib.
+# Instalar conforme a máquina:
+
+# TTS
+piper-tts>=1.2.0
+
+# STT local (fatia wake→STT)
+faster-whisper>=1.0.0
+
+# Wake-word contínuo (quando existir modelo «RIC» em ric-data/wake/)
+# openwakeword>=0.6.0
+# sounddevice>=0.4.6

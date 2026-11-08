@@ -13,9 +13,14 @@ from ric.core.events import EventBus
 from ric.db.connection import Database
 from ric.reminders.service import ReminderPermissionError, ReminderService
 from ric.voice import VoiceService
+from ric.voice.session import VoiceSession
+from ric.voice.stt import SpeechToText, SttUnavailableError
+from ric.voice.tts import format_alert_phrase
+from ric.voice.wake import WakeWordService
 from ric.web.ws import WsHub, accept_key, decode_frames, encode_text
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
+MAX_BODY_BYTES = 10 * 1024 * 1024
 
 
 class RicApp:
@@ -34,6 +39,13 @@ class RicApp:
             length_scale=settings.piper_length_scale,
             on_speaking=self._on_speaking,
         )
+        self.stt = SpeechToText(
+            cache_dir=settings.data_dir / "stt",
+            model_size=settings.whisper_model,
+            language=settings.stt_language,
+        )
+        self.session = VoiceSession(events=self.events, stt=self.stt)
+        self.wake = WakeWordService(on_detect=self.session.on_wake)
         self._watchdog_stop = threading.Event()
         self._watchdog_thread: threading.Thread | None = None
         self._alert_lock = threading.Lock()
@@ -79,7 +91,7 @@ class RicApp:
                     if key == self._last_alert_key:
                         continue
                     self._last_alert_key = key
-                    frase = f"Atenção, é a hora de {updated.titulo}."
+                    frase = format_alert_phrase(updated.titulo)
                     wav = self.voice.synthesize_alert(
                         frase, stem=f"alert-{updated.id}-{updated.avisos_feitos}"
                     )
@@ -145,6 +157,8 @@ def make_handler(app: RicApp) -> type[BaseHTTPRequestHandler]:
             length = int(self.headers.get("Content-Length", "0") or "0")
             if length <= 0:
                 return {}
+            if length > MAX_BODY_BYTES:
+                raise ValueError("Pedido demasiado grande")
             raw = self.rfile.read(length)
             data = json.loads(raw.decode("utf-8"))
             if not isinstance(data, dict):
@@ -161,7 +175,12 @@ def make_handler(app: RicApp) -> type[BaseHTTPRequestHandler]:
                             "error": None,
                             "data": {
                                 "state": app.events.state,
-                                "voice": app.voice.status(),
+                                "voice": {
+                                    **app.voice.status(),
+                                    "wake": app.wake.status(),
+                                    "stt": app.stt.status(),
+                                    "last_transcript": app.session.last_transcript,
+                                },
                             },
                         },
                     )
@@ -254,9 +273,118 @@ def make_handler(app: RicApp) -> type[BaseHTTPRequestHandler]:
                     )
                     self._json(200, {"ok": True, "error": None, "data": item.to_dict()})
                     return
+                if path == "/api/v1/voice/preview":
+                    # Ouvir TTS (afinar voz) — não é STT
+                    texto = str(
+                        body.get("text")
+                        or format_alert_phrase("beber água")
+                    ).strip()
+                    if app.events.state == "alert":
+                        raise ValueError("Alerta activo — termina o lembrete primeiro.")
+                    wav = app.voice.synthesize_alert(texto, stem="preview")
+                    if wav is None:
+                        app.voice.speak(texto, async_=True, with_beep=False)
+                        self._json(
+                            200,
+                            {
+                                "ok": True,
+                                "error": None,
+                                "data": {
+                                    "text": texto,
+                                    "audio_url": None,
+                                    "length_scale": app.voice.length_scale,
+                                },
+                            },
+                        )
+                        return
+                    prev = app.events.state
+                    app.events.set_state("speaking")
+                    audio_url = f"/api/v1/tts/{wav.name}"
+                    app.events.publish(
+                        {
+                            "type": "tts_preview",
+                            "text": texto,
+                            "audio_url": audio_url,
+                            "play_id": f"preview-{wav.stem}",
+                        }
+                    )
+
+                    def _back_idle() -> None:
+                        import time as _t
+
+                        _t.sleep(0.4)
+                        if app.events.state == "speaking":
+                            app.events.set_state(
+                                "idle" if prev in ("idle", "speaking") else prev
+                            )
+
+                    threading.Thread(
+                        target=_back_idle, name="ric-preview-idle", daemon=True
+                    ).start()
+                    self._json(
+                        200,
+                        {
+                            "ok": True,
+                            "error": None,
+                            "data": {
+                                "text": texto,
+                                "audio_url": audio_url,
+                                "length_scale": app.voice.length_scale,
+                            },
+                        },
+                    )
+                    return
+                if path == "/api/v1/voice/wake":
+                    app.wake.trigger_manual()
+                    self._json(
+                        200,
+                        {
+                            "ok": True,
+                            "error": None,
+                            "data": {"state": app.events.state},
+                        },
+                    )
+                    return
+                if path == "/api/v1/voice/cancel":
+                    app.session.cancel()
+                    self._json(
+                        200,
+                        {
+                            "ok": True,
+                            "error": None,
+                            "data": {"state": app.events.state},
+                        },
+                    )
+                    return
+                if path == "/api/v1/voice/utterance":
+                    if app.events.state not in ("listening", "thinking"):
+                        raise ValueError(
+                            "Sessão de voz não activa. Carrega em Falar primeiro."
+                        )
+                    audio_b64 = str(body.get("audio_base64", "")).strip()
+                    if not audio_b64:
+                        raise ValueError("audio_base64 é obrigatório")
+                    content_type = str(body.get("content_type", "audio/wav"))
+                    text = app.session.process_base64(
+                        audio_b64, content_type=content_type
+                    )
+                    self._json(
+                        200,
+                        {
+                            "ok": True,
+                            "error": None,
+                            "data": {
+                                "text": text,
+                                "state": app.events.state,
+                            },
+                        },
+                    )
+                    return
                 self._json(404, {"ok": False, "error": "Não encontrado", "data": None})
             except ReminderPermissionError as exc:
                 self._json(403, {"ok": False, "error": str(exc), "data": None})
+            except SttUnavailableError as exc:
+                self._json(503, {"ok": False, "error": str(exc), "data": None})
             except (ValueError, LookupError) as exc:
                 self._json(400, {"ok": False, "error": str(exc), "data": None})
             except Exception as exc:  # noqa: BLE001
@@ -331,10 +459,15 @@ def run_server(settings: Settings | None = None) -> None:
     app = RicApp(settings)
     app.events.set_state("idle")
     app.start_watchdog()
+    app.wake.start()
     handler = make_handler(app)
     server = ThreadingHTTPServer((settings.host, settings.port), handler)
     print(
         f"RIC em http://{settings.host}:{settings.port}/  (WS /ws)",
+        flush=True,
+    )
+    print(
+        f"[RIC] wake={app.wake.status()['mode']} stt={app.stt.status()['engine']}",
         flush=True,
     )
     try:
@@ -342,5 +475,6 @@ def run_server(settings: Settings | None = None) -> None:
     except KeyboardInterrupt:
         print("\nA parar RIC…", flush=True)
     finally:
+        app.wake.stop()
         app.stop_watchdog()
         server.server_close()

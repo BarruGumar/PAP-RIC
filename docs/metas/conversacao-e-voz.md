@@ -36,4 +36,4 @@ Deve funcionar offline nas funções essenciais.
 
 ## O que o protótipo já faz hoje
 
-Confirmado no código e no `CONTEXTO-PAP.md`: chat local, TTS no Windows por SAPI e STT no browser. São ainda frágeis.
+App nova `ric/`: Piper TTS nos alertas; botão **Falar** grava WAV e envia a STT local (faster-whisper se instalado); estados `listening`/`thinking` no rosto. Wake-word contínuo «RIC» e conversa com LLM ainda não.

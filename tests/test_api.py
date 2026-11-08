@@ -76,3 +76,32 @@ def test_medicamento_forbidden_without_caregiver(http_server) -> None:
     )
     assert status == 403
     assert payload["ok"] is False
+
+
+def test_voice_wake_and_utterance(http_server) -> None:
+    import base64
+
+    from ric.voice.stt import SpeechToText
+
+    base, app = http_server
+    app.session.stt = SpeechToText(backend=lambda _p: "beber água")
+
+    status, payload = _request(base, "/api/v1/voice/wake", {}, method="POST")
+    assert status == 200
+    assert payload["data"]["state"] == "listening"
+
+    audio_b64 = base64.b64encode(b"RIFF-fake").decode("ascii")
+    status, payload = _request(
+        base,
+        "/api/v1/voice/utterance",
+        {"audio_base64": audio_b64, "content_type": "audio/wav"},
+        method="POST",
+    )
+    assert status == 200
+    assert payload["data"]["text"] == "beber água"
+    assert payload["data"]["state"] == "idle"
+
+    status, health = _request(base, "/api/v1/health")
+    assert status == 200
+    assert health["data"]["voice"]["wake"]["mode"] == "manual"
+    assert health["data"]["voice"]["last_transcript"] == "beber água"

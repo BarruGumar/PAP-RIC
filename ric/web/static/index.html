@@ -23,6 +23,17 @@
       <p id="next-reminder" class="next-value">Nenhum lembrete</p>
     </section>
 
+    <section class="talk" aria-label="Falar com o RIC">
+      <button type="button" id="btn-talk" class="btn btn-talk" aria-label="Carregar para falar">
+        Falar
+      </button>
+      <p class="talk-hint">Toca para começar · fala · toca outra vez para enviar</p>
+      <p id="heard" class="heard" aria-live="polite"></p>
+      <button type="button" id="btn-preview" class="btn" aria-label="Ouvir amostra da voz do RIC">
+        Ouvir voz
+      </button>
+    </section>
+
     <section id="alert-panel" class="alert-panel hidden" aria-live="assertive">
       <p id="alert-title" class="alert-title">Lembrete</p>
       <div class="alert-actions">

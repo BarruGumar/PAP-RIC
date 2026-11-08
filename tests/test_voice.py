@@ -2,12 +2,27 @@
 
 from __future__ import annotations
 
-from ric.voice.tts import VoiceService, prepare_speech_text
+from ric.voice.tts import VoiceService, format_alert_phrase, prepare_speech_text
 
 
 def test_prepare_speech_text_clears_symbols() -> None:
     assert prepare_speech_text("Lembrete: beber água") == "Lembrete, beber água."
     assert prepare_speech_text("  oi  ") == "oi."
+    assert prepare_speech_text("a,, b") == "a, b."
+
+
+def test_prepare_speech_text_says_ric_not_letters() -> None:
+    assert prepare_speech_text("Olá, eu sou o RIC") == "Olá, eu sou o Ric."
+    assert prepare_speech_text("R.I.C. está aqui") == "Ric está aqui."
+    assert prepare_speech_text("o RIC") == "o Ric."
+
+
+
+def test_alert_phrase_avoids_mid_sentence_stop() -> None:
+    phrase = format_alert_phrase("Beber água")
+    assert phrase == "Atenção, é a hora de Beber água."
+    assert "Atenção." not in phrase
+
 
 
 def test_speak_uses_first_successful_backend() -> None:
@@ -27,7 +42,7 @@ def test_speak_uses_first_successful_backend() -> None:
         on_speaking=lambda flag: speaking.append(flag),
     )
     assert voice.speak("Olá RIC", async_=False, with_beep=False) is True
-    assert calls == ["fail", "Olá RIC."]
+    assert calls == ["fail", "Olá Ric."]
     assert speaking == [True, False]
 
 
@@ -41,5 +56,5 @@ def test_status_keys() -> None:
     status = voice.status()
     assert "piper" in status
     assert "engine" in status
-    assert status["wake"] == "stub"
-    assert status["stt"] == "stub"
+    assert "wake" not in status
+    assert "stt" not in status

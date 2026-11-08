@@ -6,11 +6,11 @@ Ordem: **Piper** (modelo PT tugão) → **SAPI** (Windows) → **espeak** (Linux
 
 Síntese: API `PiperVoice` → WAV PCM em `ric-data/tts/alert.wav`.
 
-**Reprodução na UI:** o browser toca o WAV (`audio_base64` no evento WS `/ws` ou `GET /api/v1/tts/alert.wav`). Evita o áudio partido/ininteligível do playback nativo no Windows.
+**Reprodução na UI:** o browser toca o WAV (`audio_url` no evento WS `/ws` ou `GET /api/v1/tts/….wav`). Evita o áudio partido/ininteligível do playback nativo no Windows.
 
 CLI/`speak()` ainda pode tocar localmente (SoundPlayer / SAPI) como fallback.
 
-Alertas: `Atenção. {título}.` · fala ~15% mais lenta · noise do JSON do modelo.
+Alertas: `Atenção, é a hora de {título}.` (vírgula, **sem** ponto a meio — evita travadinha) · `length_scale` default **1.35**.
 
 ```text
 py -m pip install piper-tts
@@ -32,7 +32,29 @@ Para a UI usar outra voz só temporariamente: `RIC_PIPER_MODEL=...` no `.env`; p
 
 Reinicia `py -m ric ui` depois de instalar. Confirma em `/api/v1/health` → `voice.engine` deve ser `"piper"`.
 
-## Stubs
+## Wake (`wake.py`)
 
-- `wake.py` — openWakeWord «RIC» (próxima fatia)
-- `stt.py` — Whisper local (próxima fatia)
+- `WakeWordService`: callback `on_detect`.
+- **Sempre** disponível: `trigger_manual()` (botão «Falar» / `POST /api/v1/voice/wake`).
+- openWakeWord contínuo: só quando houver detector injectado com modelo «RIC» (`ric-data/wake/` — ainda por treinar/ligar).
+
+## STT (`stt.py`)
+
+- `SpeechToText` com backend injectável (testes) ou **faster-whisper** se instalado.
+- `RIC_WHISPER_MODEL` (default **`small`** — melhor PT que `base`), `RIC_STT_LANGUAGE` (default `pt`).
+- Clips do botão: sem VAD agressivo; `beam_size=5`; `initial_prompt` com vocabulário RIC.
+- Último áudio guardado em `ric-data/stt/last.wav` para debug.
+- Sem pacote: `available=False` → API devolve 503 com mensagem clara.
+
+```text
+py -m pip install faster-whisper
+```
+
+UI: **tocar** Falar → falar ≥1 s → **tocar** outra vez (não é «segurar»). Áudio normalizado e reamostrado a 16 kHz no browser.
+
+## Sessão (`session.py`)
+
+Fluxo desta fatia: **wake → listening → thinking (STT) → transcript → idle**.  
+LLM (thinking com tools) fica para a fatia seguinte.
+
+Eventos WS: `wake_detected`, `stt_started`, `transcript`, `stt_error`, `listen_cancelled`.

@@ -29,6 +29,8 @@ class Settings:
     piper_model: Path | None = None
     piper_bin: str | None = None
     piper_length_scale: float = 1.35
+    whisper_model: str = "small"
+    stt_language: str = "pt"
 
     @property
     def db_path(self) -> Path:
@@ -66,4 +68,7 @@ class Settings:
             piper_model=model,
             piper_bin=piper_bin,
             piper_length_scale=length_scale,
+            whisper_model=os.environ.get("RIC_WHISPER_MODEL", "small").strip()
+            or "small",
+            stt_language=os.environ.get("RIC_STT_LANGUAGE", "pt").strip() or "pt",
         )

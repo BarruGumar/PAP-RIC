@@ -32,22 +32,41 @@ def beep() -> None:
 
 
 def prepare_speech_text(texto: str) -> str:
-    """Texto fluido para Piper (sem cortes a mais que soam a ‘travões’)."""
+    """Texto fluido para Piper (poucas pausas — vírgulas a mais soam a ‘travões’)."""
     t = (texto or "").strip()
     if not t:
         return ""
+    # Maiúsculas «RIC» → soletrado R-I-C. Queremos o hipocorístico de Ricardo («Ric»).
+    t = re.sub(
+        r"\bR(?:[\s·]*\.?[\s·]*)I(?:[\s·]*\.?[\s·]*)C\b\.?",
+        "Ric",
+        t,
+        flags=re.IGNORECASE,
+    )
     t = t.replace("…", ",")
     t = t.replace(":", ",")
     t = t.replace(";", ",")
     t = t.replace("/", " ")
     t = t.replace("&", " e ")
-    # Evitar vários pontos seguidos → pausas bruscas
     t = re.sub(r"[\[\]\{\}\(\)_*#@]+", " ", t)
+    # Uma vírgula basta; várias seguidas = micro-pausas metálicas
+    t = re.sub(r",+", ",", t)
+    t = re.sub(r"\s*,\s*", ", ", t)
     t = re.sub(r"\s+", " ", t).strip()
     t = re.sub(r"\.{2,}", ".", t)
     if not t.endswith((".", "!", "?")):
         t = t + "."
     return t
+
+
+def format_alert_phrase(titulo: str) -> str:
+    """Uma só frase — ponto a meio («Atenção.») causa a travadinha no Piper."""
+    nome = re.sub(r"\s+", " ", (titulo or "").strip())
+    nome = nome.rstrip(".")
+    if not nome:
+        nome = "o teu lembrete"
+    # Vírgula = pausa curta; evita fim de frase a seguir a «Atenção»
+    return f"Atenção, é a hora de {nome}."
 
 
 def _escape_ps(texto: str) -> str:
@@ -139,18 +158,18 @@ class PiperEngine:
         if not texto or not self.model.is_file():
             return False
         defaults = _load_model_inference(self.model)
-        # 1.3–1.4: mais lento sem artefactos; >1.5 costuma “travar” a prosódia
-        length_scale = max(min(self.length_scale, 1.5), defaults["length_scale"])
+        # Preferido no RIC: ~1.35. Acima de ~1.5 a prosódia começa a “travar”.
+        length_scale = min(max(float(self.length_scale), 0.9), 1.5)
         try:
             from piper.config import SynthesisConfig
 
             syn = SynthesisConfig(
                 length_scale=length_scale,
-                # Um pouco menos noise = menos “chiado”; volume < 1 evita estouro
-                noise_scale=min(defaults["noise_scale"], 0.6),
-                noise_w_scale=min(defaults["noise_w"], 0.75),
+                # Manter noise perto do default do modelo = prosódia mais natural
+                noise_scale=float(defaults["noise_scale"]),
+                noise_w_scale=float(defaults["noise_w"]),
                 normalize_audio=True,
-                volume=0.75,
+                volume=0.85,
             )
             out_path.parent.mkdir(parents=True, exist_ok=True)
             with self._lock:
@@ -273,6 +292,13 @@ class VoiceService:
             pass
         return out
 
+    def set_length_scale(self, value: float) -> float:
+        """Ajusta ritmo TTS em runtime (ex.: `ric tune`)."""
+        self.length_scale = min(max(float(value), 0.9), 1.5)
+        if self._piper is not None:
+            self._piper.length_scale = self.length_scale
+        return self.length_scale
+
     def status(self) -> dict:
         piper_ok = self._piper is not None
         return {
@@ -283,8 +309,6 @@ class VoiceService:
             "playback": "browser+local",
             "sapi": sys.platform == "win32",
             "espeak": bool(shutil.which("espeak-ng") or shutil.which("espeak")),
-            "wake": "stub",
-            "stt": "stub",
         }
 
     def speak(self, texto: str, *, async_: bool = True, with_beep: bool = False) -> bool:
