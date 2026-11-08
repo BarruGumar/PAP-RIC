@@ -174,6 +174,15 @@
           ? `Ouvi: ${msg.text}`
           : "Não percebi. Tenta outra vez."
       }
+      if (msg.type === "assistant_reply" && typeof msg.text === "string") {
+        heardEl.textContent = msg.text ? `Ric: ${msg.text}` : heardEl.textContent
+        if (msg.audio_url) {
+          playAlertAudio({
+            audio_url: msg.audio_url,
+            play_id: msg.play_id || `reply-${Date.now()}`,
+          })
+        }
+      }
       if (msg.type === "stt_error" && msg.error) {
         heardEl.textContent = msg.error
       }
@@ -322,9 +331,19 @@
         method: "POST",
         body: JSON.stringify({ audio_base64, content_type: "audio/wav" }),
       })
-      heardEl.textContent = data.text
-        ? `Ouvi: ${data.text}`
-        : "Não percebi. Tenta outra vez."
+      if (data.reply) {
+        heardEl.textContent = `Ric: ${data.reply}`
+        if (data.audio_url) {
+          playAlertAudio({
+            audio_url: data.audio_url,
+            play_id: `reply-${Date.now()}`,
+          })
+        }
+      } else {
+        heardEl.textContent = data.text
+          ? `Ouvi: ${data.text}`
+          : "Não percebi. Tenta outra vez."
+      }
     } catch (err) {
       heardEl.textContent = err.message || "Erro ao reconhecer a voz."
       setFace("idle")

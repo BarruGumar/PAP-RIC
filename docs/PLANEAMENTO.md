@@ -68,7 +68,7 @@ Ver [`ARQUITETURA.md`](ARQUITETURA.md) §6.11.
 - Critérios: naturalidade em pt-PT, latência no PC reciclado, tamanho do modelo.
 - Até essa decisão, **não substituir** o medium na UI / `ric-data/vozes/`.
 
-### Fatia voz wake→STT (estado)
+### Fatia voz wake→STT→LLM (estado)
 
-- Feito: botão **Falar**, gravação WAV no browser, `VoiceSession`, API `/voice/*`, faster-whisper opcional, estados `listening`/`thinking`.
-- Em falta: modelo openWakeWord «RIC» + microfone contínuo no servidor; ligação STT → Ollama (tools).
+- Feito: botão **Falar**, Whisper STT, `VoiceSession`, API `/voice/*`, Ollama `qwen2.5:3b` + tools ler lembretes, resposta em Piper.
+- Em falta: modelo openWakeWord «RIC» + microfone contínuo; mais tools P1 (música/história/gosto); cuidador PIN.

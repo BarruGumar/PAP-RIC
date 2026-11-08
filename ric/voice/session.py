@@ -1,14 +1,26 @@
-"""Sessão de voz: wake → listening → STT → transcript (LLM na fatia seguinte)."""
+"""Sessão de voz: wake → listening → STT → LLM → TTS → idle."""
 
 from __future__ import annotations
 
 import base64
 import binascii
 import threading
-from typing import Any
+from typing import Any, Protocol
 
 from ric.core.events import EventBus
 from ric.voice.stt import SpeechToText, SttUnavailableError
+
+
+class LlmLike(Protocol):
+    available: bool
+
+    def chat(self, text: str) -> str: ...
+
+    def status(self) -> dict: ...
+
+
+class TtsLike(Protocol):
+    def synthesize_alert(self, texto: str, *, stem: str = "alert") -> Any: ...
 
 
 class VoiceSession:
@@ -17,11 +29,17 @@ class VoiceSession:
         *,
         events: EventBus,
         stt: SpeechToText,
+        llm: LlmLike | None = None,
+        tts: TtsLike | None = None,
     ) -> None:
         self.events = events
         self.stt = stt
+        self.llm = llm
+        self.tts = tts
         self._lock = threading.Lock()
         self.last_transcript: str | None = None
+        self.last_reply: str | None = None
+        self.last_audio_url: str | None = None
 
     def on_wake(self) -> None:
         with self._lock:
@@ -61,10 +79,63 @@ class VoiceSession:
         with self._lock:
             self.last_transcript = text
             self.events.publish({"type": "transcript", "text": text})
-            # Não sobrescrever um alerta que tenha disparado a meio do STT
+            if self.events.state == "alert":
+                return text
+
+        reply = self._maybe_chat(text)
+        audio_url = None
+        if reply and self.tts is not None and self.events.state != "alert":
+            with self._lock:
+                if self.events.state != "alert":
+                    self.events.set_state("speaking")
+            try:
+                wav = self.tts.synthesize_alert(reply, stem="reply")
+                if wav is not None:
+                    audio_url = f"/api/v1/tts/{wav.name}"
+                    self.last_audio_url = audio_url
+                    self.events.publish(
+                        {
+                            "type": "assistant_reply",
+                            "text": reply,
+                            "audio_url": audio_url,
+                            "play_id": f"reply-{wav.stem}",
+                        }
+                    )
+                else:
+                    self.events.publish(
+                        {"type": "assistant_reply", "text": reply, "audio_url": None}
+                    )
+            except Exception as exc:  # noqa: BLE001
+                self.events.publish(
+                    {
+                        "type": "assistant_reply",
+                        "text": reply,
+                        "audio_url": None,
+                        "tts_error": str(exc),
+                    }
+                )
+        elif reply:
+            self.events.publish(
+                {"type": "assistant_reply", "text": reply, "audio_url": None}
+            )
+
+        with self._lock:
             if self.events.state != "alert":
                 self.events.set_state("idle")
         return text
+
+    def _maybe_chat(self, text: str) -> str | None:
+        if self.llm is None:
+            return None
+        if not text.strip():
+            return None
+        try:
+            reply = (self.llm.chat(text) or "").strip()
+        except Exception as exc:  # noqa: BLE001
+            self.events.publish({"type": "llm_error", "error": str(exc)})
+            return None
+        self.last_reply = reply or None
+        return self.last_reply
 
     def process_base64(
         self,
@@ -88,7 +159,10 @@ class VoiceSession:
     def status(self) -> dict[str, Any]:
         return {
             "last_transcript": self.last_transcript,
+            "last_reply": self.last_reply,
+            "last_audio_url": self.last_audio_url,
             "stt": self.stt.status(),
+            "llm": self.llm.status() if self.llm is not None else {"available": False},
         }
 
 

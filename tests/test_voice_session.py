@@ -43,6 +43,36 @@ def test_process_audio_publishes_transcript_and_returns_idle() -> None:
     )
 
 
+def test_process_audio_with_llm_publishes_reply() -> None:
+    events = EventBus()
+    published: list[dict] = []
+    events.subscribe(published.append)
+
+    class FakeLlm:
+        available = True
+
+        def chat(self, text: str) -> str:
+            return f"Ouvi: {text}"
+
+        def status(self) -> dict:
+            return {"available": True, "model": "fake"}
+
+    session = VoiceSession(
+        events=events,
+        stt=SpeechToText(backend=lambda _p: "olá ric"),
+        llm=FakeLlm(),
+    )
+    session.on_wake()
+    text = session.process_audio(b"RIFF-fake")
+    assert text == "olá ric"
+    assert session.last_reply == "Ouvi: olá ric"
+    assert events.state == "idle"
+    assert any(
+        e.get("type") == "assistant_reply" and "olá ric" in (e.get("text") or "")
+        for e in published
+    )
+
+
 def test_cancel_listen_returns_idle() -> None:
     events = EventBus()
     session = VoiceSession(

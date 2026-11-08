@@ -31,6 +31,9 @@ class Settings:
     piper_length_scale: float = 1.35
     whisper_model: str = "small"
     stt_language: str = "pt"
+    ollama_url: str = "http://127.0.0.1:11434"
+    llm_model: str = "qwen2.5:3b"
+    llm_timeout: float = 10.0
 
     @property
     def db_path(self) -> Path:
@@ -71,4 +74,13 @@ class Settings:
             whisper_model=os.environ.get("RIC_WHISPER_MODEL", "small").strip()
             or "small",
             stt_language=os.environ.get("RIC_STT_LANGUAGE", "pt").strip() or "pt",
+            ollama_url=os.environ.get("RIC_OLLAMA_URL", "http://127.0.0.1:11434").strip()
+            or "http://127.0.0.1:11434",
+            llm_model=(
+                os.environ.get("RIC_MODEL")
+                or os.environ.get("RIC_LLM_MODEL")
+                or "qwen2.5:3b"
+            ).strip()
+            or "qwen2.5:3b",
+            llm_timeout=float(os.environ.get("RIC_LLM_TIMEOUT", "10")),
         )

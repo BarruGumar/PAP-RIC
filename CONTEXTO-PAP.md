@@ -326,7 +326,8 @@ BackOffice e canal próprio de monitorização **não** entram como produto nest
 - [x] Arquivar legado (`archive/legacy/`) e reescrita iniciada
 - [x] 1.ª fatia: API `:8787` + WS `/ws` + SQLite lembretes + UI Idle (regra 2A)
 - [x] Voz TTS: Piper tugão **medium** (+ SAPI/espeak fallback) nos alertas
-- [x] Voz wake→STT: botão Falar + `VoiceSession` + API `/voice/*` + faster-whisper opcional (openWakeWord «RIC» + Ollama = seguinte)
+- [x] Voz wake→STT: botão Falar + `VoiceSession` + API `/voice/*` + faster-whisper
+- [x] LLM Ollama `qwen2.5:3b` na conversa por voz (tools: listar/próximo lembrete); openWakeWord «RIC» ainda em falta
 - [ ] Em casa: A/B Piper **tugão quality** vs medium (sem trocar default até decidir)
 - [ ] Wake-word + Whisper + Ollama tools
 - [ ] PIN cuidador → Telegram/música/histórias

@@ -54,7 +54,7 @@ UI: **tocar** Falar → falar ≥1 s → **tocar** outra vez (não é «segurar�
 
 ## Sessão (`session.py`)
 
-Fluxo desta fatia: **wake → listening → thinking (STT) → transcript → idle**.  
-LLM (thinking com tools) fica para a fatia seguinte.
+Fluxo: **wake → listening → STT → LLM → TTS → idle**.
 
-Eventos WS: `wake_detected`, `stt_started`, `transcript`, `stt_error`, `listen_cancelled`.
+Eventos WS: `wake_detected`, `stt_started`, `transcript`, `assistant_reply`, `stt_error`, `listen_cancelled`.
+

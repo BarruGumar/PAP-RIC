@@ -36,4 +36,4 @@ Deve funcionar offline nas funções essenciais.
 
 ## O que o protótipo já faz hoje
 
-App nova `ric/`: Piper TTS nos alertas; botão **Falar** grava WAV e envia a STT local (faster-whisper se instalado); estados `listening`/`thinking` no rosto. Wake-word contínuo «RIC» e conversa com LLM ainda não.
+App nova `ric/`: Piper TTS; botão **Falar** → Whisper STT → Ollama (`qwen2.5:3b`) → resposta falada; tools ler lembretes. Wake-word contínuo «RIC» ainda não.

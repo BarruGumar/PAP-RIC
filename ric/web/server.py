@@ -12,6 +12,7 @@ from ric.config import Settings
 from ric.core.events import EventBus
 from ric.db.connection import Database
 from ric.reminders.service import ReminderPermissionError, ReminderService
+from ric.llm import LlmService
 from ric.voice import VoiceService
 from ric.voice.session import VoiceSession
 from ric.voice.stt import SpeechToText, SttUnavailableError
@@ -44,7 +45,18 @@ class RicApp:
             model_size=settings.whisper_model,
             language=settings.stt_language,
         )
-        self.session = VoiceSession(events=self.events, stt=self.stt)
+        self.llm = LlmService(
+            reminders=self.reminders,
+            base_url=settings.ollama_url,
+            model=settings.llm_model,
+            timeout=settings.llm_timeout,
+        )
+        self.session = VoiceSession(
+            events=self.events,
+            stt=self.stt,
+            llm=self.llm,
+            tts=self.voice,
+        )
         self.wake = WakeWordService(on_detect=self.session.on_wake)
         self._watchdog_stop = threading.Event()
         self._watchdog_thread: threading.Thread | None = None
@@ -159,7 +171,14 @@ def make_handler(app: RicApp) -> type[BaseHTTPRequestHandler]:
                 return {}
             if length > MAX_BODY_BYTES:
                 raise ValueError("Pedido demasiado grande")
-            raw = self.rfile.read(length)
+            self.connection.settimeout(15.0)
+            try:
+                raw = self.rfile.read(length)
+            finally:
+                try:
+                    self.connection.settimeout(None)
+                except Exception:  # noqa: BLE001
+                    pass
             data = json.loads(raw.decode("utf-8"))
             if not isinstance(data, dict):
                 raise ValueError("JSON inválido")
@@ -179,7 +198,9 @@ def make_handler(app: RicApp) -> type[BaseHTTPRequestHandler]:
                                     **app.voice.status(),
                                     "wake": app.wake.status(),
                                     "stt": app.stt.status(),
+                                    "llm": app.llm.status(),
                                     "last_transcript": app.session.last_transcript,
+                                    "last_reply": app.session.last_reply,
                                 },
                             },
                         },
@@ -375,6 +396,8 @@ def make_handler(app: RicApp) -> type[BaseHTTPRequestHandler]:
                             "error": None,
                             "data": {
                                 "text": text,
+                                "reply": app.session.last_reply,
+                                "audio_url": app.session.last_audio_url,
                                 "state": app.events.state,
                             },
                         },
@@ -467,7 +490,9 @@ def run_server(settings: Settings | None = None) -> None:
         flush=True,
     )
     print(
-        f"[RIC] wake={app.wake.status()['mode']} stt={app.stt.status()['engine']}",
+        f"[RIC] wake={app.wake.status()['mode']} "
+        f"stt={app.stt.status()['engine']} "
+        f"llm={'ok' if app.llm.available else 'off'} ({app.llm.model})",
         flush=True,
     )
     try:

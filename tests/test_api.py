@@ -83,8 +83,18 @@ def test_voice_wake_and_utterance(http_server) -> None:
 
     from ric.voice.stt import SpeechToText
 
+    class FakeLlm:
+        available = True
+
+        def chat(self, text: str) -> str:
+            return f"Ok, {text}"
+
+        def status(self) -> dict:
+            return {"available": True, "model": "fake"}
+
     base, app = http_server
     app.session.stt = SpeechToText(backend=lambda _p: "beber água")
+    app.session.llm = FakeLlm()
 
     status, payload = _request(base, "/api/v1/voice/wake", {}, method="POST")
     assert status == 200
@@ -99,9 +109,11 @@ def test_voice_wake_and_utterance(http_server) -> None:
     )
     assert status == 200
     assert payload["data"]["text"] == "beber água"
+    assert payload["data"]["reply"] == "Ok, beber água"
     assert payload["data"]["state"] == "idle"
 
     status, health = _request(base, "/api/v1/health")
     assert status == 200
     assert health["data"]["voice"]["wake"]["mode"] == "manual"
     assert health["data"]["voice"]["last_transcript"] == "beber água"
+    assert health["data"]["voice"]["last_reply"] == "Ok, beber água"
