@@ -1,39 +1,21 @@
 # Explicações do código — RIC
 
-Esta pasta explica **cada ficheiro de código** do projeto, ao pormenor, para a PAP e para qualquer pessoa (ou IA) que precise de perceber o sistema.
+## App atual (reescrita 2026-10-25)
 
-## Como está organizado
-
-| Ficheiro de código | Explicação |
+| Ficheiro | Explicação |
 |---|---|
-| `main.py` | [main.md](main.md) |
-| `ric/__init__.py` | [ric__init__.md](ric__init__.md) |
-| `ric/__main__.py` | [ric__main__.md](ric__main__.md) |
-| `ric/db.py` | [ric_db.md](ric_db.md) |
-| `ric/cli.py` | [ric_cli.md](ric_cli.md) |
-| `ric/web_server.py` | [ric_web_server.md](ric_web_server.md) |
-| `ric/web/` (HTML/CSS/JS) | [ric_web_ui.md](ric_web_ui.md) |
-| `ric/llm.py` | [ric_llm.md](ric_llm.md) |
-| `ric/music.py` + `ric/musica/` | [ric_music.md](ric_music.md) |
-| `ric/voice.py` | [ric_voice.md](ric_voice.md) |
+| `ric/__main__.py` / `ric/cli.py` | [ric_cli.md](ric_cli.md) |
+| `ric/config.py` | [ric_config.md](ric_config.md) |
+| `ric/db/` | [ric_db.md](ric_db.md) |
+| `ric/reminders/` | [ric_reminders.md](ric_reminders.md) |
+| `ric/core/events.py` | [ric_core_events.md](ric_core_events.md) |
+| `ric/web/server.py` + `ws.py` + `static/` | [ric_web.md](ric_web.md) |
+| `ric/voice/` | [ric_voice.md](ric_voice.md) |
 
-## Regra do projeto
+Arranque: `py -m ric ui` → `http://127.0.0.1:8787/` (REST `/api/v1/…`, WS `/ws`).
 
-Sempre que se **criar ou alterar** código relevante, a explicação correspondente em `docs/codigo/` deve ser **criada ou atualizada**.
+Testes: `py -m pytest tests/ -v`
 
-## Fluxo geral (visão rápida)
+## Legado
 
-```
-py -m ric <comando>
-        │
-        ▼
- ric/__main__.py  →  ric/cli.py  →  ric/db.py  →  ric/data/ric.db
-      (entrada)      (comandos)     (SQLite)         (dados locais)
-                          │
-                          └─ ui → ric/web_server.py → browser (ric/web/)
-                                        │              + watchdog lembretes
-                                        ├─ chat/frase → ric/llm.py → Ollama
-                                        └─ voz → ric/voice.py (TTS local)
-```
-
-`main.py` é só um atalho opcional para o mesmo `cli`.
+O protótipo antigo está em [`archive/legacy/`](../../archive/legacy/README.md). As fichas antigas (`ric_llm.md`, `ric_voice.md`, …) descrevem esse código; não são a base da demo.

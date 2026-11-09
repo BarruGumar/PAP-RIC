@@ -91,7 +91,7 @@ O rosto no ecrã **só espelha** o estado atual (ver §6.2).
 ### 4.5 Música e voz
 
 - Música: pastas por género em `musica/`; `catalogo.json` gerado ao arrancar; player `audio` no browser via API.
-- TTS: **Piper PT** (voz fixa); fallback TTS de sistema se Piper falhar (lembretes nunca mudos).
+- TTS: **Piper PT tugão medium** (default actual); fallback TTS de sistema se Piper falhar (lembretes nunca mudos). **Backlog:** A/B com tugão *quality* (ou qualidade superior) em casa — ver [`PLANEAMENTO.md`](PLANEAMENTO.md).
 - STT: Whisper local (small/base ou faster-whisper).
 - Wake-word: openWakeWord (modelo «RIC») + botão fallback.
 
@@ -215,8 +215,8 @@ Mínimo: título do lembrete + «sem confirmação» + hora local.
 
 ### 6.5 Tools do LLM (P1)
 
-Permitidas: ler lembretes / próximo lembrete, `tocar_musica` / parar, `contar_historia`, `guardar_gosto`.  
-**Proibido:** criar/editar medicamentos.  
+Permitidas: ler lembretes / próximo lembrete, **criar/apagar lembrete não médico** (`criar_lembrete`, `apagar_lembrete`), `tocar_musica` / parar, `contar_historia`, `guardar_gosto`.  
+**Proibido:** criar/apagar/editar medicamentos ou críticos.  
 Telegram **não** é tool livre do LLM — dispara no **scheduler** de lembretes (D1+D3). «Avisar cuidador» por voz = fase posterior com confirmação no ecrã.
 
 ### 6.6 Cuidador (PIN e sessão)

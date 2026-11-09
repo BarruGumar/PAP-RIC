@@ -1,19 +1,70 @@
-# Explicação: `ric/voice.py`
+# `ric/voice/`
 
-## Para que serve
+## TTS (`tts.py`)
 
-Camada de **voz local** do RIC:
+Ordem: **Piper** (modelo PT tugão) → **SAPI** (Windows) → **espeak** (Linux).
 
-- `beep()` — som curto de alerta (Windows `winsound` ou bell)
-- `falar(texto)` — TTS sem cloud (SAPI via PowerShell; opcional `pyttsx3`)
-- `estado()` — o que está disponível neste PC
+Síntese: API `PiperVoice` → WAV PCM em `ric-data/tts/`.
 
-## Onde é usada
+**Reprodução na UI:** o browser toca o WAV (`audio_url` no evento WS `/ws` ou `GET /api/v1/tts/….wav`). Evita o áudio partido/ininteligível do playback nativo no Windows.
 
-1. **Watchdog** em `ric/web_server.py` — quando um lembrete vence, faz beep + fala mesmo se o browser falhar  
-2. **UI** — `POST /api/voz/falar` quando o overlay mostra a frase do aviso  
-3. **STT** — não está em Python; o botão **Falar** usa Web Speech API no browser (`app.js`)
+CLI/`speak()` ainda pode tocar localmente (SoundPlayer / SAPI) como fallback.
 
-## Degradação
+Alertas: `Atenção, é a hora de {título}.` (vírgula, **sem** ponto a meio — evita travadinha) · `length_scale` default **1.35**.  
+Respostas de conversa (`stem="reply"`): ritmo mais ágil **1.20** via `length_scale_for_stem`.
 
-Se TTS falhar, o RIC continua: overlay visual + beep/lista. A voz é atalho, não requisito.
+Warm-up no arranque: carrega o ONNX e sintetiza «Olá.» uma vez (evita 1.ª resposta fria).
+
+```text
+py -m pip install piper-tts
+# ou: .\testar-voz.ps1  (cria voz-teste\.venv com Piper + modelo)
+```
+
+**Default guardado:** `ric-data/vozes/pt_PT-tugao-medium.onnx` (não substituir por agora).  
+
+**Backlog (em casa):** o Pedro encontrou **tugão quality** (qualidade superior) na página do Piper. Descarregar para `extras/`, comparar com medium via `say`, e só então decidir se muda o default. Ver [`docs/PLANEAMENTO.md`](../PLANEAMENTO.md).
+
+**Testar outras:** meter `.onnx` em `ric-data/vozes/extras/` e:
+
+```text
+py -m ric voices
+py -m ric say "Atenção, é a hora de beber água." --model extras/OUTRA.onnx
+```
+
+Para a UI usar outra voz só temporariamente: `RIC_PIPER_MODEL=...` no `.env`; para voltar, remove essa linha.
+
+Reinicia `py -m ric ui` depois de instalar. Confirma em `/api/v1/health` → `voice.engine` deve ser `"piper"`.
+
+## Wake (`wake.py`)
+
+- `WakeWordService`: callback `on_detect`.
+- **Sempre** disponível: `trigger_manual()` (botão «Falar» / `POST /api/v1/voice/wake`).
+- openWakeWord contínuo: só quando houver detector injectado com modelo «RIC» (`ric-data/wake/` — ainda por treinar/ligar).
+
+## STT (`stt.py`)
+
+- `SpeechToText` com backend injectável (testes) ou **faster-whisper** se instalado.
+- `RIC_WHISPER_MODEL` (default **`small`** — melhor PT que `base`), `RIC_STT_LANGUAGE` (default `pt`).
+- Decode: `beam_size=3` (e `best_of=3`; com `temperature=0` o best_of não entra em jogo).
+- `vad_filter=False` (o browser corta silêncio).
+- `join_transcript_segments`: rejeita segmentos com `no_speech_prob ≥ 0.6` ou `avg_logprob < -1.2`.
+- `initial_prompt` curto (PT-PT). Prompt longo + beam baixo fazia o Whisper inventar frases.
+- Warm-up: carrega o modelo e corre uma transcrição de WAV silencioso curto (aquece CTranslate2).
+- Último áudio guardado em `ric-data/stt/last.wav` para debug.
+- Sem pacote: `available=False` → API devolve 503 com mensagem clara.
+
+```text
+py -m pip install faster-whisper
+```
+
+UI: **tocar** Falar → falar ≥ ~0,35 s → **envia sozinho** após ~0,9 s de silêncio (ou toca **Parar**); máximo ~15 s.  
+Microfone abre **antes** do wake; PCM a 16 kHz com silêncio cortado **antes** da normalização (senão o ruído amplificado estraga o endpointing).
+
+## Sessão (`session.py`)
+
+Fluxo: **wake → listening → STT → LLM → TTS → idle**.
+
+Publica o texto da resposta **antes** do TTS; o browser toca o áudio via WS.  
+Timings no terminal: `[RIC] voz: stt=…s llm=…s tts=…s total=…s`.
+
+Eventos WS: `wake_detected`, `stt_started`, `transcript`, `assistant_reply`, `stt_error`, `listen_cancelled`.

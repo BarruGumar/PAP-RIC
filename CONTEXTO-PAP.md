@@ -73,7 +73,7 @@ Cantar música (reproduzir da biblioteca local), leitura de livros e recomendaç
 
 | Meta | Estado no protótipo |
 |---|---|
-| Conversação e voz | Ficha: [`docs/metas/conversacao-e-voz.md`](docs/metas/conversacao-e-voz.md). Fala natural em português de Portugal, como com uma pessoa: o RIC interpreta a intenção e não depende de uma lista de comandos. Protótipo: chat local; TTS Windows SAPI; STT no browser. Ainda frágeis |
+| Conversação e voz | Ficha: [`docs/metas/conversacao-e-voz.md`](docs/metas/conversacao-e-voz.md). Fala natural em português de Portugal, como com uma pessoa: o RIC interpreta a intenção e não depende de uma lista de comandos. Protótipo novo (`ric/`): Piper TTS nos alertas; botão **Falar** → STT local (faster-whisper); wake-word openWakeWord «RIC» ainda por modelo; LLM a seguir |
 | Lembretes | Ficha: [`docs/metas/lembretes.md`](docs/metas/lembretes.md). Ideal (não feito): na entrega já vêm os lembretes importantes, personalizados à pessoa; os auxiliares de saúde alteram-nos pelo BackOffice. Protótipo: criar, disparar, confirmar e adiar. Não dependem da LLM nem da Internet |
 | Gestão de agenda | Ficha: [`docs/metas/gestao-de-agenda.md`](docs/metas/gestao-de-agenda.md). Ideal (não feito): o RIC tem acesso ao tempo e à agenda da pessoa, anota o que ela quiser (consultas, compromissos) e lembra. Hoje só há lembretes com hora, não uma agenda |
 | Reprodução de músicas | Cantar música é o nome desta meta: reproduzir da biblioteca local. Ficha: [`docs/metas/reproducao-e-canto.md`](docs/metas/reproducao-e-canto.md). Ideal (nuvem não feita): grande biblioteca local de vários géneros, gerida e atualizada pela nuvem, baseada no gosto do utente. Protótipo: biblioteca offline por géneros em `ric/musica/` (pausa, continua, recomeço, volume). A busca automática no BackOffice é ideia por avaliar, não está feita |
@@ -171,7 +171,7 @@ Critérios do que já se consegue demonstrar. As metas da secção 4 que estão 
 Documento completo: [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md).
 
 ```
-Pessoa  ↔  Ecrã tactile kiosk (rosto; texto/botões só quando necessário)
+Pessoa  ↔  Ecrã tactile kiosk (rosto SVG estilo EVE + lab de expressões; texto/botões quando necessário)
                  ↕  http://127.0.0.1:8787  REST /api/v1 + WS /ws
         Um processo RIC (Python) — systemd ric.service
         /home/ric/ric-app  +  /home/ric/ric-data
@@ -216,13 +216,13 @@ Pessoa  ↔  Ecrã tactile kiosk (rosto; texto/botões só quando necessário)
 | Arranque | `ric.service` (systemd user) + kiosk XFCE **separado**; saída só com PIN |
 | Offline-first | Núcleo local; Internet só funções opcionais (Telegram críticos, meteo, …) |
 | LLM local | **`qwen2.5:3b` via Ollama**; timeout 8–12 s; core sobe sem Ollama |
-| Tools LLM P1 | Ler lembretes, música, história, guardar gosto; **não** meds; Telegram ≠ tool |
+| Tools LLM P1 | Ler + **criar/apagar** lembretes não médicos; música, história, guardar gosto; **não** meds/críticos; Telegram ≠ tool |
 | Cloud LLM | Não no núcleo |
 | Processo | Um processo Python; UI estática servida pelo mesmo processo |
 | UI Idle | Rosto + relógio + próximo lembrete; mais info sob procura |
-| Rosto | idle, listening, thinking, speaking, alert, music, story |
+| Rosto | Cara **EVE** (Círculo descartado); estados idle/listening/thinking/speaking/alert/music/story; olhos A/B (anel vs pupila) em teste |
 | Memória | SQLite: lembretes (schema A) + gostos + 80 msgs + 1 resumo + confirmações |
-| Voz | openWakeWord «RIC»; janela 6–8 s; barge-in corta TTS (não alertas); Whisper + Piper PT |
+| Voz | Botão Falar + endpointing ~0,9 s; Whisper local + Piper tugão medium; reply TTS mais rápido que alertas; wake «RIC» ainda por modelo |
 | Música | Pastas por género + `catalogo.json` ao arrancar |
 | Histórias | `historias/*.txt` + meta; áudio opcional se existir |
 | Lembretes | Default 3× ~2 min (cuidador altera); pausa/retoma música; críticos → Telegram |
@@ -323,9 +323,14 @@ BackOffice e canal próprio de monitorização **não** entram como produto nest
 - [x] Protótipo legado em `ric/` (a arquivar; não é a base final)
 - [x] Experiências de voz Piper em `voz-teste/`
 - [ ] Instalar/validar Mint XFCE + tactile no PC do protótipo
-- [ ] Arquivar legado (`archive/legacy/`) e arrancar reescrita
-- [ ] 1.ª fatia: API + SQLite lembretes + UI mínima
-- [ ] Depois: voz → Telegram/música/histórias
+- [x] Arquivar legado (`archive/legacy/`) e reescrita iniciada
+- [x] 1.ª fatia: API `:8787` + WS `/ws` + SQLite lembretes + UI Idle (regra 2A)
+- [x] Voz TTS: Piper tugão **medium** (+ SAPI/espeak fallback) nos alertas
+- [x] Voz wake→STT: botão Falar + `VoiceSession` + API `/voice/*` + faster-whisper
+- [x] LLM Ollama `qwen2.5:3b` na conversa por voz (tools: listar/próximo lembrete); openWakeWord «RIC» ainda em falta
+- [ ] Em casa: A/B Piper **tugão quality** vs medium (sem trocar default até decidir)
+- [ ] Wake-word + Whisper + Ollama tools
+- [ ] PIN cuidador → Telegram/música/histórias
 - [ ] Inventário físico + medições LLM reais
 - [ ] Anexo I no formulário da escola (se ainda pendente)
 
