@@ -18,13 +18,23 @@ def ollama_chat(
     model: str,
     messages: list[dict[str, Any]],
     tools: list[dict[str, Any]] | None = None,
-    timeout: float = 10.0,
+    timeout: float = 90.0,
+    num_predict: int = 80,
+    num_ctx: int = 2048,
+    keep_alive: str | int = "30m",
 ) -> dict[str, Any]:
+    # num_predict baixo = respostas curtas (TTS) e menos tempo no CPU.
+    # keep_alive evita descarregar o modelo entre turnos.
     payload: dict[str, Any] = {
         "model": model,
         "messages": messages,
         "stream": False,
-        "options": {"temperature": 0.4},
+        "keep_alive": keep_alive,
+        "options": {
+            "temperature": 0.3,
+            "num_predict": int(num_predict),
+            "num_ctx": int(num_ctx),
+        },
     }
     if tools:
         payload["tools"] = tools

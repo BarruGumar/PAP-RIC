@@ -50,6 +50,7 @@ class RicApp:
             base_url=settings.ollama_url,
             model=settings.llm_model,
             timeout=settings.llm_timeout,
+            on_reminders_changed=self._on_reminder_from_llm,
         )
         self.session = VoiceSession(
             events=self.events,
@@ -69,6 +70,17 @@ class RicApp:
             self.events.set_state("speaking")
         else:
             self.events.set_state("alert")
+
+    def _on_reminder_from_llm(self, reminder: dict) -> None:
+        """Actualiza a UI quando o LLM cria um lembrete por voz."""
+        self.events.publish({"type": "reminders_changed", "reminder": reminder})
+        nxt = self.reminders.next_pending()
+        self.events.publish(
+            {
+                "type": "next_reminder",
+                "reminder": nxt.to_dict() if nxt is not None else None,
+            }
+        )
 
     def start_watchdog(self, interval: float = 3.0) -> None:
         if self._watchdog_thread and self._watchdog_thread.is_alive():
@@ -492,9 +504,22 @@ def run_server(settings: Settings | None = None) -> None:
     print(
         f"[RIC] wake={app.wake.status()['mode']} "
         f"stt={app.stt.status()['engine']} "
-        f"llm={'ok' if app.llm.available else 'off'} ({app.llm.model})",
+        f"llm={'ok' if app.llm.available else 'off'} ({app.llm.model}) "
+        f"timeout={app.llm.timeout:.0f}s",
         flush=True,
     )
+    def _warm_voice_stack() -> None:
+        # Em paralelo no arranque: evita 1.º «Falar» a pagar carga a frio.
+        app.voice.warm_up()
+        app.stt.warm_up()
+        if app.llm.available:
+            app.llm.warm_up()
+
+    threading.Thread(
+        target=_warm_voice_stack,
+        name="ric-voice-warmup",
+        daemon=True,
+    ).start()
     try:
         server.serve_forever()
     except KeyboardInterrupt:

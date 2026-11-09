@@ -3,18 +3,56 @@
 from __future__ import annotations
 
 import shutil
+import struct
 import tempfile
 import threading
+import wave
 from pathlib import Path
-from typing import Callable
+from typing import Any, Callable, Iterable
 
 TranscribeFn = Callable[[Path], str]
 
-# Ajuda o Whisper a preferir vocabulário do RIC (pt) em clips curtos.
-_PT_PROMPT = (
-    "Olá RIC. Beber água. Lembrete. Medicamento. Que horas são. "
-    "Conta uma história. Põe música. Adeus."
-)
+# Prompt curto: prompts longos fazem o Whisper «alucinar» frases do exemplo.
+_PT_PROMPT = "Olá. Português de Portugal."
+_NO_SPEECH_THRESHOLD = 0.6
+_MIN_AVG_LOGPROB = -1.2
+
+
+def join_transcript_segments(
+    segments: Iterable[Any],
+    *,
+    no_speech_prob: float | None = None,
+    no_speech_threshold: float = _NO_SPEECH_THRESHOLD,
+    min_avg_logprob: float = _MIN_AVG_LOGPROB,
+) -> str:
+    """Junta texto dos segmentos Whisper, rejeitando silêncio e segmentos fracos."""
+    if isinstance(no_speech_prob, (int, float)) and float(no_speech_prob) >= no_speech_threshold:
+        return ""
+    parts: list[str] = []
+    for seg in segments:
+        text = (getattr(seg, "text", None) or "").strip()
+        if not text:
+            continue
+        seg_ns = getattr(seg, "no_speech_prob", None)
+        if isinstance(seg_ns, (int, float)) and float(seg_ns) >= no_speech_threshold:
+            continue
+        if hasattr(seg, "avg_logprob"):
+            score = getattr(seg, "avg_logprob", None)
+            if isinstance(score, (int, float)) and float(score) < min_avg_logprob:
+                continue
+        parts.append(text)
+    return " ".join(parts).strip()
+
+
+def _write_silent_wav(path: Path, *, seconds: float = 0.35, rate: int = 16000) -> None:
+    """WAV PCM silencioso curto — aquece o decoder CTranslate2."""
+    n = max(1, int(rate * seconds))
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with wave.open(str(path), "wb") as wav:
+        wav.setnchannels(1)
+        wav.setsampwidth(2)
+        wav.setframerate(rate)
+        wav.writeframes(struct.pack(f"<{n}h", *([0] * n)))
 
 
 class SttUnavailableError(RuntimeError):
@@ -79,25 +117,49 @@ class SpeechToText:
             return None
 
         def _run(path: Path) -> str:
-            # Clips curtos do botão Falar: VAD agressivo corta sílabas e piora o PT.
+            # beam=3: meio-termo CPU (5 era lento; 1 alucinava em clips curtos).
+            # VAD no modelo desligado — o browser já corta silêncio à cabeça/cauda.
             segments, _info = model.transcribe(
                 str(path),
                 language=self.language,
                 task="transcribe",
-                beam_size=5,
-                best_of=5,
+                beam_size=3,
+                best_of=3,
                 temperature=0.0,
                 vad_filter=False,
                 condition_on_previous_text=False,
                 initial_prompt=_PT_PROMPT,
                 without_timestamps=True,
+                no_speech_threshold=_NO_SPEECH_THRESHOLD,
             )
-            parts = [seg.text.strip() for seg in segments if seg.text.strip()]
-            return " ".join(parts).strip()
+            # no_speech_prob vive nos Segment (faster-whisper).
+            return join_transcript_segments(segments)
 
         self._engine = "faster-whisper"
         print(f"[RIC] Whisper ({self.model_size}) pronto.", flush=True)
         return _run
+
+    def warm_up(self) -> None:
+        """Carregar o modelo e aquecer o decoder com um clip curto."""
+        if self._backend is not None and self._engine == "mock":
+            return
+        try:
+            self._ensure_backend()
+            if self._engine != "faster-whisper":
+                return
+            tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
+            path = Path(tmp.name)
+            tmp.close()
+            try:
+                _write_silent_wav(path)
+                self.transcribe_file(path)
+            finally:
+                path.unlink(missing_ok=True)
+            print("[RIC] STT aquecido.", flush=True)
+        except SttUnavailableError as exc:
+            print(f"[RIC] STT warm-up falhou: {exc}", flush=True)
+        except Exception as exc:  # noqa: BLE001
+            print(f"[RIC] STT warm-up falhou: {exc}", flush=True)
 
     @property
     def available(self) -> bool:

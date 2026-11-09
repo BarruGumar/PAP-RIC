@@ -15,6 +15,18 @@ from typing import Callable
 
 SpeakFn = Callable[[str], bool]
 
+# Alertas um pouco mais pausados; conversa mais ágil.
+_REPLY_LENGTH_SCALE = 1.20
+
+
+def length_scale_for_stem(stem: str, base: float) -> float:
+    """Ritmo Piper por tipo de fala (reply vs alerta)."""
+    safe_base = min(max(float(base), 0.9), 1.5)
+    if (stem or "").strip().lower() == "reply":
+        # Nunca mais lento que o alerta; com default 1.35 → 1.20.
+        return min(safe_base, _REPLY_LENGTH_SCALE)
+    return safe_base
+
 
 def beep() -> None:
     try:
@@ -153,18 +165,29 @@ class PiperEngine:
         self._voice = PiperVoice.load(self.model)
         return self._voice
 
-    def synthesize_file(self, texto: str, out_path: Path) -> bool:
+    def warm_up(self) -> None:
+        with self._lock:
+            self._ensure()
+
+    def synthesize_file(
+        self,
+        texto: str,
+        out_path: Path,
+        *,
+        length_scale: float | None = None,
+    ) -> bool:
         texto = prepare_speech_text(texto)
         if not texto or not self.model.is_file():
             return False
         defaults = _load_model_inference(self.model)
-        # Preferido no RIC: ~1.35. Acima de ~1.5 a prosódia começa a “travar”.
-        length_scale = min(max(float(self.length_scale), 0.9), 1.5)
+        # Preferido no RIC: ~1.35 alertas / ~1.20 replies. Acima de ~1.5 trava.
+        scale = self.length_scale if length_scale is None else length_scale
+        scale = min(max(float(scale), 0.9), 1.5)
         try:
             from piper.config import SynthesisConfig
 
             syn = SynthesisConfig(
-                length_scale=length_scale,
+                length_scale=scale,
                 # Manter noise perto do default do modelo = prosódia mais natural
                 noise_scale=float(defaults["noise_scale"]),
                 noise_w_scale=float(defaults["noise_w"]),
@@ -280,7 +303,8 @@ class VoiceService:
         base.mkdir(parents=True, exist_ok=True)
         safe = re.sub(r"[^a-zA-Z0-9_-]+", "_", stem)[:40] or "alert"
         out = base / f"{safe}-{int(time.time() * 1000)}.wav"
-        if not self._piper.synthesize_file(texto, out):
+        scale = length_scale_for_stem(safe, self.length_scale)
+        if not self._piper.synthesize_file(texto, out, length_scale=scale):
             return None
         self.last_alert_wav = out
         # Limpar WAV antigos (manter os 5 mais recentes)
@@ -291,6 +315,21 @@ class VoiceService:
         except Exception:
             pass
         return out
+
+    def warm_up(self) -> None:
+        """Carregar Piper ONNX e sintetizar uma frase curta (1.ª resposta fria)."""
+        if self._piper is None:
+            return
+        try:
+            self._piper.warm_up()
+            warm = self.cache_dir or Path.cwd() / "ric-data" / "tts"
+            warm.mkdir(parents=True, exist_ok=True)
+            out = warm / "warmup.wav"
+            scale = length_scale_for_stem("reply", self.length_scale)
+            self._piper.synthesize_file("Olá.", out, length_scale=scale)
+            print("[RIC] TTS (Piper) aquecido.", flush=True)
+        except Exception as exc:  # noqa: BLE001
+            print(f"[RIC] TTS warm-up falhou: {exc}", flush=True)
 
     def set_length_scale(self, value: float) -> float:
         """Ajusta ritmo TTS em runtime (ex.: `ric tune`)."""

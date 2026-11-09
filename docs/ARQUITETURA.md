@@ -215,8 +215,8 @@ Mínimo: título do lembrete + «sem confirmação» + hora local.
 
 ### 6.5 Tools do LLM (P1)
 
-Permitidas: ler lembretes / próximo lembrete, `tocar_musica` / parar, `contar_historia`, `guardar_gosto`.  
-**Proibido:** criar/editar medicamentos.  
+Permitidas: ler lembretes / próximo lembrete, **criar/apagar lembrete não médico** (`criar_lembrete`, `apagar_lembrete`), `tocar_musica` / parar, `contar_historia`, `guardar_gosto`.  
+**Proibido:** criar/apagar/editar medicamentos ou críticos.  
 Telegram **não** é tool livre do LLM — dispara no **scheduler** de lembretes (D1+D3). «Avisar cuidador» por voz = fase posterior com confirmação no ecrã.
 
 ### 6.6 Cuidador (PIN e sessão)

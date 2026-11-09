@@ -33,7 +33,7 @@ class Settings:
     stt_language: str = "pt"
     ollama_url: str = "http://127.0.0.1:11434"
     llm_model: str = "qwen2.5:3b"
-    llm_timeout: float = 10.0
+    llm_timeout: float = 90.0
 
     @property
     def db_path(self) -> Path:
@@ -82,5 +82,5 @@ class Settings:
                 or "qwen2.5:3b"
             ).strip()
             or "qwen2.5:3b",
-            llm_timeout=float(os.environ.get("RIC_LLM_TIMEOUT", "10")),
+            llm_timeout=float(os.environ.get("RIC_LLM_TIMEOUT", "90")),
         )

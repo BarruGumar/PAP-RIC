@@ -2,7 +2,14 @@
 
 from __future__ import annotations
 
-from ric.voice.tts import VoiceService, format_alert_phrase, prepare_speech_text
+import pytest
+
+from ric.voice.tts import (
+    VoiceService,
+    format_alert_phrase,
+    length_scale_for_stem,
+    prepare_speech_text,
+)
 
 
 def test_prepare_speech_text_clears_symbols() -> None:
@@ -58,3 +65,19 @@ def test_status_keys() -> None:
     assert "engine" in status
     assert "wake" not in status
     assert "stt" not in status
+
+
+def test_length_scale_for_stem_reply_is_faster_than_base() -> None:
+    assert length_scale_for_stem("reply", 1.35) == pytest.approx(1.20)
+
+
+def test_length_scale_for_stem_alert_uses_base() -> None:
+    assert length_scale_for_stem("alert", 1.35) == pytest.approx(1.35)
+
+
+def test_length_scale_for_stem_alert_follows_custom_base() -> None:
+    assert length_scale_for_stem("alert", 1.1) == pytest.approx(1.1)
+
+
+def test_length_scale_for_stem_unknown_stem_uses_base() -> None:
+    assert length_scale_for_stem("other", 1.35) == pytest.approx(1.35)

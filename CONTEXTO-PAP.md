@@ -171,7 +171,7 @@ Critérios do que já se consegue demonstrar. As metas da secção 4 que estão 
 Documento completo: [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md).
 
 ```
-Pessoa  ↔  Ecrã tactile kiosk (rosto; texto/botões só quando necessário)
+Pessoa  ↔  Ecrã tactile kiosk (rosto SVG estilo EVE + lab de expressões; texto/botões quando necessário)
                  ↕  http://127.0.0.1:8787  REST /api/v1 + WS /ws
         Um processo RIC (Python) — systemd ric.service
         /home/ric/ric-app  +  /home/ric/ric-data
@@ -216,13 +216,13 @@ Pessoa  ↔  Ecrã tactile kiosk (rosto; texto/botões só quando necessário)
 | Arranque | `ric.service` (systemd user) + kiosk XFCE **separado**; saída só com PIN |
 | Offline-first | Núcleo local; Internet só funções opcionais (Telegram críticos, meteo, …) |
 | LLM local | **`qwen2.5:3b` via Ollama**; timeout 8–12 s; core sobe sem Ollama |
-| Tools LLM P1 | Ler lembretes, música, história, guardar gosto; **não** meds; Telegram ≠ tool |
+| Tools LLM P1 | Ler + **criar/apagar** lembretes não médicos; música, história, guardar gosto; **não** meds/críticos; Telegram ≠ tool |
 | Cloud LLM | Não no núcleo |
 | Processo | Um processo Python; UI estática servida pelo mesmo processo |
 | UI Idle | Rosto + relógio + próximo lembrete; mais info sob procura |
-| Rosto | idle, listening, thinking, speaking, alert, music, story |
+| Rosto | Cara **EVE** (Círculo descartado); estados idle/listening/thinking/speaking/alert/music/story; olhos A/B (anel vs pupila) em teste |
 | Memória | SQLite: lembretes (schema A) + gostos + 80 msgs + 1 resumo + confirmações |
-| Voz | openWakeWord «RIC»; janela 6–8 s; barge-in corta TTS (não alertas); Whisper + Piper PT |
+| Voz | Botão Falar + endpointing ~0,9 s; Whisper local + Piper tugão medium; reply TTS mais rápido que alertas; wake «RIC» ainda por modelo |
 | Música | Pastas por género + `catalogo.json` ao arrancar |
 | Histórias | `historias/*.txt` + meta; áudio opcional se existir |
 | Lembretes | Default 3× ~2 min (cuidador altera); pausa/retoma música; críticos → Telegram |

@@ -119,3 +119,41 @@ def test_due_and_expire_after_max_alerts(service: ReminderService) -> None:
     expired = service.get(item.id)
     assert expired.estado == "expirado"
     assert expired.avisos_feitos == 3
+
+
+def test_delete_non_critical_ok(service: ReminderService) -> None:
+    item = service.create(titulo="Beber água", hora="18:00", tipo="tarefa")
+    deleted = service.delete(item.id, caregiver_authenticated=False)
+    assert deleted.id == item.id
+    assert service.list_all() == []
+
+
+def test_delete_medicamento_without_caregiver_blocked(service: ReminderService) -> None:
+    item = service.create(
+        titulo="Medicamento manhã",
+        hora="09:00",
+        tipo="medicamento",
+        caregiver_authenticated=True,
+    )
+    with pytest.raises(ReminderPermissionError):
+        service.delete(item.id, caregiver_authenticated=False)
+    assert service.get(item.id).id == item.id
+
+
+def test_delete_medicamento_with_caregiver_ok(service: ReminderService) -> None:
+    item = service.create(
+        titulo="Medicamento manhã",
+        hora="09:00",
+        tipo="medicamento",
+        caregiver_authenticated=True,
+    )
+    service.delete(item.id, caregiver_authenticated=True)
+    assert service.list_all() == []
+
+
+def test_find_by_titulo(service: ReminderService) -> None:
+    service.create(titulo="Beber água", hora="18:00", tipo="tarefa")
+    service.create(titulo="Passear", hora="17:00", tipo="tarefa")
+    hits = service.find_by_titulo("água")
+    assert len(hits) == 1
+    assert hits[0].titulo == "Beber água"

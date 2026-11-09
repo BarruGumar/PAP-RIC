@@ -104,6 +104,31 @@ class ReminderService:
             raise LookupError(f"Lembrete #{reminder_id} não encontrado.")
         return self._row(row)
 
+    def find_by_titulo(self, titulo: str) -> list[Reminder]:
+        """Procura por título (casefold, substring)."""
+        needle = (titulo or "").strip().casefold()
+        if not needle:
+            return []
+        return [r for r in self.list_all() if needle in (r.titulo or "").casefold()]
+
+    def delete(
+        self,
+        reminder_id: int,
+        *,
+        caregiver_authenticated: bool = False,
+    ) -> Reminder:
+        """Apaga lembrete. Medicação/críticos só com cuidador autenticado."""
+        item = self.get(reminder_id)
+        needs_caregiver = item.critico or item.tipo == "medicamento"
+        if needs_caregiver and not caregiver_authenticated:
+            raise ReminderPermissionError(
+                "Lembretes de medicação/críticos só o cuidador pode apagar (PIN)."
+            )
+        with self._db.connect() as conn:
+            conn.execute("DELETE FROM lembretes WHERE id = ?", (reminder_id,))
+            conn.commit()
+        return item
+
     def list_all(self) -> list[Reminder]:
         with self._db.connect() as conn:
             rows = conn.execute(

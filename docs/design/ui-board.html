@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RIC — editor de layout</title>
+  <style>
+    :root {
+      --ui-bg: #0f141c;
+      --panel: #121821;
+      --stroke: #2a3545;
+      --text: #f2f4f7;
+      --muted: #9aa7b8;
+      --accent: #3d9b8f;
+      --accent-ink: #06221e;
+      font-family: "Segoe UI", system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--ui-bg);
+      color: var(--text);
+      display: grid;
+      grid-template-columns: 220px minmax(0, 1fr) 280px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border-color: var(--stroke);
+      border-style: solid;
+      border-width: 0;
+      padding: 1rem;
+      overflow: auto;
+    }
+
+    .panel-left { border-right-width: 1px; }
+    .panel-right { border-left-width: 1px; }
+
+    h1, h2 {
+      margin: 0 0 0.65rem;
+      font-size: 1rem;
+      font-weight: 650;
+    }
+
+    .hint {
+      margin: 0 0 1rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+      line-height: 1.45;
+    }
+
+    .layers {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .layer {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.35rem;
+      align-items: center;
+      padding: 0.45rem 0.55rem;
+      border-radius: 0.55rem;
+      background: #182030;
+      color: var(--text);
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
+
+    .layer.is-active {
+      border-color: var(--accent);
+      background: rgba(61, 155, 143, 0.14);
+    }
+
+    .layer.is-hidden { opacity: 0.45; }
+
+    .layer button {
+      border: 0;
+      background: #243044;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: 650;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      min-width: 2.6rem;
+      min-height: 1.75rem;
+      border-radius: 0.4rem;
+      padding: 0 0.35rem;
+    }
+
+    .stage-wrap {
+      display: grid;
+      place-items: center;
+      padding: 1.25rem;
+      overflow: auto;
+    }
+
+    .canvas {
+      position: relative;
+      width: 390px;
+      height: 720px;
+      background: radial-gradient(120% 80% at 50% 0%, #243044 0%, #1a2332 55%);
+      border: 1px solid #334155;
+      border-radius: 1.35rem;
+      overflow: hidden;
+      box-shadow: 0 18px 48px rgba(0, 0, 0, 0.35);
+      touch-action: none;
+      user-select: none;
+    }
+
+    .block {
+      position: absolute;
+      border-radius: 0.85rem;
+      padding: 0.55rem 0.65rem;
+      overflow: hidden;
+      cursor: grab;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .block.is-selected {
+      outline: 2px solid var(--accent);
+      outline-offset: 1px;
+      z-index: 1000 !important;
+    }
+
+    .block.is-dragging { cursor: grabbing; }
+
+    .block-label {
+      position: absolute;
+      top: 0.3rem;
+      right: 0.3rem;
+      font-size: 0.65rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      background: rgba(0, 0, 0, 0.45);
+      color: #fff;
+      border-radius: 999px;
+      padding: 0.1rem 0.4rem;
+      pointer-events: none;
+    }
+
+    .block-title {
+      margin: 0;
+      font-weight: 700;
+      font-size: 1.15rem;
+    }
+
+    .block-sub {
+      margin: 0.25rem 0 0;
+      font-size: 0.9rem;
+      opacity: 0.85;
+    }
+
+    .face-preview {
+      display: grid;
+      grid-auto-flow: column;
+      gap: 1.1rem;
+      place-content: center;
+      height: calc(100% - 0.4rem);
+    }
+
+    .eye-dot {
+      width: 34px;
+      height: 44px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #f2ffff, #5ee7ff 55%, #178aa8);
+    }
+
+    .handle {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: var(--accent);
+      border: 2px solid #fff;
+      border-radius: 2px;
+      z-index: 2;
+    }
+
+    .handle.nw { left: -6px; top: -6px; cursor: nwse-resize; }
+    .handle.ne { right: -6px; top: -6px; cursor: nesw-resize; }
+    .handle.sw { left: -6px; bottom: -6px; cursor: nesw-resize; }
+    .handle.se { right: -6px; bottom: -6px; cursor: nwse-resize; }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      margin-bottom: 0.65rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .field input[type="number"],
+    .field input[type="text"] {
+      min-height: 2.4rem;
+      border-radius: 0.55rem;
+      border: 1px solid #3a4a60;
+      background: #0f141c;
+      color: var(--text);
+      padding: 0 0.65rem;
+      font-size: 0.95rem;
+    }
+
+    .field input[type="color"] {
+      width: 100%;
+      min-height: 2.4rem;
+      border: 1px solid #3a4a60;
+      border-radius: 0.55rem;
+      background: transparent;
+      padding: 0.15rem;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+    }
+
+    .check {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      color: var(--text);
+      font-size: 0.95rem;
+      margin: 0.35rem 0 0.85rem;
+    }
+
+    .actions {
+      display: grid;
+      gap: 0.45rem;
+      margin-top: 0.5rem;
+    }
+
+    .btn {
+      min-height: 2.6rem;
+      border: 0;
+      border-radius: 0.65rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      background: #243044;
+      color: var(--text);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--accent-ink);
+    }
+
+    .btn-danger {
+      background: rgba(196, 92, 38, 0.25);
+      color: #ffd8c2;
+    }
+
+    .status {
+      margin: 0.75rem 0 0;
+      min-height: 1.2rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .empty {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 980px) {
+      body {
+        grid-template-columns: 1fr;
+      }
+      .panel-left,
+      .panel-right {
+        border-width: 0;
+        border-bottom-width: 1px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <aside class="panel panel-left" aria-label="Camadas">
+    <h1>Camadas</h1>
+    <p class="hint">Clica para seleccionar. O botão Mostrar/Ocultar controla a visibilidade.</p>
+    <ul class="layers" id="layers"></ul>
+  </aside>
+
+  <main class="stage-wrap">
+    <div
+      class="canvas"
+      id="canvas"
+      role="application"
+      aria-label="Canvas do ecrã RIC"
+      tabindex="0"
+    ></div>
+  </main>
+
+  <aside class="panel panel-right" aria-label="Inspector">
+    <h2>Inspector</h2>
+    <p class="hint">
+      Arrasta os blocos. Pegas nos cantos para redimensionar. Delete oculta. Ctrl+Z desfaz.
+    </p>
+    <div id="inspector">
+      <p class="empty">Selecciona um bloco no canvas.</p>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn" id="btn-reset">Repor layout</button>
+      <button type="button" class="btn btn-primary" id="btn-copy">Copiar JSON</button>
+      <button type="button" class="btn" id="btn-export">Exportar JSON</button>
+    </div>
+    <p class="status" id="status" role="status"></p>
+  </aside>
+
+  <script>
+    (() => {
+      const STORAGE_KEY = "ric_ui_layout"
+      const CANVAS_W = 390
+      const CANVAS_H = 720
+      const MIN_SIZE = 48
+
+      const DEFAULT_BLOCKS = [
+        {
+          id: "brand",
+          label: "Marca",
+          kind: "brand",
+          x: 16,
+          y: 18,
+          w: 358,
+          h: 56,
+          bg: "#1a2332",
+          color: "#f2f4f7",
+          visible: true,
+          z: 1,
+        },
+        {
+          id: "face",
+          label: "Cara EVE",
+          kind: "face",
+          x: 55,
+          y: 90,
+          w: 280,
+          h: 150,
+          bg: "#0b1018",
+          color: "#5ee7ff",
+          visible: true,
+          z: 2,
+        },
+        {
+          id: "next",
+          label: "Próximo",
+          kind: "next",
+          x: 16,
+          y: 270,
+          w: 358,
+          h: 78,
+          bg: "#243044",
+          color: "#f2f4f7",
+          visible: true,
+          z: 3,
+        },
+        {
+          id: "talk",
+          label: "Falar",
+          kind: "talk",
+          x: 16,
+          y: 368,
+          w: 358,
+          h: 110,
+          bg: "#3d9b8f",
+          color: "#06221e",
+          visible: true,
+          z: 4,
+        },
+        {
+          id: "alert",
+          label: "Alerta",
+          kind: "alert",
+          x: 16,
+          y: 498,
+          w: 358,
+          h: 110,
+          bg: "#3a2418",
+          color: "#f2f4f7",
+          visible: true,
+          z: 5,
+        },
+        {
+          id: "form",
+          label: "Formulário",
+          kind: "form",
+          x: 16,
+          y: 628,
+          w: 358,
+          h: 70,
+          bg: "#243044",
+          color: "#9aa7b8",
+          visible: true,
+          z: 6,
+        },
+      ]
+
+      const cloneBlocks = (list) => list.map((b) => ({ ...b }))
+
+      const canvas = document.getElementById("canvas")
+      const layersEl = document.getElementById("layers")
+      const inspectorEl = document.getElementById("inspector")
+      const statusEl = document.getElementById("status")
+      const btnReset = document.getElementById("btn-reset")
+      const btnCopy = document.getElementById("btn-copy")
+      const btnExport = document.getElementById("btn-export")
+
+      let blocks = cloneBlocks(DEFAULT_BLOCKS)
+      let selectedId = null
+      let history = []
+      let drag = null
+      let skipHistoryOnce = false
+
+      const setStatus = (msg) => {
+        statusEl.textContent = msg || ""
+      }
+
+      const pushHistory = () => {
+        if (skipHistoryOnce) {
+          skipHistoryOnce = false
+          return
+        }
+        history.push(JSON.stringify(blocks))
+        if (history.length > 40) history.shift()
+      }
+
+      const undo = () => {
+        if (!history.length) {
+          setStatus("Nada para desfazer.")
+          return
+        }
+        blocks = JSON.parse(history.pop())
+        if (!blocks.some((b) => b.id === selectedId)) selectedId = null
+        persist()
+        render()
+        setStatus("Desfeito.")
+      }
+
+      const persist = () => {
+        localStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify({
+            version: 1,
+            canvas: { w: CANVAS_W, h: CANVAS_H },
+            blocks,
+          })
+        )
+      }
+
+      const load = () => {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY)
+          if (!raw) return
+          const data = JSON.parse(raw)
+          if (!data || !Array.isArray(data.blocks)) return
+          blocks = data.blocks.map((b) => {
+            const base = DEFAULT_BLOCKS.find((d) => d.id === b.id) || {}
+            return { ...base, ...b }
+          })
+        } catch {
+          blocks = cloneBlocks(DEFAULT_BLOCKS)
+        }
+      }
+
+      const getBlock = (id) => blocks.find((b) => b.id === id)
+
+      const clampBlock = (b) => {
+        b.w = Math.max(MIN_SIZE, Math.min(Number(b.w) || MIN_SIZE, CANVAS_W))
+        b.h = Math.max(MIN_SIZE, Math.min(Number(b.h) || MIN_SIZE, CANVAS_H))
+        b.x = Math.max(0, Math.min(Number(b.x) || 0, CANVAS_W - b.w))
+        b.y = Math.max(0, Math.min(Number(b.y) || 0, CANVAS_H - b.h))
+      }
+
+      const exportPayload = () => ({
+        version: 1,
+        canvas: { w: CANVAS_W, h: CANVAS_H },
+        blocks: blocks.map((b) => ({ ...b })),
+      })
+
+      const toHex = (value) => (/^#[0-9a-fA-F]{6}$/.test(value) ? value : "#243044")
+
+      const blockInner = (b) => {
+        if (b.kind === "face") {
+          return (
+            '<div class="face-preview" aria-hidden="true">' +
+            '<span class="eye-dot"></span><span class="eye-dot"></span></div>'
+          )
+        }
+        if (b.kind === "brand") {
+          return '<p class="block-title">RIC</p><p class="block-sub">21:44</p>'
+        }
+        if (b.kind === "next") {
+          return '<p class="block-sub">Próximo</p><p class="block-title">Beber água · 18:30</p>'
+        }
+        if (b.kind === "talk") {
+          return '<p class="block-title">Falar</p><p class="block-sub">Toca · fala · envia</p>'
+        }
+        if (b.kind === "alert") {
+          return '<p class="block-title">Alerta</p><p class="block-sub">Já fiz · Adiar</p>'
+        }
+        return '<p class="block-title">Rotina</p><p class="block-sub">Adicionar</p>'
+      }
+
+      const renderLayers = () => {
+        const ordered = [...blocks].sort((a, b) => b.z - a.z)
+        layersEl.innerHTML = ""
+        for (const b of ordered) {
+          const li = document.createElement("li")
+          li.className =
+            "layer" +
+            (b.id === selectedId ? " is-active" : "") +
+            (b.visible ? "" : " is-hidden")
+          const name = document.createElement("span")
+          name.textContent = b.label
+          const eyeBtn = document.createElement("button")
+          eyeBtn.type = "button"
+          eyeBtn.textContent = b.visible ? "On" : "Off"
+          eyeBtn.setAttribute(
+            "aria-label",
+            (b.visible ? "Ocultar " : "Mostrar ") + b.label
+          )
+          eyeBtn.addEventListener("click", (ev) => {
+            ev.stopPropagation()
+            pushHistory()
+            b.visible = !b.visible
+            if (!b.visible && selectedId === b.id) selectedId = null
+            persist()
+            render()
+          })
+          li.appendChild(name)
+          li.appendChild(eyeBtn)
+          li.addEventListener("click", () => {
+            selectedId = b.id
+            render()
+          })
+          layersEl.appendChild(li)
+        }
+      }
+
+      const renderInspector = () => {
+        const b = getBlock(selectedId)
+        if (!b) {
+          inspectorEl.innerHTML =
+            '<p class="empty">Selecciona um bloco no canvas.</p>'
+          return
+        }
+
+        inspectorEl.innerHTML = ""
+
+        const addField = (labelText, inputEl) => {
+          const label = document.createElement("label")
+          label.className = "field"
+          label.appendChild(document.createTextNode(labelText))
+          label.appendChild(inputEl)
+          return label
+        }
+
+        const nameInput = document.createElement("input")
+        nameInput.type = "text"
+        nameInput.value = b.label
+        nameInput.disabled = true
+        inspectorEl.appendChild(addField("Bloco", nameInput))
+
+        const rowPos = document.createElement("div")
+        rowPos.className = "field-row"
+        const inputX = document.createElement("input")
+        inputX.type = "number"
+        inputX.id = "insp-x"
+        inputX.value = String(Math.round(b.x))
+        const inputY = document.createElement("input")
+        inputY.type = "number"
+        inputY.id = "insp-y"
+        inputY.value = String(Math.round(b.y))
+        rowPos.appendChild(addField("X", inputX))
+        rowPos.appendChild(addField("Y", inputY))
+        inspectorEl.appendChild(rowPos)
+
+        const rowSize = document.createElement("div")
+        rowSize.className = "field-row"
+        const inputW = document.createElement("input")
+        inputW.type = "number"
+        inputW.id = "insp-w"
+        inputW.value = String(Math.round(b.w))
+        const inputH = document.createElement("input")
+        inputH.type = "number"
+        inputH.id = "insp-h"
+        inputH.value = String(Math.round(b.h))
+        rowSize.appendChild(addField("Largura", inputW))
+        rowSize.appendChild(addField("Altura", inputH))
+        inspectorEl.appendChild(rowSize)
+
+        const inputBg = document.createElement("input")
+        inputBg.type = "color"
+        inputBg.value = toHex(b.bg)
+        inspectorEl.appendChild(addField("Fundo", inputBg))
+
+        const inputColor = document.createElement("input")
+        inputColor.type = "color"
+        inputColor.value = toHex(b.color)
+        inspectorEl.appendChild(addField("Texto", inputColor))
+
+        const checkLabel = document.createElement("label")
+        checkLabel.className = "check"
+        const check = document.createElement("input")
+        check.type = "checkbox"
+        check.checked = b.visible
+        checkLabel.appendChild(check)
+        checkLabel.appendChild(document.createTextNode(" Visível"))
+        inspectorEl.appendChild(checkLabel)
+
+        const hideBtn = document.createElement("button")
+        hideBtn.type = "button"
+        hideBtn.className = "btn btn-danger"
+        hideBtn.textContent = "Apagar (ocultar)"
+        inspectorEl.appendChild(hideBtn)
+
+        const bindNum = (input, key) => {
+          input.addEventListener("change", () => {
+            pushHistory()
+            b[key] = Number(input.value)
+            clampBlock(b)
+            persist()
+            render()
+          })
+        }
+        bindNum(inputX, "x")
+        bindNum(inputY, "y")
+        bindNum(inputW, "w")
+        bindNum(inputH, "h")
+
+        inputBg.addEventListener("input", () => {
+          if (!drag) pushHistory()
+          skipHistoryOnce = true
+          b.bg = inputBg.value
+          persist()
+          applyBlockStyles(b)
+        })
+        inputColor.addEventListener("input", () => {
+          if (!drag) pushHistory()
+          skipHistoryOnce = true
+          b.color = inputColor.value
+          persist()
+          applyBlockStyles(b)
+        })
+        check.addEventListener("change", () => {
+          pushHistory()
+          b.visible = check.checked
+          if (!b.visible) selectedId = null
+          persist()
+          render()
+        })
+        hideBtn.addEventListener("click", () => {
+          pushHistory()
+          b.visible = false
+          selectedId = null
+          persist()
+          render()
+          setStatus("Bloco ocultado. Podes voltar a mostrar nas camadas.")
+        })
+      }
+
+      const applyBlockStyles = (b) => {
+        const node = canvas.querySelector('.block[data-id="' + b.id + '"]')
+        if (!node) return
+        node.style.background = b.bg
+        node.style.color = b.color
+      }
+
+      const renderCanvas = () => {
+        canvas.innerHTML = ""
+        const ordered = [...blocks].sort((a, b) => a.z - b.z)
+        for (const b of ordered) {
+          if (!b.visible) continue
+          clampBlock(b)
+          const el = document.createElement("div")
+          el.className = "block" + (b.id === selectedId ? " is-selected" : "")
+          el.dataset.id = b.id
+          el.style.left = b.x + "px"
+          el.style.top = b.y + "px"
+          el.style.width = b.w + "px"
+          el.style.height = b.h + "px"
+          el.style.background = b.bg
+          el.style.color = b.color
+          el.style.zIndex = String(b.z)
+          el.setAttribute("tabindex", "0")
+          el.setAttribute("aria-label", b.label)
+          el.innerHTML =
+            '<span class="block-label">' + b.id + "</span>" + blockInner(b)
+          el.addEventListener("pointerdown", (ev) => onPointerDown(ev, b, "move"))
+          if (b.id === selectedId) {
+            for (const corner of ["nw", "ne", "sw", "se"]) {
+              const handle = document.createElement("div")
+              handle.className = "handle " + corner
+              handle.dataset.corner = corner
+              handle.addEventListener("pointerdown", (ev) => {
+                ev.stopPropagation()
+                onPointerDown(ev, b, "resize", corner)
+              })
+              el.appendChild(handle)
+            }
+          }
+          canvas.appendChild(el)
+        }
+      }
+
+      const render = () => {
+        renderLayers()
+        renderCanvas()
+        renderInspector()
+      }
+
+      const onPointerDown = (ev, block, mode, corner) => {
+        if (ev.button !== undefined && ev.button !== 0) return
+        ev.preventDefault()
+        selectedId = block.id
+        pushHistory()
+        const rect = canvas.getBoundingClientRect()
+        drag = {
+          mode,
+          corner: corner || null,
+          id: block.id,
+          startX: ev.clientX,
+          startY: ev.clientY,
+          orig: { x: block.x, y: block.y, w: block.w, h: block.h },
+          scaleX: CANVAS_W / rect.width,
+          scaleY: CANVAS_H / rect.height,
+        }
+        try {
+          canvas.setPointerCapture(ev.pointerId)
+        } catch {
+          /* ignore */
+        }
+        render()
+        const node = canvas.querySelector('.block[data-id="' + block.id + '"]')
+        if (node) node.classList.add("is-dragging")
+      }
+
+      const onPointerMove = (ev) => {
+        if (!drag) return
+        const b = getBlock(drag.id)
+        if (!b) return
+        const dx = (ev.clientX - drag.startX) * drag.scaleX
+        const dy = (ev.clientY - drag.startY) * drag.scaleY
+        if (drag.mode === "move") {
+          b.x = drag.orig.x + dx
+          b.y = drag.orig.y + dy
+        } else {
+          const c = drag.corner
+          let x = drag.orig.x
+          let y = drag.orig.y
+          let w = drag.orig.w
+          let h = drag.orig.h
+          if (c.includes("e")) w = drag.orig.w + dx
+          if (c.includes("s")) h = drag.orig.h + dy
+          if (c.includes("w")) {
+            w = drag.orig.w - dx
+            x = drag.orig.x + dx
+          }
+          if (c.includes("n")) {
+            h = drag.orig.h - dy
+            y = drag.orig.y + dy
+          }
+          if (w < MIN_SIZE) {
+            if (c.includes("w")) x = drag.orig.x + drag.orig.w - MIN_SIZE
+            w = MIN_SIZE
+          }
+          if (h < MIN_SIZE) {
+            if (c.includes("n")) y = drag.orig.y + drag.orig.h - MIN_SIZE
+            h = MIN_SIZE
+          }
+          b.x = x
+          b.y = y
+          b.w = w
+          b.h = h
+        }
+        clampBlock(b)
+        const node = canvas.querySelector('.block[data-id="' + b.id + '"]')
+        if (!node) return
+        node.style.left = b.x + "px"
+        node.style.top = b.y + "px"
+        node.style.width = b.w + "px"
+        node.style.height = b.h + "px"
+      }
+
+      const onPointerUp = () => {
+        if (!drag) return
+        drag = null
+        persist()
+        render()
+      }
+
+      canvas.addEventListener("pointermove", onPointerMove)
+      canvas.addEventListener("pointerup", onPointerUp)
+      canvas.addEventListener("pointercancel", onPointerUp)
+      canvas.addEventListener("click", (ev) => {
+        if (ev.target === canvas) {
+          selectedId = null
+          render()
+        }
+      })
+
+      window.addEventListener("keydown", (ev) => {
+        const tag = (ev.target && ev.target.tagName) || ""
+        if (tag === "INPUT" || tag === "TEXTAREA") return
+        if ((ev.key === "Delete" || ev.key === "Backspace") && selectedId) {
+          ev.preventDefault()
+          const b = getBlock(selectedId)
+          if (!b) return
+          pushHistory()
+          b.visible = false
+          selectedId = null
+          persist()
+          render()
+          setStatus("Bloco ocultado.")
+        }
+        if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === "z") {
+          ev.preventDefault()
+          undo()
+        }
+      })
+
+      btnReset.addEventListener("click", () => {
+        pushHistory()
+        blocks = cloneBlocks(DEFAULT_BLOCKS)
+        selectedId = null
+        localStorage.removeItem(STORAGE_KEY)
+        render()
+        setStatus("Layout reposto.")
+      })
+
+      btnCopy.addEventListener("click", async () => {
+        const text = JSON.stringify(exportPayload(), null, 2)
+        try {
+          await navigator.clipboard.writeText(text)
+          setStatus("JSON copiado. Cola no chat: «aplica este layout no RIC».")
+        } catch {
+          setStatus("Não consegui copiar. Usa Exportar JSON.")
+        }
+      })
+
+      btnExport.addEventListener("click", () => {
+        const text = JSON.stringify(exportPayload(), null, 2)
+        const blob = new Blob([text], { type: "application/json" })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement("a")
+        a.href = url
+        a.download = "ric-ui-layout.json"
+        a.click()
+        URL.revokeObjectURL(url)
+        setStatus("Ficheiro ric-ui-layout.json descarregado.")
+      })
+
+      load()
+      render()
+      setStatus("Pronto. Arrasta os blocos no ecrã.")
+    })()
+  </script>
+</body>
+</html>

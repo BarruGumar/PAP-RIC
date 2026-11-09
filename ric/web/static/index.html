@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>RIC</title>
   <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/eye-shapes.css" />
 </head>
 <body>
   <main class="screen" id="app">
@@ -14,20 +15,200 @@
     </header>
 
     <section class="face-wrap" aria-live="polite">
-      <div id="face" class="face state-idle" role="img" aria-label="Estado: idle"></div>
+      <div
+        id="face"
+        class="face theme-eve state-idle"
+        data-expression="calm"
+        data-eye-style="ring"
+        role="img"
+        aria-label="Estado: idle"
+      >
+        <svg class="face-svg" viewBox="0 0 200 120" aria-hidden="true">
+          <defs>
+            <filter id="eye-glow" x="-80%" y="-80%" width="260%" height="260%">
+              <feGaussianBlur stdDeviation="4" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+            <radialGradient id="eye-fill" cx="42%" cy="36%" r="70%">
+              <stop offset="0%" stop-color="#f2ffff" />
+              <stop offset="35%" stop-color="#6ee9ff" />
+              <stop offset="78%" stop-color="#2bb8d6" />
+              <stop offset="100%" stop-color="#178aa8" />
+            </radialGradient>
+            <pattern
+              id="eye-scanlines"
+              width="3"
+              height="2.4"
+              patternUnits="userSpaceOnUse"
+            >
+              <rect width="3" height="1.15" fill="rgba(6, 28, 42, 0.38)" />
+            </pattern>
+            <pattern
+              id="eye-pixel-cols"
+              width="2.6"
+              height="2.6"
+              patternUnits="userSpaceOnUse"
+            >
+              <rect x="1.9" width="0.7" height="2.6" fill="rgba(4, 20, 32, 0.18)" />
+            </pattern>
+            <clipPath id="clip-eye-left">
+              <path
+                class="eye-clip-path eye-clip-l"
+                d="M 36,60 C 36,42.3 47.7,28 62,28 C 76.3,28 88,42.3 88,60 C 88,77.7 76.3,92 62,92 C 47.7,92 36,77.7 36,60 Z"
+              />
+            </clipPath>
+            <clipPath id="clip-eye-right">
+              <path
+                class="eye-clip-path eye-clip-r"
+                d="M 112,60 C 112,42.3 123.7,28 138,28 C 152.3,28 164,42.3 164,60 C 164,77.7 152.3,92 138,92 C 123.7,92 112,77.7 112,60 Z"
+              />
+            </clipPath>
+          </defs>
+          <g class="eyes-pair">
+            <g class="eye-wrap eye-wrap-left">
+              <path
+                class="eye-bloom eye-bloom-l"
+                filter="url(#eye-glow)"
+                d="M 36,60 C 36,42.3 47.7,28 62,28 C 76.3,28 88,42.3 88,60 C 88,77.7 76.3,92 62,92 C 47.7,92 36,77.7 36,60 Z"
+              />
+              <path
+                class="eye-shape eye-shape-l"
+                d="M 36,60 C 36,42.3 47.7,28 62,28 C 76.3,28 88,42.3 88,60 C 88,77.7 76.3,92 62,92 C 47.7,92 36,77.7 36,60 Z"
+              />
+              <g clip-path="url(#clip-eye-left)">
+                <rect
+                  class="eye-scan"
+                  x="28"
+                  y="18"
+                  width="70"
+                  height="90"
+                  fill="url(#eye-scanlines)"
+                />
+                <rect
+                  class="eye-pixels"
+                  x="28"
+                  y="18"
+                  width="70"
+                  height="90"
+                  fill="url(#eye-pixel-cols)"
+                />
+                <ellipse class="eye-pupil eye-pupil-l" cx="62" cy="61" rx="4.6" ry="9.2" />
+                <ellipse
+                  class="eye-ring eye-ring-l"
+                  cx="62"
+                  cy="60"
+                  rx="24.2"
+                  ry="30.2"
+                  fill="none"
+                />
+                <ellipse class="eye-shine eye-shine-main" cx="51" cy="45" rx="5.2" ry="6.4" />
+                <ellipse class="eye-shine eye-shine-spec" cx="56" cy="41" rx="2" ry="2.4" />
+              </g>
+            </g>
+            <g class="eye-wrap eye-wrap-right">
+              <path
+                class="eye-bloom eye-bloom-r"
+                filter="url(#eye-glow)"
+                d="M 112,60 C 112,42.3 123.7,28 138,28 C 152.3,28 164,42.3 164,60 C 164,77.7 152.3,92 138,92 C 123.7,92 112,77.7 112,60 Z"
+              />
+              <path
+                class="eye-shape eye-shape-r"
+                d="M 112,60 C 112,42.3 123.7,28 138,28 C 152.3,28 164,42.3 164,60 C 164,77.7 152.3,92 138,92 C 123.7,92 112,77.7 112,60 Z"
+              />
+              <g clip-path="url(#clip-eye-right)">
+                <rect
+                  class="eye-scan"
+                  x="104"
+                  y="18"
+                  width="70"
+                  height="90"
+                  fill="url(#eye-scanlines)"
+                />
+                <rect
+                  class="eye-pixels"
+                  x="104"
+                  y="18"
+                  width="70"
+                  height="90"
+                  fill="url(#eye-pixel-cols)"
+                />
+                <ellipse class="eye-pupil eye-pupil-r" cx="138" cy="61" rx="4.6" ry="9.2" />
+                <ellipse
+                  class="eye-ring eye-ring-r"
+                  cx="138"
+                  cy="60"
+                  rx="24.2"
+                  ry="30.2"
+                  fill="none"
+                />
+                <ellipse class="eye-shine eye-shine-main" cx="127" cy="45" rx="5.2" ry="6.4" />
+                <ellipse class="eye-shine eye-shine-spec" cx="132" cy="41" rx="2" ry="2.4" />
+              </g>
+            </g>
+          </g>
+        </svg>
+      </div>
       <p id="state-label" class="state-label">À espera</p>
+
+      <div class="face-controls" aria-label="Cara EVE">
+        <div class="eye-style-lab" role="group" aria-label="Versão dos olhos">
+          <button
+            type="button"
+            class="btn btn-eye-style is-active"
+            data-eye-style="ring"
+            aria-pressed="true"
+            aria-label="Olho A: anel e highlight"
+          >
+            Olho A · anel
+          </button>
+          <button
+            type="button"
+            class="btn btn-eye-style"
+            data-eye-style="pupil"
+            aria-pressed="false"
+            aria-label="Olho B: anel, highlight e pupila"
+          >
+            Olho B · pupila
+          </button>
+        </div>
+        <details class="expr-lab">
+          <summary>Laboratório de expressões</summary>
+          <div class="expr-grid" role="group" aria-label="Pré-visualizar expressões">
+            <button type="button" class="btn btn-expr" data-expression="calm" aria-label="Calmo">Calmo</button>
+            <button type="button" class="btn btn-expr" data-expression="curious" aria-label="Curioso">Curioso</button>
+            <button type="button" class="btn btn-expr" data-expression="think" aria-label="A pensar">Pensar</button>
+            <button type="button" class="btn btn-expr" data-expression="talk" aria-label="A falar">Falar</button>
+            <button type="button" class="btn btn-expr" data-expression="alert" aria-label="Alerta">Alerta</button>
+            <button type="button" class="btn btn-expr" data-expression="focus" aria-label="Focado">Focado</button>
+            <button type="button" class="btn btn-expr" data-expression="happy" aria-label="Contente">Contente</button>
+            <button type="button" class="btn btn-expr" data-expression="sad" aria-label="Triste">Triste</button>
+            <button type="button" class="btn btn-expr" data-expression="surprised" aria-label="Surpreso">Surpreso</button>
+            <button type="button" class="btn btn-expr" data-expression="sleepy" aria-label="Sonolento">Sono</button>
+            <button type="button" class="btn btn-expr" data-expression="confused" aria-label="Confuso">Confuso</button>
+            <button type="button" class="btn btn-expr" data-expression="wink" aria-label="Piscar um olho">Pisca</button>
+            <button type="button" class="btn btn-expr" data-expression="blink" aria-label="Piscar">Piscar</button>
+          </div>
+        </details>
+      </div>
     </section>
 
-    <section class="next" aria-label="Próximo lembrete">
-      <p class="next-label">Próximo</p>
-      <p id="next-reminder" class="next-value">Nenhum lembrete</p>
+    <section class="action-row" aria-label="Próximo lembrete e falar">
+      <div class="next" aria-label="Próximo lembrete">
+        <p class="next-label">Próximo</p>
+        <p id="next-reminder" class="next-value">Nenhum lembrete</p>
+      </div>
+      <div class="talk" aria-label="Falar com o RIC">
+        <button type="button" id="btn-talk" class="btn btn-talk" aria-label="Carregar para falar">
+          Falar
+        </button>
+        <p class="talk-hint">Toca · fala · envia</p>
+      </div>
     </section>
 
-    <section class="talk" aria-label="Falar com o RIC">
-      <button type="button" id="btn-talk" class="btn btn-talk" aria-label="Carregar para falar">
-        Falar
-      </button>
-      <p class="talk-hint">Toca para começar · fala · toca outra vez para enviar</p>
+    <section class="voice-feedback" aria-label="Resposta de voz">
       <p id="heard" class="heard" aria-live="polite"></p>
       <button type="button" id="btn-preview" class="btn" aria-label="Ouvir amostra da voz do RIC">
         Ouvir voz

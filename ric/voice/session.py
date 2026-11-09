@@ -5,6 +5,7 @@ from __future__ import annotations
 import base64
 import binascii
 import threading
+import time
 from typing import Any, Protocol
 
 from ric.core.events import EventBus
@@ -64,8 +65,11 @@ class VoiceSession:
         with self._lock:
             if self.events.state == "alert":
                 raise ValueError("Alerta activo — termina o lembrete primeiro.")
+            self.last_reply = None
+            self.last_audio_url = None
             self.events.set_state("thinking")
             self.events.publish({"type": "stt_started"})
+        t0 = time.perf_counter()
         try:
             suffix = _suffix_for(content_type)
             text = self.stt.transcribe_bytes(data, suffix=suffix)
@@ -75,6 +79,8 @@ class VoiceSession:
         except Exception as exc:  # noqa: BLE001
             self._finish_error(str(exc))
             raise
+        t_stt = time.perf_counter() - t0
+        print(f"[RIC] ouvi: {text!r}", flush=True)
 
         with self._lock:
             self.last_transcript = text
@@ -82,14 +88,33 @@ class VoiceSession:
             if self.events.state == "alert":
                 return text
 
-        reply = self._maybe_chat(text)
+        t1 = time.perf_counter()
+        if not text.strip():
+            reply = "Não percebi. Podes repetir?"
+            t_llm = 0.0
+        else:
+            reply = self._maybe_chat(text)
+            t_llm = time.perf_counter() - t1
+        if reply:
+            print(f"[RIC] resposta: {reply!r}", flush=True)
+            self.last_reply = reply
+
+        # Mostrar texto já (WS), sintetizar áudio a seguir.
+        if reply and self.events.state != "alert":
+            self.events.publish(
+                {"type": "assistant_reply", "text": reply, "audio_url": None}
+            )
+
         audio_url = None
+        t_tts = 0.0
         if reply and self.tts is not None and self.events.state != "alert":
             with self._lock:
                 if self.events.state != "alert":
                     self.events.set_state("speaking")
+            t2 = time.perf_counter()
             try:
                 wav = self.tts.synthesize_alert(reply, stem="reply")
+                t_tts = time.perf_counter() - t2
                 if wav is not None:
                     audio_url = f"/api/v1/tts/{wav.name}"
                     self.last_audio_url = audio_url
@@ -101,11 +126,8 @@ class VoiceSession:
                             "play_id": f"reply-{wav.stem}",
                         }
                     )
-                else:
-                    self.events.publish(
-                        {"type": "assistant_reply", "text": reply, "audio_url": None}
-                    )
             except Exception as exc:  # noqa: BLE001
+                t_tts = time.perf_counter() - t2
                 self.events.publish(
                     {
                         "type": "assistant_reply",
@@ -114,10 +136,13 @@ class VoiceSession:
                         "tts_error": str(exc),
                     }
                 )
-        elif reply:
-            self.events.publish(
-                {"type": "assistant_reply", "text": reply, "audio_url": None}
-            )
+
+        total = time.perf_counter() - t0
+        print(
+            f"[RIC] voz: stt={t_stt:.1f}s llm={t_llm:.1f}s "
+            f"tts={t_tts:.1f}s total={total:.1f}s",
+            flush=True,
+        )
 
         with self._lock:
             if self.events.state != "alert":
