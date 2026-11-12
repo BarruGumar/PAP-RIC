@@ -37,3 +37,5 @@ Deve funcionar offline nas funções essenciais.
 ## O que o protótipo já faz hoje
 
 App nova `ric/`: Piper TTS; botão **Falar** → Whisper STT → Ollama (`qwen2.5:3b`) → resposta falada; tools ler lembretes. Wake-word contínuo «RIC» ainda não.
+
+O reconhecimento no navegador enviava o áudio à Google e saiu. A análise do orientador (Piper tugão, faster-whisper, Kokoro) está em [`docs/FEEDBACK-ORIENTADOR.md`](../FEEDBACK-ORIENTADOR.md). Um Qwen que ouve áudio foi investigado em 2026-10-16 e não entra. A nota está em [`docs/TABELA-LLMS.md`](../TABELA-LLMS.md).

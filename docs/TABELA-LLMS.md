@@ -59,3 +59,47 @@ Aquecimento (primeira carga do modelo nesta sessão): 3B ~6,7 s; 7B ~15,1 s.
 - Data: 2026-10-11
 - PC / RAM / CPU: Windows 11 Home, 16 GB RAM, Ollama a usar CPU+GPU no 7B
 - Ollama versão: 0.40.2
+
+## AMALIA-9B (pedido do orientador, 2026-10-18)
+
+Modelo de texto para português de Portugal. Licença Apache-2.0. Publicado a 1 de julho de 2026. Não ouve nem fala.
+
+| Variante no Ollama | Tamanho | Quando |
+|---|---|---|
+| `teex/amalia:q4_K_M` | 5,6 GB | A testar num PC com 16 GB, ao lado do Whisper |
+| `teex/amalia:q8_0` | 9,7 GB | Só se o Q4 falhar por qualidade e ainda sobrar RAM |
+
+Critério para passar a modelo principal: nos prompts A a D desta tabela, fala mais claro em português de Portugal do que o `qwen2.5:3b` e a ferramenta de agendar é chamada. O estudo completo está em [`FEEDBACK-ORIENTADOR.md`](FEEDBACK-ORIENTADOR.md).
+
+## Voz — audição no PC (2026-10-18)
+
+O roteiro está em [`ROTEIRO-VOZ.md`](ROTEIRO-VOZ.md). O `ric/` já usa Piper tugão e Whisper. Esta tabela é a audição lado a lado, ainda por preencher.
+
+| | Piper tugão | tts-eu-pt |
+|---|---|---|
+| A hora do comprimido percebe-se? | por medir | por medir |
+| «16:54» soa a português de Portugal? | por medir | por medir |
+| Notas | | |
+| Fico com esta voz? | | |
+
+Voz escolhida: por medir.  
+Data da audição: _______________  
+PC e RAM: _______________
+
+| | |
+|---|---|
+| Modelo Whisper | por medir (`small`, ou `base` se o `small` não couber) |
+| Ollama aberto | por medir |
+| Frases certas | ____ / 10 |
+
+## Modelos Qwen com entrada de áudio (2026-10-16)
+
+O Pedro encontrou modelos Qwen que recebem áudio, não só texto. Nenhuma linha substitui o `qwen2.5:3b` nesta PAP.
+
+| Modelo | O que aceita | O que devolve | Onde corre | Porque fica de fora |
+|---|---|---|---|---|
+| Qwen2-Audio-7B | Áudio e texto. Frases curtas, até cerca de 30 s | Texto | Transformers ou Nexa. O Ollama do RIC não recebe o áudio | Cerca de 16 GB de VRAM em FP16 |
+| Qwen2.5-Omni-3B e 7B | Texto, imagem, áudio e vídeo | Texto e fala | Transformers ou vLLM | Os testes oficiais de reconhecimento não são português de Portugal. Num estudo de 2026 sobre português do Brasil, o Omni-3B errou mais do que o Whisper |
+| Qwen3-Omni-30B-A3B | Texto, imagem, áudio e vídeo. A lista de 19 línguas faladas inclui português | Texto e fala, também em português | Transformers ou vLLM | A ficha oficial pede cerca de 79 GB de GPU. A API na nuvem envia o áudio para fora |
+
+O Ollama continua sem entrada de áudio para estes modelos. O RIC ouve com Whisper local.

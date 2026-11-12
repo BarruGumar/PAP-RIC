@@ -1,10 +1,10 @@
 # CONTEXTO DO PROJETO — RIC (PAP)
 
 > Ficheiro de contexto para qualquer modelo de IA (Cursor, ChatGPT, Claude, etc.).
-> **Colocar em:** `C:\Users\pedro\Desktop\PAP\CONTEXTO-PAP.md`
+> No PC do Pedro a pasta do projeto é `C:\Users\pedro\Desktop\PAP`.
 > Atualizar sempre que houver decisões importantes.
 
-**Última atualização:** 2026-10-25 (arquitetura níveis 0–5; Mint XFCE; detalhe ops em `docs/ARQUITETURA.md`)  
+**Última atualização:** 2026-11-12 (arquitetura em `docs/ARQUITETURA.md`; corpo de gato e estudos de visual em `docs/estudos/VISUAL-E-CORPO.md`)
 **Aluno:** Pedro Albuquerque  
 **Curso:** Profissional de Técnico/a de Informática — Sistemas (turma 3-TIS)  
 **Orientador:** Gil Ribeiro  
@@ -216,13 +216,16 @@ Pessoa  ↔  Ecrã tactile kiosk (rosto SVG estilo EVE + lab de expressões; tex
 | Arranque | `ric.service` (systemd user) + kiosk XFCE **separado**; saída só com PIN |
 | Offline-first | Núcleo local; Internet só funções opcionais (Telegram críticos, meteo, …) |
 | LLM local | **`qwen2.5:3b` via Ollama**; timeout 8–12 s; core sobe sem Ollama |
+| Qwen com entrada de áudio | Investigado em 2026-10-16. Fica de fora: não corre no Ollama, pede GPU. Nota em `docs/TABELA-LLMS.md` |
+| Comparação opcional | `qwen2.5:7b` se a RAM chegar; `llama3.2:3b` / `qwen2.5:1.5b` se o 3B for fraco. A AMALIA-9B entra no teste a pedido do orientador. Só substitui o Qwen se agendar e couber. Ver `docs/FEEDBACK-ORIENTADOR.md` |
 | Tools LLM P1 | Ler + **criar/apagar** lembretes não médicos; música, história, guardar gosto; **não** meds/críticos; Telegram ≠ tool |
 | Cloud LLM | Não no núcleo |
 | Processo | Um processo Python; UI estática servida pelo mesmo processo |
 | UI Idle | Rosto + relógio + próximo lembrete; mais info sob procura |
-| Rosto | Cara **EVE** (Círculo descartado); estados idle/listening/thinking/speaking/alert/music/story; olhos A/B (anel vs pupila) em teste |
+| Rosto no código | Cara **EVE**; estados idle/listening/thinking/speaking/alert/music/story |
+| Corpo físico (2026-11-12) | Gato de cabeça grande e tronco pequeno, parado, sem copiar uma personagem. A cara ocupa o ecrã. Detalhe em `docs/estudos/VISUAL-E-CORPO.md`. Ainda não substitui a EVE no código |
 | Memória | SQLite: lembretes (schema A) + gostos + 80 msgs + 1 resumo + confirmações |
-| Voz | Botão Falar + endpointing ~0,9 s; Whisper local + Piper tugão medium; reply TTS mais rápido que alertas; wake «RIC» ainda por modelo |
+| Voz | Botão Falar + endpointing ~0,9 s; Whisper local + Piper tugão medium; reply TTS mais rápido que alertas; wake «RIC» ainda por modelo. Roteiro de audição: `docs/ROTEIRO-VOZ.md` |
 | Música | Pastas por género + `catalogo.json` ao arrancar |
 | Histórias | `historias/*.txt` + meta; áudio opcional se existir |
 | Lembretes | Default 3× ~2 min (cuidador altera); pausa/retoma música; críticos → Telegram |
@@ -251,7 +254,7 @@ Ordem de interesse para o «cérebro» (LLM local):
 3. **Raspberry Pi 5 + AI HAT** — só se o PC falhar e houver justificação  
 4. **Arduino** — fora desta PAP (locomoção)  
 
-Tablet separado **não** é o ecrã principal desta PAP (evita depender de Wi‑Fi local).
+Tablet separado **não** é o ecrã principal desta PAP (evita depender de Wi‑Fi local). O corpo físico que o Pedro quer é o gato de [`docs/estudos/VISUAL-E-CORPO.md`](docs/estudos/VISUAL-E-CORPO.md): a cara ocupa o ecrã tactile deste PC.
 
 Inventário: `docs/INVENTARIO-HARDWARE.md` · Orçamento: `docs/ORCAMENTO.md` · Arquitetura/SO: `docs/ARQUITETURA.md`
 
@@ -367,9 +370,9 @@ BackOffice e canal próprio de monitorização **não** entram como produto nest
 
 ---
 
-## 17. Pasta local do aluno
+## 17. Pasta do projeto
 
-`C:\Users\pedro\Desktop\PAP`  
+No PC do Pedro a pasta do projeto é `C:\Users\pedro\Desktop\PAP`. Aí estão `CONTEXTO-PAP.md`, `ric/`, `docs/` e `testar-voz.bat`. Os comandos correm nessa pasta.  
 Remoto GitHub: `https://github.com/BarruGumar/PAP-RIC.git`
 
 Ficheiros importantes:
