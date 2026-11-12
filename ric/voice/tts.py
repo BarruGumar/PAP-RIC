@@ -249,14 +249,13 @@ def speak_espeak(texto: str) -> bool:
 
 
 def normalize_tts_engine(value: str | None) -> str:
-    raw = (value or "piper").strip().lower()
-    if raw in ("chatterbox", "cb", "experimental"):
-        return "chatterbox"
+    """Mantém API estável; o motor activo do RIC é só Piper."""
+    _ = value
     return "piper"
 
 
 class VoiceService:
-    """TTS: Piper (default) ou Chatterbox experimental → WAV + fallback SAPI/espeak."""
+    """TTS Piper → WAV + fallback SAPI/espeak."""
 
     def __init__(
         self,
@@ -266,9 +265,6 @@ class VoiceService:
         cache_dir: Path | None = None,
         length_scale: float = 1.35,
         engine: str = "piper",
-        chatterbox_device: str = "auto",
-        chatterbox_audio_prompt: Path | None = None,
-        chatterbox_t3_model: str = "pt-pt",
         on_speaking: Callable[[bool], None] | None = None,
         backends: list[SpeakFn] | None = None,
     ) -> None:
@@ -277,58 +273,18 @@ class VoiceService:
         self.cache_dir = cache_dir
         self.length_scale = length_scale
         self.engine = normalize_tts_engine(engine)
-        self.chatterbox_device = chatterbox_device
-        self.chatterbox_audio_prompt = chatterbox_audio_prompt
-        self.chatterbox_t3_model = chatterbox_t3_model
         self.on_speaking = on_speaking
         self._lock = threading.Lock()
-        self._cb_init_lock = threading.Lock()
         self._piper: PiperEngine | None = (
             PiperEngine(piper_model, length_scale=length_scale)
             if piper_model and piper_model.is_file()
             else None
         )
-        self._chatterbox = None
-        if self.engine == "chatterbox" or chatterbox_audio_prompt is not None:
-            from ric.voice.chatterbox_engine import ChatterboxEngine
-
-            data_dir = None
-            if cache_dir is not None:
-                data_dir = cache_dir.parent if cache_dir.name == "tts" else cache_dir
-            self._chatterbox = ChatterboxEngine(
-                device=chatterbox_device,
-                t3_model=chatterbox_t3_model,
-                audio_prompt=chatterbox_audio_prompt,
-                data_dir=data_dir,
-            )
         self.last_alert_wav: Path | None = None
         if backends is not None:
             self._backends = backends
         else:
             self._backends = self._default_backends()
-
-    def _ensure_chatterbox(self):
-        if self._chatterbox is not None:
-            return self._chatterbox
-        with self._cb_init_lock:
-            if self._chatterbox is not None:
-                return self._chatterbox
-            from ric.voice.chatterbox_engine import ChatterboxEngine
-
-            data_dir = None
-            if self.cache_dir is not None:
-                data_dir = (
-                    self.cache_dir.parent
-                    if self.cache_dir.name == "tts"
-                    else self.cache_dir
-                )
-            self._chatterbox = ChatterboxEngine(
-                device=self.chatterbox_device,
-                t3_model=self.chatterbox_t3_model,
-                audio_prompt=self.chatterbox_audio_prompt,
-                data_dir=data_dir,
-            )
-            return self._chatterbox
 
     def _default_backends(self) -> list[SpeakFn]:
         backends: list[SpeakFn] = []
@@ -339,7 +295,7 @@ class VoiceService:
                 return False
             return _play_wav(path)
 
-        if self.engine == "chatterbox" or self._piper is not None:
+        if self._piper is not None:
             backends.append(_file_local)
         backends.append(speak_sapi)
         backends.append(speak_espeak)
@@ -355,15 +311,12 @@ class VoiceService:
         safe = re.sub(r"[^a-zA-Z0-9_-]+", "_", stem)[:40] or "alert"
         out = base / f"{safe}-{chosen}-{int(time.time() * 1000)}.wav"
 
-        ok = False
-        if chosen == "chatterbox":
-            ok = self._ensure_chatterbox().synthesize_file(texto, out)
-        elif self._piper is not None:
-            scale = length_scale_for_stem(safe, self.length_scale)
-            ok = self._piper.synthesize_file(texto, out, length_scale=scale)
-
-        if not ok:
+        if self._piper is None:
             return None
+        scale = length_scale_for_stem(safe, self.length_scale)
+        if not self._piper.synthesize_file(texto, out, length_scale=scale):
+            return None
+
         self.last_alert_wav = out
         try:
             old = sorted(base.glob("*.wav"), key=lambda p: p.stat().st_mtime, reverse=True)
@@ -374,30 +327,22 @@ class VoiceService:
         return out
 
     def warm_up(self) -> None:
-        """Aquecer o motor activo (Piper e/ou Chatterbox)."""
+        """Aquecer o Piper."""
         warm = self.cache_dir or Path.cwd() / "ric-data" / "tts"
         warm.mkdir(parents=True, exist_ok=True)
-        if self._piper is not None and self.engine == "piper":
-            try:
-                self._piper.warm_up()
-                out = warm / "warmup-piper.wav"
-                scale = length_scale_for_stem("reply", self.length_scale)
-                self._piper.synthesize_file("Olá.", out, length_scale=scale)
-                print("[RIC] TTS (Piper) aquecido.", flush=True)
-            except Exception as exc:  # noqa: BLE001
-                print(f"[RIC] TTS Piper warm-up falhou: {exc}", flush=True)
-        if self.engine == "chatterbox":
-            try:
-                cb = self._ensure_chatterbox()
-                cb.warm_up()
-                out = warm / "warmup-chatterbox.wav"
-                cb.synthesize_file("Olá.", out)
-                print("[RIC] TTS (Chatterbox experimental) aquecido.", flush=True)
-            except Exception as exc:  # noqa: BLE001
-                print(f"[RIC] TTS Chatterbox warm-up falhou: {exc}", flush=True)
+        if self._piper is None:
+            return
+        try:
+            self._piper.warm_up()
+            out = warm / "warmup-piper.wav"
+            scale = length_scale_for_stem("reply", self.length_scale)
+            self._piper.synthesize_file("Olá.", out, length_scale=scale)
+            print("[RIC] TTS (Piper) aquecido.", flush=True)
+        except Exception as exc:  # noqa: BLE001
+            print(f"[RIC] TTS Piper warm-up falhou: {exc}", flush=True)
 
     def set_length_scale(self, value: float) -> float:
-        """Ajusta ritmo TTS em runtime (ex.: `ric tune`) — só afecta Piper."""
+        """Ajusta ritmo TTS em runtime (ex.: `ric tune`)."""
         self.length_scale = min(max(float(value), 0.9), 1.5)
         if self._piper is not None:
             self._piper.length_scale = self.length_scale
@@ -405,20 +350,10 @@ class VoiceService:
 
     def status(self) -> dict:
         piper_ok = self._piper is not None
-        from ric.voice.chatterbox_engine import chatterbox_importable
-
-        active = self.engine
-        if active == "chatterbox" and not chatterbox_importable():
-            active = "fallback" if not piper_ok else "piper"
-        elif active == "piper" and not piper_ok:
-            active = "fallback"
-        cb = self._chatterbox
         return {
             "piper": piper_ok,
             "piper_model": str(self.piper_model) if self.piper_model else None,
-            "chatterbox": chatterbox_importable(),
-            "chatterbox_detail": cb.status() if cb is not None else None,
-            "engine": active,
+            "engine": "piper" if piper_ok else "fallback",
             "engine_requested": self.engine,
             "length_scale": self.length_scale,
             "playback": "browser+local",

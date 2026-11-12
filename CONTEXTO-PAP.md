@@ -4,7 +4,7 @@
 > No PC do Pedro a pasta do projeto é `C:\Users\pedro\Desktop\PAP`.
 > Atualizar sempre que houver decisões importantes.
 
-**Última atualização:** 2026-11-12 (arquitetura em `docs/ARQUITETURA.md`; corpo de gato e estudos de visual em `docs/estudos/VISUAL-E-CORPO.md`)
+**Última atualização:** 2026-11-12 (Chatterbox descartado; Piper TTS; UI kiosk com próximo lembrete sempre visível; próximo: wake-word «RIC»)
 **Aluno:** Pedro Albuquerque  
 **Curso:** Profissional de Técnico/a de Informática — Sistemas (turma 3-TIS)  
 **Orientador:** Gil Ribeiro  
@@ -222,10 +222,10 @@ Pessoa  ↔  Ecrã tactile kiosk (rosto SVG estilo EVE + lab de expressões; tex
 | Cloud LLM | Não no núcleo |
 | Processo | Um processo Python; UI estática servida pelo mesmo processo |
 | UI Idle | Rosto + relógio + próximo lembrete; mais info sob procura |
-| Rosto no código | Cara **EVE** no ecrã inteiro. Em repouso só se leem RIC e as horas. Botões ao toque, ou quando um lembrete dispara |
+| Rosto no código | Cara **EVE** no ecrã inteiro. Em repouso: RIC, horas e **próximo lembrete**. Botões ao toque, ou quando um lembrete dispara |
 | Corpo físico (2026-11-12) | Gato de cabeça grande e tronco pequeno, parado, sem copiar uma personagem. Detalhe em `docs/estudos/VISUAL-E-CORPO.md` |
 | Memória | SQLite: lembretes (schema A) + gostos + 80 msgs + 1 resumo + confirmações |
-| Voz | Botão Falar + endpointing ~0,9 s; Whisper local + Piper tugão medium (default); Chatterbox experimental A/B com ref pt-PT; wake «RIC» ainda por modelo. Roteiro: `docs/ROTEIRO-VOZ.md` |
+| Voz | Botão Falar + endpointing ~0,9 s; Whisper local + Piper tugão medium; wake «RIC» ainda por modelo. Roteiro: `docs/ROTEIRO-VOZ.md`. Chatterbox descartado (pesado demais para o hardware da PAP) |
 | Música | Pastas por género + `catalogo.json` ao arrancar |
 | Histórias | `historias/*.txt` + meta; áudio opcional se existir |
 | Lembretes | Default 3× ~2 min (cuidador altera); pausa/retoma música; críticos → Telegram |
@@ -331,9 +331,8 @@ BackOffice e canal próprio de monitorização **não** entram como produto nest
 - [x] Voz TTS: Piper tugão **medium** (+ SAPI/espeak fallback) nos alertas
 - [x] Voz wake→STT: botão Falar + `VoiceSession` + API `/voice/*` + faster-whisper
 - [x] LLM Ollama `qwen2.5:3b` na conversa por voz (tools: listar/criar/apagar lembretes não médicos); openWakeWord «RIC» ainda em falta
-- [x] Chatterbox experimental (`requirements-chatterbox.txt`, `ric say --engine chatterbox`, A/B `tts-compare`); Piper continua default
+- [x] Chatterbox testado e **descartado** (CPU lento / deps pesadas); Piper é o TTS do projeto
 - [ ] Em casa: A/B Piper **tugão quality** vs medium (sem trocar default até decidir)
-- [ ] Decidir Piper vs Chatterbox (e baixar pack pt-PT HF se valer a pena)
 - [ ] Wake-word contínuo «RIC»
 - [ ] PIN cuidador → Telegram/música/histórias
 - [ ] Inventário físico + medições LLM reais

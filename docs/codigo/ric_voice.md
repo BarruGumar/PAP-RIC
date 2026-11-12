@@ -1,10 +1,10 @@
 # `ric/voice/`
 
-## TTS (`tts.py` + `chatterbox_engine.py`)
+## TTS (`tts.py`)
 
-**Default estável: Piper.** Chatterbox é **experimental** e fica separado.
+**Motor do projeto: Piper** (`pt_PT-tugão-medium`).
 
-Ordem Piper: **Piper** (modelo PT tugão) → **SAPI** (Windows) → **espeak** (Linux).  
+Ordem: **Piper** → **SAPI** (Windows) → **espeak** (Linux).  
 Síntese Piper: API `PiperVoice` → WAV PCM em `ric-data/tts/`.
 
 **Reprodução na UI:** o browser toca o WAV (`audio_url` no evento WS `/ws` ou `GET /api/v1/tts/….wav`).
@@ -16,34 +16,9 @@ Respostas (`stem="reply"`): ritmo **1.20** via `length_scale_for_stem`.
 py -m pip install piper-tts
 ```
 
-**Default guardado:** `ric-data/vozes/pt_PT-tugao-medium.onnx` (não substituir por agora).
+**Default guardado:** `ric-data/vozes/pt_PT-tugao-medium.onnx`.
 
-### Chatterbox experimental (pt-PT)
-
-Pacote opcional — **não** entra no `requirements.txt` principal:
-
-```text
-python -m pip install -r requirements-chatterbox.txt
-py -m ric tts-compare --play
-py -m ric say "Olá, eu sou o RIC." --engine chatterbox
-```
-
-- Objectivo: português de **Portugal** (não BR). O modelo genérico com `language_id=pt` tende a sotaque brasileiro.
-- Por defeito usa referência oficial pt-PT (`ric-data/vozes/extras/pt_pt_ref.wav`, descarregada à primeira).
-- Pack dedicado `ResembleAI/Chatterbox-Multilingual-pt-pt` quando estiver no cache HF; senão fallback: base + referência Portugal.
-- UI experimental: `RIC_TTS_ENGINE=chatterbox` no `.env` (volta a `piper` para o default).
-- Clonagem zero-shot (opção escolhida): `py -m ric record-ref` ou `RIC_CHATTERBOX_AUDIO_PROMPT=…wav`.
-- Fine-tune/LoRA: possível mas fora do caminho crítico da PAP.
-- 1.ª corrida descarrega pesos HF (~GB); GPU ajuda; CPU é lenta.
-- Se aparecer `LlamaModel` / `torchvision::nms`: reinstalar trio alinhado (ver `requirements-chatterbox.txt`).
-
-### Comparar Piper vs Chatterbox
-
-```text
-py -m ric tts-compare "Atenção, é a hora de beber água." --play
-```
-
-WAV em `ric-data/tts/compare/`. Critérios: naturalidade pt-PT, clareza, latência.
+**Nota:** Chatterbox (Resemble AI) foi testado e **descartado** na PAP — demasiado pesado/lento para o hardware alvo.
 
 **Backlog Piper:** tugão quality em `extras/` (ver [`PLANEAMENTO.md`](../PLANEAMENTO.md)).
 
@@ -52,7 +27,7 @@ py -m ric voices
 py -m ric say "…" --model extras/OUTRA.onnx
 ```
 
-Health: `/api/v1/health` → `voice.engine` / `voice.engine_requested` / `voice.chatterbox`.
+Health: `/api/v1/health` → `voice.engine` / `voice.piper`.
 
 ## Wake (`wake.py`)
 
@@ -77,7 +52,7 @@ py -m pip install faster-whisper
 ```
 
 UI: **tocar** Falar → falar ≥ ~0,35 s → **envia sozinho** após ~0,9 s de silêncio (ou toca **Parar**); máximo ~15 s.  
-Microfone abre **antes** do wake; PCM a 16 kHz com silêncio cortado **antes** da normalização (senão o ruído amplificado estraga o endpointing).
+Microfone abre **antes** do wake; PCM a 16 kHz com silêncio cortado **antes** da normalização.
 
 ## Sessão (`session.py`)
 

@@ -4,7 +4,7 @@
 **Turma:** 3-TIS  
 **Orientador:** Gil Ribeiro  
 **Trabalho:** RIC — Robô Interativo Companheiro  
-**Atualizado:** 2026-10-27 (nota TTS: experimentar tugão quality em casa)
+**Atualizado:** 2026-11-12 (Chatterbox descartado; UI: próximo lembrete sempre visível)
 
 Um aluno, fora das aulas. A voz é a forma principal de uso; o ecrã mostra o rosto e só revela texto/botões quando necessário. SO alvo do protótipo: **Linux Mint XFCE**.
 
@@ -65,12 +65,12 @@ Ver [`ARQUITETURA.md`](ARQUITETURA.md) §6.11.
 
 - **Agora (não mudar):** default TTS = Piper **tugão medium** (`pt_PT-tugao-medium.onnx`).
 - **A testar (Piper):** variante **tugão quality** em `ric-data/vozes/extras/` via `py -m ric say "…" --model extras/…`.
-- **A testar (experimental):** **Chatterbox** pt-PT — `requirements-chatterbox.txt`, `py -m ric tts-compare --play`, `py -m ric say "…" --engine chatterbox`. Referência oficial Portugal; pack HF quando o cache estiver completo.
-- **Voz própria:** clonagem zero-shot (`record-ref` / `--prompt`); fine-tune fora do caminho crítico.
+- **TTS:** **Piper** tugão medium (default). Chatterbox foi testado e **descartado** (pesado/lento demais para a PAP).
+- **Voz própria / fine-tune:** fora do caminho crítico da PAP (Piper tugão cobre o MVP).
 - Critérios: naturalidade em pt-PT (não BR), clareza para idoso, latência no PC reciclado, tamanho/RAM.
 - Até decisão, **não substituir** o Piper medium na UI.
 
 ### Fatia voz wake→STT→LLM (estado)
 
-- Feito: botão **Falar**, Whisper STT, `VoiceSession`, API `/voice/*`, Ollama `qwen2.5:3b` + tools ler/criar/apagar lembretes não médicos, resposta em Piper; A/B Chatterbox experimental.
-- Em falta: modelo openWakeWord «RIC» + microfone contínuo; mais tools P1 (música/história/gosto); cuidador PIN; decisão Piper vs Chatterbox.
+- Feito: botão **Falar**, Whisper STT, `VoiceSession`, API `/voice/*`, Ollama `qwen2.5:3b` + tools ler/criar/apagar lembretes não médicos, resposta em Piper; Chatterbox descartado.
+- Em falta: modelo openWakeWord «RIC» + microfone contínuo; mais tools P1 (música/história/gosto); cuidador PIN.

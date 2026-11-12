@@ -6,7 +6,7 @@ Carrega definições locais a partir de variáveis de ambiente e de `.env` (ver 
 - `RIC_HOST` / `RIC_PORT` — default `127.0.0.1:8787`.
 - `RIC_DEBUG` — logs HTTP verbosos.
 - `RIC_REMINDER_MAX_ALERTS` / `RIC_REMINDER_RETRY_MINUTES` — retries de lembrete (default 3 × 2 min).
-- `RIC_TTS_ENGINE` — `piper` (default) ou `chatterbox` (experimental).
-- `RIC_CHATTERBOX_DEVICE` / `RIC_CHATTERBOX_T3_MODEL` / `RIC_CHATTERBOX_AUDIO_PROMPT` — só Chatterbox.
+- `RIC_TTS_ENGINE` — `piper` (único motor TTS do projeto).
+- `RIC_PIPER_MODEL` / `RIC_PIPER_LENGTH_SCALE` — modelo e ritmo Piper.
 
 Não contém segredos no código; tokens Telegram ficam só no `.env` (etapa 3).

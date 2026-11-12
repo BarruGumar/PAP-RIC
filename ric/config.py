@@ -30,9 +30,6 @@ class Settings:
     piper_bin: str | None = None
     piper_length_scale: float = 1.35
     tts_engine: str = "piper"
-    chatterbox_device: str = "auto"
-    chatterbox_audio_prompt: Path | None = None
-    chatterbox_t3_model: str = "pt-pt"
     whisper_model: str = "small"
     stt_language: str = "pt"
     ollama_url: str = "http://127.0.0.1:11434"
@@ -66,20 +63,6 @@ class Settings:
         piper_bin = os.environ.get("RIC_PIPER_BIN", "").strip() or None
         length_scale = float(os.environ.get("RIC_PIPER_LENGTH_SCALE", "1.35"))
 
-        cb_prompt_raw = os.environ.get("RIC_CHATTERBOX_AUDIO_PROMPT", "").strip()
-        cb_prompt: Path | None = None
-        if cb_prompt_raw:
-            cb_prompt = Path(cb_prompt_raw)
-            if not cb_prompt.is_absolute():
-                cb_prompt = (root / cb_prompt).resolve()
-
-        engine_raw = (
-            os.environ.get("RIC_TTS_ENGINE")
-            or os.environ.get("RIC_VOICE_ENGINE")
-            or "piper"
-        ).strip().lower()
-        engine = "chatterbox" if engine_raw in ("chatterbox", "cb", "experimental") else "piper"
-
         return cls(
             host=os.environ.get("RIC_HOST", "127.0.0.1"),
             port=int(os.environ.get("RIC_PORT", "8787")),
@@ -90,12 +73,7 @@ class Settings:
             piper_model=model,
             piper_bin=piper_bin,
             piper_length_scale=length_scale,
-            tts_engine=engine,
-            chatterbox_device=os.environ.get("RIC_CHATTERBOX_DEVICE", "auto").strip()
-            or "auto",
-            chatterbox_audio_prompt=cb_prompt,
-            chatterbox_t3_model=os.environ.get("RIC_CHATTERBOX_T3_MODEL", "pt-pt").strip()
-            or "pt-pt",
+            tts_engine="piper",
             whisper_model=os.environ.get("RIC_WHISPER_MODEL", "small").strip()
             or "small",
             stt_language=os.environ.get("RIC_STT_LANGUAGE", "pt").strip() or "pt",

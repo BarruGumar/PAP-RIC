@@ -16,6 +16,14 @@
   const btnTalk = document.getElementById("btn-talk")
   const btnPreview = document.getElementById("btn-preview")
   const heardEl = document.getElementById("heard")
+  const spokenHintEl = document.getElementById("spoken-hint")
+  const libraryWidget = document.getElementById("library-widget")
+  const libraryList = document.getElementById("library-list")
+  const widgetTitle = document.getElementById("widget-title")
+  const libraryButtons = Array.from(document.querySelectorAll(".btn-lib"))
+  const debugHud = document.getElementById("debug-hud")
+  const btnDebugToggle = document.getElementById("btn-debug-toggle")
+  const btnDebugClose = document.getElementById("btn-debug-close")
   const previewPhrases = [
     "Atenção, é a hora de beber água.",
     "Olá, eu sou o RIC.",
@@ -23,6 +31,22 @@
     "Boa noite, descansa bem.",
   ]
   let previewIndex = 0
+  let activeLibrary = null
+
+  const LIBRARY_COPY = {
+    musica: {
+      title: "Biblioteca de músicas",
+      items: ["Fado clássico (local)", "Canções antigas (MP3)", "Pasta: ric/musica/"],
+    },
+    historias: {
+      title: "Coleção de histórias",
+      items: ["Histórias locais em breve", "Pasta: ric/historias/"],
+    },
+    livros: {
+      title: "Audiolivros locais",
+      items: ["Audiolivros em breve", "Pasta: ric/livros/"],
+    },
+  }
 
   let activeAlertId = null
   let ws = null
@@ -417,7 +441,52 @@
       nextEl.textContent = "Próximo"
       return
     }
-    nextEl.textContent = `Próximo: ${reminder.hora}`
+    const title = String(reminder.titulo || "").trim()
+    const time = String(reminder.hora || "").trim()
+    if (title && time) {
+      nextEl.textContent = `Próximo: ${title} · ${time}`
+      return
+    }
+    nextEl.textContent = time ? `Próximo: ${time}` : title ? `Próximo: ${title}` : "Próximo"
+  }
+
+  const closeLibraryWidget = () => {
+    activeLibrary = null
+    if (libraryWidget) libraryWidget.hidden = true
+    for (const btn of libraryButtons) {
+      btn.classList.remove("is-active")
+      btn.setAttribute("aria-expanded", "false")
+    }
+  }
+
+  const openLibraryWidget = (kind) => {
+    const copy = LIBRARY_COPY[kind]
+    if (!copy || !libraryWidget || !libraryList || !widgetTitle) return
+    if (activeLibrary === kind && !libraryWidget.hidden) {
+      closeLibraryWidget()
+      return
+    }
+    activeLibrary = kind
+    widgetTitle.textContent = copy.title
+    libraryList.replaceChildren(
+      ...copy.items.map((item) => {
+        const li = document.createElement("li")
+        li.textContent = item
+        return li
+      })
+    )
+    libraryWidget.hidden = false
+    for (const btn of libraryButtons) {
+      const active = btn.dataset.library === kind
+      btn.classList.toggle("is-active", active)
+      btn.setAttribute("aria-expanded", active ? "true" : "false")
+    }
+  }
+
+  const setDebugOpen = (open) => {
+    if (!debugHud || !btnDebugToggle) return
+    debugHud.hidden = !open
+    btnDebugToggle.setAttribute("aria-expanded", open ? "true" : "false")
   }
 
   const closeControls = () => {
@@ -425,6 +494,7 @@
     controlsTimer = null
     controlsEl.hidden = true
     appEl.classList.remove("is-open")
+    closeLibraryWidget()
     const panel = document.getElementById("create-panel")
     if (panel) panel.hidden = true
   }
@@ -761,6 +831,7 @@
     speechHeard = false
     silenceSamples = 0
     speechSamples = 0
+    closeControls()
     heardEl.textContent = "A ouvir… paro sozinho quando acabares (ou toca em Parar)"
     btnTalk.classList.add("recording")
     btnTalk.textContent = "Parar"
@@ -906,17 +977,55 @@
     const panel = document.getElementById("create-panel")
     panel.hidden = !panel.hidden
     if (!panel.hidden) document.getElementById("input-titulo").focus()
+    armControlsIdle()
+  })
+
+  for (const btn of libraryButtons) {
+    btn.addEventListener("click", (event) => {
+      event.stopPropagation()
+      openLibraryWidget(btn.dataset.library || "musica")
+      armControlsIdle()
+    })
+  }
+
+  if (btnDebugToggle) {
+    btnDebugToggle.addEventListener("click", (event) => {
+      event.stopPropagation()
+      setDebugOpen(debugHud.hidden)
+    })
+  }
+
+  if (btnDebugClose) {
+    btnDebugClose.addEventListener("click", (event) => {
+      event.stopPropagation()
+      setDebugOpen(false)
+    })
+  }
+
+  window.addEventListener("keydown", (event) => {
+    if (event.key !== "d" && event.key !== "D") return
+    if (event.target && ["INPUT", "TEXTAREA"].includes(event.target.tagName)) return
+    setDebugOpen(debugHud.hidden)
   })
 
   appEl.addEventListener("click", (event) => {
     if (activeAlertId) return
-    if (event.target.closest("#controls")) {
-      armControlsIdle()
+    if (
+      event.target.closest("#controls") ||
+      event.target.closest("#debug-hud") ||
+      event.target.closest("#btn-debug-toggle")
+    ) {
+      if (event.target.closest("#controls")) armControlsIdle()
       return
     }
     if (controlsEl.hidden) openControls()
     else closeControls()
   })
+
+  if (!heardEl.textContent) {
+    heardEl.textContent = "Bom dia. Estou aqui."
+  }
+  if (spokenHintEl) spokenHintEl.hidden = false
 
   applyEyeStyle(readEyeStyle())
   tickClock()

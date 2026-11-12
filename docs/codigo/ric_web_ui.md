@@ -4,44 +4,42 @@
 
 | Ficheiro | Função |
 |---|---|
-| `index.html` | Layout: marca RIC + rosto SVG EVE + lembretes + Falar |
-| `style.css` | Contraste alto, painel EVE, glow e estados |
+| `index.html` | Layout kiosk: RIC + horas + rosto SVG EVE + controlos + alerta + Lab PAP |
+| `style.css` | Outline kiosk, alerta, biblioteca, debug HUD; CSS dos olhos SVG |
 | `eye-shapes.css` | Morph SVG das expressões (paths) |
-| `app.js` | Estados, face, STT, TTS, laboratório de expressões |
+| `app.js` | Estados, face, STT, TTS, biblioteca local, laboratório |
 
 ## Rosto (estilo EVE)
 
-- SVG com **dois olhos** num painel escuro estilo EVE (glow cyan, scanlines, reflexo de vidro). Tema **Círculo** removido — EVE é a cara definitiva por agora.
-- Olhos com **paths SVG** que mudam de forma (oval → crescente, barra inclinada, etc.); piscar fecha o contorno; idle ambient + laboratório.
+- SVG com **dois olhos** num fundo escuro estilo EVE (glow cyan, scanlines, shine). Tema **Círculo** removido — EVE é a cara definitiva por agora.
+- Olhos com **paths SVG** que mudam de forma; piscar fecha o contorno; idle ambient + laboratório.
 - Detalhe «Morgana-light» (provisório, a decidir):
-  - **Olho A · anel** — anel claro junto à borda + highlight afiado (`data-eye-style="ring"`)
-  - **Olho B · pupila** — A + pupila oval fina (`data-eye-style="pupil"`); a pupila/anel reagem por expressão (escala, inclinação, pulso em `talk`)
-  - Toggle temporário no ecrã; preferência em `localStorage` (`ric-eye-style`)
+  - **Olho A · anel** — anel claro junto à borda + highlight (`data-eye-style="ring"`)
+  - **Olho B · pupila** — A + pupila oval fina (`data-eye-style="pupil"`)
+  - Toggle no **Lab PAP** (botão canto inferior direito ou tecla `D`); preferência em `localStorage` (`ric-eye-style`)
 - Estados → expressões: `idle→calm`, `listening→curious`, `thinking→think`, `speaking→talk`, `alert→alert`.
-- **Idle ambient:** sem interação, cicla expressões base (calmo, curioso, contente, pensar, sono, confuso) com pausas longas; pisca sozinho de 3–8 s.
-- **Laboratório de expressões:** Calmo, Curioso, Pensar, Falar, Alerta, Contente, Triste, Surpreso, Sono, Confuso, Pisca, Piscar.  
-  Morph fluido. Estado real (ex. Falar) tem prioridade; «Calmo» em idle volta ao ambient.
+- **Idle ambient:** cicla expressões base com pausas longas; pisca sozinho de 3–8 s.
+- **Laboratório de expressões:** dentro do Lab PAP (Calmo, Curioso, Pensar, Falar, Alerta, …).
 
 ## Design / layout
 
 O kiosk **não** inclui editor de layout.  
-Prototipar: [`docs/design/ui-board.html`](../design/ui-board.html) — ver [`docs/design/README.md`](../design/README.md).  
+Prototipar: [`docs/design/ui-board.html`](../design/ui-board.html) — ver [`docs/design/README.md`](../design/README.md).
 
-**Ecrã actual:** cara EVE em ecrã inteiro. RIC e relógio ficam por cima. O resto abre com um toque e fecha sozinho ao fim de 8 segundos, ou quando um lembrete está a tocar.
+**Ecrã actual:** cara EVE em ecrã inteiro. Estética outline (borda fina, cantos ~0.25rem, fundo `#0b1018`).
 
-## Ecrã
+## Ecrã — 3 estados
 
-Em repouso a cara fica ao centro. Por cima, RIC e as horas. Por baixo dos olhos, a frase que o RIC está a dizer.
-
-Um toque abre o resto à volta da cara: o próximo lembrete ao centro em cima, a lista de música à esquerda, e Adicionar em baixo. Outro toque na cara fecha. Sem uso, fecha ao fim de 8 segundos.
-
-Um lembrete a disparar mostra um cartão com o título, a hora e os botões Já fiz e Adiar.
+1. **Repouso (idle):** RIC + horas + pill **«Próximo: …»** no topo; olhos ao centro; legenda em baixo (`#heard`) + hint «toque no ecrã». Sem botões.
+2. **Aberto (toque):** à esquerda Música / Histórias / Livros (widget flutuante); em baixo Falar + Lembrete. Fecha ao toque na cara ou aos 8 s sem uso.
+3. **Alerta:** cartão modal com badge «Lembrete agora», título, hora, **Já fiz** (ciano) e **Adiar (10 min)** (outline). Controlos do aberto ficam escondidos.
 
 ## Layout (público mais velho)
 
-- **Marca RIC** e relógio sempre visíveis  
-- **Botões em pastilha:** Falar e Já fiz a azul-claro, Adiar só com contorno, só quando fazem falta  
+- **Marca RIC**, relógio e **próximo lembrete** sempre visíveis (não dependem do toque)  
+- Botões outline grandes; Falar e Já fiz a ciano  
 - Textos em **pt-PT**; foco visível no teclado  
+- Lab PAP só para demonstração / júri (não é UI do idoso)
 
 ## Voz (botão Falar)
 

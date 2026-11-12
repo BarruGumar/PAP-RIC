@@ -11,6 +11,7 @@
   <main class="screen" id="app">
     <header class="top">
       <p class="brand" aria-label="RIC">RIC</p>
+      <p id="next-reminder" class="next-pill" aria-live="polite">Próximo</p>
       <p class="clock" id="clock" aria-live="polite">--:--</p>
     </header>
 
@@ -153,20 +154,112 @@
       </div>
       <p id="state-label" class="state-label">À espera</p>
       <p id="heard" class="spoken" aria-live="polite"></p>
+      <p id="spoken-hint" class="spoken-hint">(toque no ecrã para interagir)</p>
     </section>
 
     <div id="controls" class="controls" hidden>
-      <p id="next-reminder" class="next-line">Próximo</p>
-      <aside class="music" aria-label="Música">
-        <p class="music-title">Música</p>
-        <ul class="music-list">
-          <li>Sem faixas</li>
-        </ul>
-        <button type="button" id="btn-talk" class="btn btn-line" aria-label="Carregar para falar">Falar</button>
-        <button type="button" id="btn-preview" class="btn btn-line" aria-label="Ouvir amostra da voz do RIC">Ouvir voz</button>
+      <aside class="library-panel" aria-label="Biblioteca local">
+        <button
+          type="button"
+          id="btn-lib-music"
+          class="btn btn-line btn-lib"
+          data-library="musica"
+          aria-label="Abrir biblioteca de músicas"
+          aria-expanded="false"
+        >
+          Música
+        </button>
+        <button
+          type="button"
+          id="btn-lib-stories"
+          class="btn btn-line btn-lib"
+          data-library="historias"
+          aria-label="Abrir coleção de histórias"
+          aria-expanded="false"
+        >
+          Histórias
+        </button>
+        <button
+          type="button"
+          id="btn-lib-books"
+          class="btn btn-line btn-lib"
+          data-library="livros"
+          aria-label="Abrir audiolivros locais"
+          aria-expanded="false"
+        >
+          Livros
+        </button>
+        <div id="library-widget" class="floating-widget" hidden>
+          <p class="widget-title" id="widget-title">Biblioteca local</p>
+          <ul class="widget-list" id="library-list" aria-label="Itens da biblioteca">
+            <li>Sem itens nesta pasta</li>
+          </ul>
+        </div>
       </aside>
-      <button type="button" id="btn-add" class="btn btn-line btn-add">Adicionar</button>
-      <div class="face-controls" aria-label="Cara EVE">
+
+      <div class="center-actions">
+        <button type="button" id="btn-talk" class="btn btn-line btn-mic" aria-label="Carregar para falar">
+          Falar
+        </button>
+        <button type="button" id="btn-add" class="btn btn-line" aria-label="Adicionar lembrete">
+          + Lembrete
+        </button>
+      </div>
+
+      <section id="create-panel" class="create" aria-label="Novo lembrete simples" hidden>
+        <form id="form-create" class="form">
+          <label>
+            Título
+            <input id="input-titulo" name="titulo" type="text" required maxlength="120" autocomplete="off" />
+          </label>
+          <label>
+            Hora
+            <input id="input-hora" name="hora" type="time" required />
+          </label>
+          <button type="submit" class="btn btn-line">Guardar</button>
+          <p id="form-msg" class="form-msg" role="status"></p>
+        </form>
+      </section>
+    </div>
+
+    <section id="alert-panel" class="alert-panel hidden" aria-live="assertive">
+      <p class="alert-badge">Lembrete agora</p>
+      <p id="alert-title" class="alert-title">Lembrete</p>
+      <p id="alert-time" class="alert-time"></p>
+      <div class="alert-actions">
+        <button type="button" id="btn-confirm" class="btn btn-primary" aria-label="Já fiz">Já fiz</button>
+        <button type="button" id="btn-snooze" class="btn btn-quiet" aria-label="Adiar 10 minutos">Adiar (10 min)</button>
+      </div>
+    </section>
+
+    <button
+      type="button"
+      id="btn-debug-toggle"
+      class="debug-toggle"
+      aria-label="Abrir laboratório PAP"
+      aria-expanded="false"
+      title="Atalho: tecla D"
+    >
+      Lab PAP
+    </button>
+
+    <aside id="debug-hud" class="debug-hud" hidden aria-label="Laboratório PAP">
+      <div class="debug-header">
+        <p class="debug-title">Laboratório PAP</p>
+        <button type="button" id="btn-debug-close" class="debug-close" aria-label="Fechar laboratório">
+          Fechar
+        </button>
+      </div>
+
+      <div class="debug-section">
+        <p class="debug-section-title">Voz</p>
+        <button type="button" id="btn-preview" class="btn btn-line btn-debug" aria-label="Ouvir amostra da voz do RIC">
+          Ouvir voz
+        </button>
+      </div>
+
+      <div class="debug-section face-controls" aria-label="Cara EVE">
+        <p class="debug-section-title">Versão dos olhos</p>
         <div class="eye-style-lab" role="group" aria-label="Versão dos olhos">
           <button
             type="button"
@@ -206,31 +299,7 @@
           </div>
         </details>
       </div>
-
-    <section id="create-panel" class="create" aria-label="Novo lembrete simples" hidden>
-        <form id="form-create" class="form">
-          <label>
-            Título
-            <input id="input-titulo" name="titulo" type="text" required maxlength="120" autocomplete="off" />
-          </label>
-          <label>
-            Hora
-            <input id="input-hora" name="hora" type="time" required />
-          </label>
-          <button type="submit" class="btn">Guardar</button>
-          <p id="form-msg" class="form-msg" role="status"></p>
-        </form>
-    </section>
-    </div>
-
-    <section id="alert-panel" class="alert-panel hidden" aria-live="assertive">
-      <p id="alert-title" class="alert-title">Lembrete</p>
-      <p id="alert-time" class="alert-time"></p>
-      <div class="alert-actions">
-        <button type="button" id="btn-confirm" class="btn btn-primary" aria-label="Já fiz">Já fiz</button>
-        <button type="button" id="btn-snooze" class="btn btn-quiet" aria-label="Adiar 10 minutos">Adiar</button>
-      </div>
-    </section>
+    </aside>
   </main>
   <audio id="tts-player" preload="auto"></audio>
   <script src="/app.js"></script>

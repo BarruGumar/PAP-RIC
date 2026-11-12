@@ -1,9 +1,8 @@
 # Runtime opcional — o núcleo (lembretes/API/UI) corre só com stdlib.
 # Instalar conforme a máquina:
 
-# TTS (default estável)
+# TTS
 piper-tts>=1.2.0
-# TTS experimental (opcional): requirements-chatterbox.txt
 
 # STT local (fatia wake→STT)
 faster-whisper>=1.0.0
