@@ -7,7 +7,9 @@ Três textos. O de Halicka e Surel está em PDF nesta pasta, licença CC BY-NC 4
 
 ## 1. Oh, Oh e Ju (2019) — preferência de forma
 
-Suyeon Oh, Young Hoon Oh e Da Young Ju, Yonsei University. «Understanding the Preference of the Elderly for Companion Robot Design». Conferência AHFE 2019. DOI: [10.1007/978-3-030-20467-9_9](https://doi.org/10.1007/978-3-030-20467-9_9). Ficha: [Yonsei](https://yonsei.elsevierpure.com/en/publications/understanding-the-preference-of-the-elderly-for-companion-robot-d/).
+**De onde é.** Coreia do Sul. Os três autores são da Yonsei University, no Yonsei Institute of Convergence Technology, em Incheon e Seul. O texto saiu nas atas da conferência AHFE 2019, que se realizou em Washington, e a Springer publicou o capítulo. Não é um estudo português nem europeu.
+
+Suyeon Oh, Young Hoon Oh e Da Young Ju. «Understanding the Preference of the Elderly for Companion Robot Design». DOI: [10.1007/978-3-030-20467-9_9](https://doi.org/10.1007/978-3-030-20467-9_9). Ficha da universidade: [Yonsei](https://yonsei.elsevierpure.com/en/publications/understanding-the-preference-of-the-elderly-for-companion-robot-d/).
 
 Entrevistaram 19 pessoas de idades diferentes sobre cinco conceitos de robô companheiro.
 
@@ -19,7 +21,9 @@ Para o RIC: o rosto no ecrã deve ser redondo, com olhos e boca simples, e o con
 
 ## 2. Sun e Jin (2021) — abstrato ou figurativo
 
-Xinxin Sun e Wenkui Jin. «Elderly’s preferences towards rehabilitation robot appearance using electroencephalogram signal». *EURASIP Journal on Advances in Signal Processing*. 2021. Acesso aberto: [10.1186/s13634-021-00757-z](https://link.springer.com/article/10.1186/s13634-021-00757-z).
+**De onde é.** China, cidade de Nanjing. Xinxin Sun é da School of Design Arts and Media, Nanjing University of Science and Technology. Wenkui Jin é do College of Furnishings and Industrial Design, Nanjing Forestry University. O artigo saiu no *EURASIP Journal on Advances in Signal Processing*, da Springer, em acesso aberto. O financiamento indicado é do Ministério da Educação da China. As dez pessoas do teste são descritas como idosas, sem dizer a cidade.
+
+Xinxin Sun e Wenkui Jin. «Elderly’s preferences towards rehabilitation robot appearance using electroencephalogram signal». 2021. [10.1186/s13634-021-00757-z](https://link.springer.com/article/10.1186/s13634-021-00757-z).
 
 Dez pessoas com cerca de 61 anos viram dez robôs do mercado. O grupo abstrato parece uma máquina com traços humanos estilizados (olhos, orelhas, sobrancelhas). O grupo figurativo aproxima-se de um corpo humano real, com braços, mãos e pernas. Mediram o gosto (gosto / neutro / não gosto) e o eletroencefalograma.
 
@@ -34,7 +38,9 @@ A amostra é pequena (dez pessoas) e o tema é robô de reabilitação, não um 
 
 ## 3. Halicka e Surel (2022) — Rudy e smart living
 
-Katarzyna Halicka e Dariusz Surel. «Smart living technologies in the context of improving the quality of life for older people: the case of the humanoid Rudy robot». *Human Technology*, 18(2), 2022, 191–208. DOI: [10.14254/1795-6889.2022.18-2.5](https://doi.org/10.14254/1795-6889.2022.18-2.5). Licença CC BY-NC 4.0. Cópia: [`halicka-surel-2022-rudy-smart-living.pdf`](halicka-surel-2022-rudy-smart-living.pdf).
+**De onde é.** Polónia. Katarzyna Halicka e Dariusz Surel são da Bialystok University of Technology, em Białystok. O Surel está na escola doutoral. O inquérito foi feito a cidadãos polacos, de todos os voivodatos. A revista é a *Human Technology*, volume 18, número 2, outubro de 2022, páginas 191–208, no sítio ht.csr-pub.eu. O robô Rudy não é polaco: os autores escrevem que essa tecnologia não está à venda na Polónia e que as pessoas a conhecem pela televisão e pela Internet.
+
+Katarzyna Halicka e Dariusz Surel. «Smart living technologies in the context of improving the quality of life for older people: the case of the humanoid Rudy robot». DOI: [10.14254/1795-6889.2022.18-2.5](https://doi.org/10.14254/1795-6889.2022.18-2.5). Licença CC BY-NC 4.0. Cópia: [`halicka-surel-2022-rudy-smart-living.pdf`](halicka-surel-2022-rudy-smart-living.pdf).
 
 Inquérito na Polónia a 1152 pessoas com mais de 40 anos. Não usaram o Rudy. Avaliaram a descrição, fotos e filmes. O Rudy lembra medicamentos, pode doseá-los, monitoriza o paciente à distância, chama ajuda, procura objetos, transporta coisas, propõe jogos, música e dança, e faz companhia.
 
