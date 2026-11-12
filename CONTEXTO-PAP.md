@@ -4,7 +4,7 @@
 > No PC do Pedro a pasta do projeto é `C:\Users\pedro\Desktop\PAP`.
 > Atualizar sempre que houver decisões importantes.
 
-**Última atualização:** 2026-11-12 (corpo: gato de cabeça grande e tronco pequeno, cara no ecrã inteiro)  
+**Última atualização:** 2026-11-12 (arquitetura em `docs/ARQUITETURA.md`; corpo de gato e estudos de visual em `docs/estudos/VISUAL-E-CORPO.md`)
 **Aluno:** Pedro Albuquerque  
 **Curso:** Profissional de Técnico/a de Informática — Sistemas (turma 3-TIS)  
 **Orientador:** Gil Ribeiro  
@@ -73,7 +73,7 @@ Cantar música (reproduzir da biblioteca local), leitura de livros e recomendaç
 
 | Meta | Estado no protótipo |
 |---|---|
-| Conversação e voz | Ficha: [`docs/metas/conversacao-e-voz.md`](docs/metas/conversacao-e-voz.md). Fala natural em português de Portugal, como com uma pessoa: o RIC interpreta a intenção e não depende de uma lista de comandos. Protótipo: chat local; TTS Windows SAPI; STT no browser. Ainda frágeis |
+| Conversação e voz | Ficha: [`docs/metas/conversacao-e-voz.md`](docs/metas/conversacao-e-voz.md). Fala natural em português de Portugal, como com uma pessoa: o RIC interpreta a intenção e não depende de uma lista de comandos. Protótipo novo (`ric/`): Piper TTS nos alertas; botão **Falar** → STT local (faster-whisper); wake-word openWakeWord «RIC» ainda por modelo; LLM a seguir |
 | Lembretes | Ficha: [`docs/metas/lembretes.md`](docs/metas/lembretes.md). Ideal (não feito): na entrega já vêm os lembretes importantes, personalizados à pessoa; os auxiliares de saúde alteram-nos pelo BackOffice. Protótipo: criar, disparar, confirmar e adiar. Não dependem da LLM nem da Internet |
 | Gestão de agenda | Ficha: [`docs/metas/gestao-de-agenda.md`](docs/metas/gestao-de-agenda.md). Ideal (não feito): o RIC tem acesso ao tempo e à agenda da pessoa, anota o que ela quiser (consultas, compromissos) e lembra. Hoje só há lembretes com hora, não uma agenda |
 | Reprodução de músicas | Cantar música é o nome desta meta: reproduzir da biblioteca local. Ficha: [`docs/metas/reproducao-e-canto.md`](docs/metas/reproducao-e-canto.md). Ideal (nuvem não feita): grande biblioteca local de vários géneros, gerida e atualizada pela nuvem, baseada no gosto do utente. Protótipo: biblioteca offline por géneros em `ric/musica/` (pausa, continua, recomeço, volume). A busca automática no BackOffice é ideia por avaliar, não está feita |
@@ -166,32 +166,35 @@ Critérios do que já se consegue demonstrar. As metas da secção 4 que estão 
 
 ---
 
-## 8. Arquitetura atual (direção)
+## 8. Arquitetura (acordada 2026-10-25)
+
+Documento completo: [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md).
 
 ```
-Pessoa  ↔  Tablet/ecrã (rosto, chat, botões)
-                 ↕
-        Cérebro local (PC / NUC / Pi)
-        - Backend de lembretes + memória (SQLite)
-        - Watchdog de lembretes (thread no servidor UI)
-        - LLM local (Ollama)
-        - TTS (Windows SAPI) + STT no browser (forma principal de uso; protótipo ainda frágil)
-                 ↕ (opcional, desligado por defeito)
-        LLM cloud (perguntas complexas)
-                 ↕ (fase extra)
-        Arduino (motores/sensores)
+Pessoa  ↔  Ecrã tactile kiosk (rosto SVG estilo EVE + lab de expressões; texto/botões quando necessário)
+                 ↕  http://127.0.0.1:8787  REST /api/v1 + WS /ws
+        Um processo RIC (Python) — systemd ric.service
+        /home/ric/ric-app  +  /home/ric/ric-data
+        - core + reminders + db (SQLite: lembretes, gostos, 80 msgs+resumo, PIN hash)
+        - voice: openWakeWord («RIC») + Whisper + Piper PT (+ fallback TTS)
+        - llm: Ollama qwen2.5:3b + tools P1 (ler lembretes, música, história, gosto)
+        - music (pastas + catalogo.json) + stories (txt/meta ± áudio)
+        - caregiver (PIN + sessão timeout) + notify (Telegram D1+D3)
+                 ⇣ (só críticos sem confirmação, se houver net)
+        Telegram → cuidador (conteúdo mínimo)
 ```
 
 ### Divisão de responsabilidades
 | Camada | Função |
 |---|---|
-| **Backend** | Lembretes, horários, confirmações, memória estruturada, watchdog |
-| **LLM local** | Conversa, histórias, companhia, tools (agendar/música/perfil) |
-| **LLM cloud** | Só suplente opcional para perguntas difíceis |
-| **Tablet** | Rosto / interface (cliente fino) |
-| **Arduino** | Locomoção/sensores depois — não é obrigatório no MVP de interação |
+| **core + reminders** | Estados, prioridades, lembretes fiáveis (sem LLM) |
+| **LLM local** | Conversa + tools P1; meds só cuidador; histórias geradas = stretch |
+| **voice** | Wake-word, STT, TTS locais; barge-in em conversa |
+| **web** | Rosto (incl. music/story) + UI kiosk bloqueada |
+| **notify** | Telegram na PAP (scheduler, não tool livre do LLM); canal próprio depois |
+| **Arduino / locomoção** | Fora desta PAP |
 
-**Regra de ouro:** segurança e lembretes **não dependem** da LLM nem da internet.
+**Regra de ouro:** lembretes e o núcleo offline **não dependem** da LLM nem da Internet. Legado → `archive/legacy/`; código novo em `ric/` segundo `docs/ARQUITETURA.md`.
 
 ---
 
@@ -200,67 +203,81 @@ Pessoa  ↔  Tablet/ecrã (rosto, chat, botões)
 | Decisão | Estado |
 |---|---|
 | Nome oficial | **RIC** — Robô Interativo Companheiro |
+| Horizonte do plano 2026-10-25 | Só entregável da **PAP**; visão completa documentada à parte |
+| Sucesso da defesa | Companheiro: voz + memória + música + histórias (critério C) |
+| Utilizadores | Idoso (principal); cuidador (PIN local + aviso em falha crítica) |
 | Prioridade | Interação primeiro; locomoção depois |
-| Foco desta PAP | Protótipo do RIC e funcionalidades testáveis. Recolha escolar, TAS/TIS e utentes ficam como visão futura |
-| LLM local principal a testar/usar | **`qwen2.5:3b` via Ollama** (Pedro já testou e achou suficientemente boa) |
-| Qwen com entrada de áudio | Investigado em 2026-10-16. Qwen2-Audio, Qwen2.5-Omni e Qwen3-Omni ouvem áudio. Ficam de fora: não correm no Ollama do protótipo, pedem GPU e o português de Portugal não está medido. Ouvir continua a ser Vosk ou Whisper. Nota em `docs/TABELA-LLMS.md` |
-| Comparação opcional | `llama3.2:3b` / `qwen2.5:1.5b` se PC fraco / `qwen2.5:7b` se PC forte. A AMALIA-9B (pt-PT, Q4 no Ollama) entra no teste a pedido do orientador. Só substitui o Qwen se agendar e couber no PC. Ver `docs/FEEDBACK-ORIENTADOR.md` |
-| Cloud | Opcional, não obrigatória |
-| Servidor UI | **stdlib** `http.server` (sem FastAPI/Docker nesta fase) |
-| Memória | SQLite: tabelas `perfil` + `conversas` (+ `confirmacoes`) |
-| Voz | Forma principal de uso. O navegador (Chrome) envia o áudio à Google: é o estado do protótipo, não a solução da PAP. Audição por fazer no PC: Piper tugão contra `tts-eu-pt`, e faster-whisper `small`. Roteiro: `docs/ROTEIRO-VOZ.md`. Resultado: por medir. Análise: `docs/FEEDBACK-ORIENTADOR.md` |
-| SO preferido em PC reciclado | Linux (quando for formatar) |
-| Braço/garra | Futuro; se existir, via Arduino (não precisa Raspberry só por isso) |
+| Foco desta PAP | Protótipo do RIC. Recolha escolar, TAS/TIS e utentes = visão futura |
+| Hardware UI | PC reciclado + **ecrã tactile** HDMI/DP no mesmo PC |
+| SO do protótipo / demo | **Linux Mint XFCE**; validar tactile em live USB |
+| SO de desenvolvimento | Windows (ou outro) opcional; alvo de execução = Linux do RIC |
+| Disco na máquina RIC | `/home/ric/ric-app/` + `/home/ric/ric-data/` |
+| Rede UI↔cérebro | `http://127.0.0.1:8787` — REST `/api/v1` + WS `/ws` |
+| Arranque | `ric.service` (systemd user) + kiosk XFCE **separado**; saída só com PIN |
+| Offline-first | Núcleo local; Internet só funções opcionais (Telegram críticos, meteo, …) |
+| LLM local | **`qwen2.5:3b` via Ollama**; timeout 8–12 s; core sobe sem Ollama |
+| Qwen com entrada de áudio | Investigado em 2026-10-16. Fica de fora: não corre no Ollama, pede GPU. Nota em `docs/TABELA-LLMS.md` |
+| Comparação opcional | `qwen2.5:7b` se a RAM chegar; `llama3.2:3b` / `qwen2.5:1.5b` se o 3B for fraco. A AMALIA-9B entra no teste a pedido do orientador. Só substitui o Qwen se agendar e couber. Ver `docs/FEEDBACK-ORIENTADOR.md` |
+| Tools LLM P1 | Ler + **criar/apagar** lembretes não médicos; música, história, guardar gosto; **não** meds/críticos; Telegram ≠ tool |
+| Cloud LLM | Não no núcleo |
+| Processo | Um processo Python; UI estática servida pelo mesmo processo |
+| UI Idle | Rosto + relógio + próximo lembrete; mais info sob procura |
+| Rosto no código | Cara **EVE**; estados idle/listening/thinking/speaking/alert/music/story |
+| Corpo físico (2026-11-12) | Gato de cabeça grande e tronco pequeno, parado, sem copiar uma personagem. A cara ocupa o ecrã. Detalhe em `docs/estudos/VISUAL-E-CORPO.md`. Ainda não substitui a EVE no código |
+| Memória | SQLite: lembretes (schema A) + gostos + 80 msgs + 1 resumo + confirmações |
+| Voz | Botão Falar + endpointing ~0,9 s; Whisper local + Piper tugão medium; reply TTS mais rápido que alertas; wake «RIC» ainda por modelo. Roteiro de audição: `docs/ROTEIRO-VOZ.md` |
+| Música | Pastas por género + `catalogo.json` ao arrancar |
+| Histórias | `historias/*.txt` + meta; áudio opcional se existir |
+| Lembretes | Default 3× ~2 min (cuidador altera); pausa/retoma música; críticos → Telegram |
+| Cuidador | PIN 4–6 + hash + bloqueio após ~5 falhas; sessão 2–5 min + aviso 30 s |
+| Telegram | Título + sem confirmação + hora; sem chat/áudio/GPS |
+| Logs | Técnicos por defeito; `RIC_DEBUG=1` para frases; áudio não gravado |
+| Backup | Diário local ~7 dias; cloud só depois com consentimento |
+| Config | `.env` + `config.example.env`; PIN hash no SQLite |
+| Ética | Não diagnostica nem aconselha doses |
+| Código | Legado → `archive/legacy/`; app nova `ric/`; 1.º fatia = lembretes+API+UI |
+| Braço/garra / locomoção | Fora desta PAP |
 | Medir pressão | Lembrete/registo — não diagnóstico médico |
+
+Detalhe completo nível 5: [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md) secção 6.
 
 ---
 
 ## 10. Hardware a explorar
 
-Ordem de interesse para LLM local + autonomia:
+**Padrão PAP (2026-10-25):** PC/laptop reciclado com **Linux Mint XFCE** + ecrã **tactile** (HDMI/DP) + microfone/colunas. Tudo no mesmo equipamento; UI em `127.0.0.1:8787`. Windows não é o SO da demonstração.
 
-1. **Raspberry Pi 5 + AI HAT+ 2** (Hailo-10H) — forte para GenAI local  
-2. **Intel NUC / mini-PC usado** (ideal 16 GB RAM)  
-3. **PC reaproveitado** — usar o máximo possível; se for fraco demais para LLM, reutilizar como UI/backend/apoio  
-4. **Tablet antigo** — rosto/interface. A cara ocupa o ecrã. O corpo que o Pedro quer é um gato de cabeça grande e tronco pequeno, parado, em material reaproveitado, sem copiar uma personagem comercial. Detalhe em [`docs/estudos/VISUAL-E-CORPO.md`](docs/estudos/VISUAL-E-CORPO.md).  
-5. **Arduino** — fase extra (motores/sensores/garra)  
+Ordem de interesse para o «cérebro» (LLM local):
 
-Inventário a preencher: `docs/INVENTARIO-HARDWARE.md`
+1. **PC reaproveitado** com Linux leve e RAM suficiente para Ollama 3B + Whisper pequeno  
+2. **Intel NUC / mini-PC usado** (ideal ≥ 16 GB RAM)  
+3. **Raspberry Pi 5 + AI HAT** — só se o PC falhar e houver justificação  
+4. **Arduino** — fora desta PAP (locomoção)  
 
-Orçamento e ligação do tablet sem Internet: `docs/ORCAMENTO.md`
+Tablet separado **não** é o ecrã principal desta PAP (evita depender de Wi‑Fi local). O corpo físico que o Pedro quer é o gato de [`docs/estudos/VISUAL-E-CORPO.md`](docs/estudos/VISUAL-E-CORPO.md): a cara ocupa o ecrã tactile deste PC.
 
-O inventário deste projeto regista o hardware do protótipo. Não é o registo escolar de equipamentos recolhidos (esse processo ainda não existe).
+Inventário: `docs/INVENTARIO-HARDWARE.md` · Orçamento: `docs/ORCAMENTO.md` · Arquitetura/SO: `docs/ARQUITETURA.md`
 
 ---
 
-## 11. Software / stack atual
+## 11. Software / stack
 
-### Já existente no repositório
-- `ric/` — lembretes + chat + música + memória + UI companheiro
-- Comandos (neste Windows: usar `py`, não `python`):
-  - `py -m ric demo`
-  - `py -m ric run`
-  - `py -m ric ui` ← interface web local (`http://127.0.0.1:8787/`)
-  - `py -m ric add "Tomar medicamento" 18:00 --tipo medicamento`
-  - `py -m ric list`
-  - `py -m ric ok ID`
-  - `py -m ric adiar ID`
-- Dados em `ric/data/ric.db` (local, privado)
-- Guias: `docs/GUIA-LEMBRETES-WINDOWS.md`, `docs/CHECKLIST-REGRESSAO.md`, `docs/GUIAO-DEMO.md`
-- Inventário: `docs/INVENTARIO-HARDWARE.md`
-- Estudo LLM: `docs/TABELA-LLMS.md`
-- Explicações de código: `docs/codigo/`
+### Direção (reescrita)
+- **Linux Mint XFCE** (`ric.service` + kiosk XFCE separado)
+- Python 3 + SQLite + HTTP em `:8787` (rosto + REST + WS) — um processo
+- Ollama + Qwen2.5 3B + tools P1
+- openWakeWord + Whisper + Piper PT (+ fallback TTS sistema)
+- UI: HTML/CSS/JS kiosk bloqueado
+- `notify` Telegram (scheduler D1+D3)
+- Arquitetura: [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md)
 
-### Ferramentas em uso / a usar
-- Python 3 + SQLite + stdlib HTTP
-- Ollama + Qwen2.5 3B
-- TTS local (SAPI no Windows); STT no browser
-- Git para versões
-- **Não** nesta fase: FastAPI/Docker/cloud obrigatória
+### Legado no repositório (a arquivar)
+- `ric/` atual → `archive/legacy/` (referência)
+- `voz-teste/` — experiências Piper
+- Docs de código em `docs/codigo/` — atualizar quando o código novo existir
 
-### Modelos LLM (referência)
-**Locais grátis (Ollama):** Qwen2.5, Llama 3.2, Gemma 2, Phi-3.5, Mistral, SmolLM  
-**Cloud (freemium/pago):** GPT, Claude, Gemini, Groq — só suplente
+### Não nesta PAP
+- React/Next como UI principal, Docker obrigatório, cloud LLM no núcleo, microsserviços, ROS
 
 ---
 
@@ -280,67 +297,54 @@ O processo, as etapas e o tempo estão em [`docs/PLANEAMENTO.md`](docs/PLANEAMEN
 
 Quando o regulamento 2026/27 for aprovado, estas datas podem mudar.
 
-### Etapas
+### Etapas (P1-crono, 2026-10-25)
 
 | Até | Foco |
 |---|---|
-| 23/10/2026 | Só a planificação para aprovarem o projeto. Não se implementa funcionalidade nova |
-| Etapa 1 (08/01/2027) | Voz estável. Conversação por voz, lembretes pedidos em fala livre e avisados em voz, cantar música da biblioteca local, história curta já existente mais um pequeno conjunto de histórias guardadas. Pormenor em [`docs/PLANEAMENTO-ETAPA-1.md`](docs/PLANEAMENTO-ETAPA-1.md) |
-| Etapa 2 (26/03/2027) | Agenda (dia, consulta, compromisso, e a lembrança sai daí) e leitura de livros em voz, com música de ambiente. Livros de domínio público ou com autorização. Vozes diferentes por personagem só se a leitura simples já estiver estável |
-| Etapa 3 (21/05/2027) | Recomendações a partir dos gostos e do que está no robô; meteorologia do dia e da semana; notícias atuais. A previsão guardada para quando cai a Internet fica se a meteorologia em direto já funcionar. Testes, privacidade e limites |
+| 23/10/2026 | Planificação (Anexo I) |
+| Etapa 1 (08/01/2027) | Reescrita + Mint XFCE + 1.ª fatia lembretes/API/UI → voz + Ollama tools |
+| Etapa 2 (26/03/2027) | Música + histórias + gostos/memória + PIN cuidador + meds só cuidador |
+| Etapa 3 (21/05/2027) | Telegram D1+D3 + polish + testes + docs/ética; stretch se sobrar |
 | 18/06/2027 | Relatório |
 | 09/07/2027 | Defesa |
 
-O BackOffice não entra nestas etapas. O foco é o RIC. Um protótipo de envio de dados, se sobrar tempo depois de maio, fica como extra. A estrutura do BackOffice não se desenha agora. Criar histórias novas na hora e a busca automática de músicas no BackOffice são ideias a explorar, não trabalho calendarizado.
+Detalhe: [`docs/PLANEAMENTO.md`](docs/PLANEAMENTO.md) · Arquitetura: [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md).  
+Nota: [`docs/PLANEAMENTO-ETAPA-1.md`](docs/PLANEAMENTO-ETAPA-1.md) ainda descreve o protótipo antigo (2026-10-09); prevalece o P1-crono e a arquitetura de 2026-10-25.
 
-### Fases técnicas (conteúdo, não datas fixas de funcionalidade)
-
-A ordem com datas é a tabela de etapas acima e [`docs/PLANEAMENTO.md`](docs/PLANEAMENTO.md).
-
-**Fase A — Núcleo**  
-Lembretes + LLM local + privacidade local-first + watchdog UI  
-
-**Fase B — Companhia**  
-Histórias, músicas, memória de conversas, UI/rosto, TTS  
-
-**Fase C — Investigação**  
-Comparar LLMs / local vs híbrido; documentar conclusões  
-
-**Fase D — Extra**  
-Locomoção, sensores, cloud opcional e braço. Meteorologia e notícias entram na etapa 3. Atualizações e BackOffice não entram nas etapas; o foco da PAP é o RIC
+BackOffice e canal próprio de monitorização **não** entram como produto nestas etapas. O módulo `notify` fica preparado para os substituir no projeto final.
 
 ---
 
-## 13. Estado atual (2026-10-09)
+## 13. Estado atual (2026-10-25)
 
-- [x] Conceito e objetivos definidos
-- [x] Nome RIC — Robô Interativo Companheiro
-- [x] Visão futura (recolha, Ponto Eletrão, TAS/TIS) separada do âmbito desta PAP
-- [x] Privacidade e reaproveitamento como pilares
-- [x] Ollama instalado no PC do Pedro
-- [x] `qwen2.5:3b` testado — considerado suficientemente bom
-- [x] MVP de lembretes em Python (`ric/`)
-- [x] Interface web local (`py -m ric ui`) — agendar + aviso à hora
-- [x] Chat com Ollama + tools (lembretes + música + perfil)
-- [x] Player offline (pausa / continua / do começo / volume)
-- [x] Watchdog de lembretes no servidor (beep/TTS + log)
-- [x] Perfil + histórico de chat em SQLite
-- [x] UI companheiro (rosto simples, botões grandes, a11y)
-- [x] TTS nos avisos + STT no browser (ainda frágeis; a voz é a forma principal de uso)
-- [x] Docs: checklist, tabela LLM, inventário, guião demo
-- [ ] Preencher medições reais na tabela LLM
-- [ ] Escolher hardware final do cérebro (Pi+HAT / NUC / PC reaproveitado)
-- [ ] Inventário físico preenchido com o que existe em casa
-- [ ] Anexo I (planificação) — texto-base neste ficheiro; formulário da escola ainda por preencher
+- [x] Conceito, nome, visão futura vs PAP
+- [x] Arquitetura níveis 0–5 acordada (`docs/ARQUITETURA.md`)
+- [x] Planeamento P1-crono (`docs/PLANEAMENTO.md`)
+- [x] SO alvo: **Mint XFCE**; Windows só desenvolvimento opcional
+- [x] Detalhe ops: API 8787, schema, voz, kiosk, PIN, tools, backup, ordem de fatias
+- [x] Ollama + `qwen2.5:3b` testados
+- [x] Protótipo legado em `ric/` (a arquivar; não é a base final)
+- [x] Experiências de voz Piper em `voz-teste/`
+- [ ] Instalar/validar Mint XFCE + tactile no PC do protótipo
+- [x] Arquivar legado (`archive/legacy/`) e reescrita iniciada
+- [x] 1.ª fatia: API `:8787` + WS `/ws` + SQLite lembretes + UI Idle (regra 2A)
+- [x] Voz TTS: Piper tugão **medium** (+ SAPI/espeak fallback) nos alertas
+- [x] Voz wake→STT: botão Falar + `VoiceSession` + API `/voice/*` + faster-whisper
+- [x] LLM Ollama `qwen2.5:3b` na conversa por voz (tools: listar/próximo lembrete); openWakeWord «RIC» ainda em falta
+- [ ] Em casa: A/B Piper **tugão quality** vs medium (sem trocar default até decidir)
+- [ ] Wake-word + Whisper + Ollama tools
+- [ ] PIN cuidador → Telegram/música/histórias
+- [ ] Inventário físico + medições LLM reais
+- [ ] Anexo I no formulário da escola (se ainda pendente)
 
 ---
 
 ## 14. Próximo passo
 
-1. Transcrever o rascunho [`docs/ANEXO-I-RASCUNHO.md`](docs/ANEXO-I-RASCUNHO.md) para o formulário oficial do Anexo I (prazo 23/10/2026). O planeamento está em [`docs/PLANEAMENTO.md`](docs/PLANEAMENTO.md)  
-2. Descrever cada meta em `docs/metas/`, com o que o Pedro disser (a conversação e voz já tem ficha)  
-3. Correr `docs/CHECKLIST-REGRESSAO.md` e ensaiar `docs/GUIAO-DEMO.md`  
-4. Preencher `docs/TABELA-LLMS.md` e `docs/INVENTARIO-HARDWARE.md` com dados reais  
+1. Seguir [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md) (§6) e [`docs/PLANEAMENTO.md`](docs/PLANEAMENTO.md)  
+2. Arquivar `ric/` → `archive/legacy/` e criar esqueleto novo  
+3. 1.ª fatia: lembretes + API `:8787` + UI mínima; depois voz; depois extras  
+4. Atualizar fichas em `docs/metas/` quando o comportamento real mudar  
 5. Relatório PAP (ética, custos, limitações, melhorias)
 
 ---
@@ -368,10 +372,12 @@ Locomoção, sensores, cloud opcional e braço. Meteorologia e notícias entram 
 
 ## 17. Pasta do projeto
 
-No PC do Pedro a pasta do projeto é `C:\Users\pedro\Desktop\PAP`. Aí estão `CONTEXTO-PAP.md`, `ric/`, `docs/` e `testar-voz.bat`. Os comandos correm nessa pasta.
+No PC do Pedro a pasta do projeto é `C:\Users\pedro\Desktop\PAP`. Aí estão `CONTEXTO-PAP.md`, `ric/`, `docs/` e `testar-voz.bat`. Os comandos correm nessa pasta.  
+Remoto GitHub: `https://github.com/BarruGumar/PAP-RIC.git`
 
 Ficheiros importantes:
 - `CONTEXTO-PAP.md` ← este ficheiro
-- código `ric/`
-- `docs/` (guias, checklist, demo, inventário, tabela LLM, fichas em `docs/metas/`, explicações de código)
-- diário semanal da PAP
+- `docs/ARQUITETURA.md` ← sistema informático acordado
+- `docs/PLANEAMENTO.md` ← calendário P1-crono
+- `ric/` ← legado a mover para `archive/legacy/`; código novo segundo a arquitetura
+- `docs/` (metas, guias, checklist, demo, inventário, tabela LLM, `docs/codigo/`)

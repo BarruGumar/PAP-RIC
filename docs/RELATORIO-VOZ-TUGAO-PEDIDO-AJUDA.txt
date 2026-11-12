@@ -1,0 +1,104 @@
+Assunto: Pedido de ajuda — qualidade da voz TTS (Piper pt_PT-tugao-medium) no projeto RIC
+
+Aluno: Pedro
+Projeto: RIC (Robotic Interactive Companion) — PAP
+Data: 26/10/2026
+
+--------------------------------------------------------------------------------
+1. Contexto
+--------------------------------------------------------------------------------
+
+No RIC, a voz é a forma principal de interação (utilizador-alvo: pessoa idosa).
+A síntese de voz (TTS) actual é local e offline, com o motor Piper e o modelo
+português europeu:
+
+  pt_PT-tugao-medium.onnx
+
+Este relatório resume os problemas que encontrei ao testar esta voz e o que já
+tentei corrigir. Peço orientação sobre se vale a pena manter o tugão medium,
+passar ao tugão high (se existir e for adequado ao PC), ou estudar outra
+alternativa de TTS em português de Portugal.
+
+--------------------------------------------------------------------------------
+2. Problemas que fui reportando (por ordem)
+--------------------------------------------------------------------------------
+
+1) A voz parecia muito robótica.
+2) Não se entendia bem o que era dito.
+3) Em alguns testes, não se entendia quase nada.
+4) A fala ia demasiado rápida.
+5) Pedi para ficar um pouco mais devagar e mais compreensível.
+6) A fala parecia ter “travadinhas” (cortes / ritmo pouco natural).
+7) O áudio parecia ter eco, ficar um pouco estourado e com ruído.
+8) Depois de ajustes, já se entendia melhor, mas o eco ainda se notava.
+
+--------------------------------------------------------------------------------
+3. Hipóteses que também considerei / mencionei
+--------------------------------------------------------------------------------
+
+A) Passar do tugão medium para o tugão high (se existir e o PC aguentar),
+   na expectativa de melhor qualidade e menos “sabor robótico”.
+
+B) Manter o tugão medium guardado como está (não estragar o que já funciona)
+   e ir testando outras vozes / outros modelos .onnx à parte.
+
+C) Pedir recomendação sobre qual opção faz mais sentido para a PAP:
+   ficar no medium afinado, ir para o high, ou experimentar outra voz pt-PT.
+
+D) Estudar o AMALIA (recomendação do coordenador). Percebi que o AMALIA é
+   sobretudo um LLM em português europeu (e tem reconhecimento de fala),
+   não um motor TTS. A hipótese que levantei foi: se o computador aguentar
+   o AMALIA, será melhor usá-lo na conversa do RIC?
+
+E) Hipótese prática actual (em discussão):
+   - Voz (TTS): Piper (tugão medium por defeito; high ou outras em testes).
+   - Conversa (LLM): manter Qwen no Ollama por agora; só considerar AMALIA
+     se o hardware aguentar e se as “tools” (lembretes, música, etc.)
+     funcionarem bem — porque “aguentar” não significa automaticamente
+     “ser melhor para o RIC”.
+
+--------------------------------------------------------------------------------
+4. O que já foi feito / melhorado
+--------------------------------------------------------------------------------
+
+- Confirmação de que o Piper estava mesmo a ser usado (sem cair para a voz
+  do Windows SAPI, que soava mais robótica).
+- Ajuste de velocidade da fala (mais lenta) e parâmetros do Piper.
+- Normalização do texto falado (pausas mais naturais).
+- Reprodução do áudio pelo browser da UI (em vez do leitor de som do Windows),
+  para reduzir distorção / eco / sobreposição.
+- Controlo de volume e fila de reprodução (evitar dois áudios ao mesmo tempo).
+- O modelo actual (tugão medium) ficou guardado como default.
+- Foi criada uma forma de listar e testar outras vozes .onnx sem substituir
+  o default (pasta de extras + comandos de teste).
+
+Estado actual (resumo):
+- Já se consegue perceber o que é dito.
+- A qualidade ainda não está “natural” o suficiente para o objectivo do RIC
+  (companhia para idosos).
+- Continuo aberto a testar outras vozes / o tugão high, sem perder o medium.
+
+--------------------------------------------------------------------------------
+5. Pedido aos professores
+--------------------------------------------------------------------------------
+
+Gostaria de ajuda / opinião sobre as hipóteses acima e, em concreto:
+
+1) Para um protótipo offline em português europeu, dirigido a idosos,
+   recomendam a hipótese A (tugão high), a B (medium + testes), outra
+   voz TTS local, ou misturar?
+
+2) Conhecem vozes pt-PT open-source (ou de uso escolar) com melhor
+   inteligibilidade e menos “sabor robótico”?
+
+3) Há algum critério técnico simples para decidir (CPU/RAM do PC reciclado,
+   latência, qualidade vs. tamanho do modelo)?
+
+4) Sobre a hipótese D (AMALIA): faz sentido usá-lo na conversa se o PC
+   aguentar, cruzá-lo com Piper na voz (hipótese E), ou sugerem outro
+   caminho?
+
+Agradeço qualquer orientação, referência ou exemplo que possam partilhar.
+
+Obrigado,
+Pedro

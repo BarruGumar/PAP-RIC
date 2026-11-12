@@ -1,0 +1,88 @@
+{
+  "version": 1,
+  "note": "Layout provisório aplicado ao RIC (cara larga + Próximo|Falar lado a lado). Refinar depois.",
+  "canvas": {
+    "w": 390,
+    "h": 720
+  },
+  "blocks": [
+    {
+      "id": "brand",
+      "label": "Marca",
+      "kind": "brand",
+      "x": 14.4,
+      "y": 17.2,
+      "w": 353.2,
+      "h": 71.2,
+      "bg": "#1a2332",
+      "color": "#f2f4f7",
+      "visible": true,
+      "z": 1
+    },
+    {
+      "id": "face",
+      "label": "Cara EVE",
+      "kind": "face",
+      "x": 0,
+      "y": 120.8,
+      "w": 390,
+      "h": 234.4,
+      "bg": "#0b1018",
+      "color": "#5ee7ff",
+      "visible": true,
+      "z": 2
+    },
+    {
+      "id": "next",
+      "label": "Próximo",
+      "kind": "next",
+      "x": 15.2,
+      "y": 398,
+      "w": 160.4,
+      "h": 94,
+      "bg": "#243044",
+      "color": "#f2f4f7",
+      "visible": true,
+      "z": 3
+    },
+    {
+      "id": "talk",
+      "label": "Falar",
+      "kind": "talk",
+      "x": 193.6,
+      "y": 396,
+      "w": 160.4,
+      "h": 94,
+      "bg": "#3d9b8f",
+      "color": "#06221e",
+      "visible": true,
+      "z": 4
+    },
+    {
+      "id": "alert",
+      "label": "Alerta",
+      "kind": "alert",
+      "x": 8,
+      "y": 507.6,
+      "w": 358,
+      "h": 110,
+      "bg": "#3a2418",
+      "color": "#f2f4f7",
+      "visible": true,
+      "z": 5
+    },
+    {
+      "id": "form",
+      "label": "Formulário",
+      "kind": "form",
+      "x": 12,
+      "y": 629.6,
+      "w": 358,
+      "h": 70,
+      "bg": "#243044",
+      "color": "#9aa7b8",
+      "visible": true,
+      "z": 6
+    }
+  ]
+}

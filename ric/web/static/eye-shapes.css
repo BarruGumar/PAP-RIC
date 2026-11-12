@@ -1,0 +1,381 @@
+/* Formas EVE — morph do atributo SVG `d` (Chromium/kiosk).
+   Cada expressão redefine o contorno do olho (círculo → crescente, etc.). */
+
+.eye-shape,
+.eye-bloom,
+.eye-clip-path {
+  transition: d 0.8s cubic-bezier(0.37, 0.05, 0.2, 1);
+}
+
+.eye-shape {
+  fill: url(#eye-fill);
+}
+
+.eye-bloom {
+  fill: var(--eye-tint, #5ad8f0);
+  opacity: 0.5;
+  transition: d 0.8s cubic-bezier(0.37, 0.05, 0.2, 1), fill 0.6s ease, opacity 0.4s ease;
+}
+
+/* ---- calm: oval vertical ---- */
+.face[data-expression="calm"] .eye-shape-l,
+.face[data-expression="calm"] .eye-bloom-l,
+.face[data-expression="calm"] .eye-clip-l {
+  d: path(
+    "M 36,60 C 36,42.3 47.7,28 62,28 C 76.3,28 88,42.3 88,60 C 88,77.7 76.3,92 62,92 C 47.7,92 36,77.7 36,60 Z"
+  );
+}
+
+.face[data-expression="calm"] .eye-shape-r,
+.face[data-expression="calm"] .eye-bloom-r,
+.face[data-expression="calm"] .eye-clip-r {
+  d: path(
+    "M 112,60 C 112,42.3 123.7,28 138,28 C 152.3,28 164,42.3 164,60 C 164,77.7 152.3,92 138,92 C 123.7,92 112,77.7 112,60 Z"
+  );
+}
+
+/* ---- curious: oval um pouco maior / aberto ---- */
+.face[data-expression="curious"] .eye-shape-l,
+.face[data-expression="curious"] .eye-bloom-l,
+.face[data-expression="curious"] .eye-clip-l {
+  d: path(
+    "M 34,58 C 34,38 48,24 62,24 C 76,24 90,38 90,58 C 90,78 76,94 62,94 C 48,94 34,78 34,58 Z"
+  );
+}
+
+.face[data-expression="curious"] .eye-shape-r,
+.face[data-expression="curious"] .eye-bloom-r,
+.face[data-expression="curious"] .eye-clip-r {
+  d: path(
+    "M 110,58 C 110,38 124,24 138,24 C 152,24 166,38 166,58 C 166,78 152,94 138,94 C 124,94 110,78 110,58 Z"
+  );
+}
+
+/* ---- think: semi-cerrado ---- */
+.face[data-expression="think"] .eye-shape-l,
+.face[data-expression="think"] .eye-bloom-l,
+.face[data-expression="think"] .eye-clip-l {
+  d: path(
+    "M 34,60 C 34,50 46,42 62,42 C 78,42 90,50 90,60 C 90,70 78,78 62,78 C 46,78 34,70 34,60 Z"
+  );
+}
+
+.face[data-expression="think"] .eye-shape-r,
+.face[data-expression="think"] .eye-bloom-r,
+.face[data-expression="think"] .eye-clip-r {
+  d: path(
+    "M 114,62 C 114,53 126,46 140,46 C 154,46 164,53 164,62 C 164,71 152,78 138,78 C 124,78 114,71 114,62 Z"
+  );
+}
+
+/* ---- talk: oval suave ---- */
+.face[data-expression="talk"] .eye-shape-l,
+.face[data-expression="talk"] .eye-bloom-l,
+.face[data-expression="talk"] .eye-clip-l {
+  d: path(
+    "M 38,60 C 38,44 49,32 62,32 C 75,32 86,44 86,60 C 86,76 75,88 62,88 C 49,88 38,76 38,60 Z"
+  );
+}
+
+.face[data-expression="talk"] .eye-shape-r,
+.face[data-expression="talk"] .eye-bloom-r,
+.face[data-expression="talk"] .eye-clip-r {
+  d: path(
+    "M 114,60 C 114,44 125,32 138,32 C 151,32 162,44 162,60 C 162,76 151,88 138,88 C 125,88 114,76 114,60 Z"
+  );
+}
+
+/* ---- alert / focus: barras inclinadas (V) ---- */
+.face[data-expression="alert"] .eye-shape-l,
+.face[data-expression="alert"] .eye-bloom-l,
+.face[data-expression="alert"] .eye-clip-l,
+.face[data-expression="focus"] .eye-shape-l,
+.face[data-expression="focus"] .eye-bloom-l,
+.face[data-expression="focus"] .eye-clip-l {
+  d: path(
+    "M 42,46 C 48,40 58,44 78,58 C 86,64 88,72 82,78 C 76,84 58,78 44,64 C 36,56 36,50 42,46 Z"
+  );
+}
+
+.face[data-expression="alert"] .eye-shape-r,
+.face[data-expression="alert"] .eye-bloom-r,
+.face[data-expression="alert"] .eye-clip-r,
+.face[data-expression="focus"] .eye-shape-r,
+.face[data-expression="focus"] .eye-bloom-r,
+.face[data-expression="focus"] .eye-clip-r {
+  d: path(
+    "M 158,46 C 152,40 142,44 122,58 C 114,64 112,72 118,78 C 124,84 142,78 156,64 C 164,56 164,50 158,46 Z"
+  );
+}
+
+.face[data-expression="alert"] {
+  --eye-tint: var(--eye-alert);
+}
+
+.face[data-expression="alert"] .eye-shape {
+  fill: var(--eye-alert);
+}
+
+/* ---- happy: crescentes a sorrir (refs EVE) ---- */
+.face[data-expression="happy"] .eye-shape-l,
+.face[data-expression="happy"] .eye-bloom-l,
+.face[data-expression="happy"] .eye-clip-l {
+  d: path(
+    "M 34,74 C 40,48 50,34 62,34 C 74,34 84,48 90,74 C 82,64 72,56 62,54 C 52,56 42,64 34,74 Z"
+  );
+}
+
+.face[data-expression="happy"] .eye-shape-r,
+.face[data-expression="happy"] .eye-bloom-r,
+.face[data-expression="happy"] .eye-clip-r {
+  d: path(
+    "M 110,74 C 116,48 126,34 138,34 C 150,34 160,48 166,74 C 158,64 148,56 138,54 C 128,56 118,64 110,74 Z"
+  );
+}
+
+/* ---- sad: crescentes invertidos ---- */
+.face[data-expression="sad"] .eye-shape-l,
+.face[data-expression="sad"] .eye-bloom-l,
+.face[data-expression="sad"] .eye-clip-l {
+  d: path(
+    "M 34,46 C 42,56 52,64 62,66 C 72,64 82,56 90,46 C 84,72 74,88 62,88 C 50,88 40,72 34,46 Z"
+  );
+}
+
+.face[data-expression="sad"] .eye-shape-r,
+.face[data-expression="sad"] .eye-bloom-r,
+.face[data-expression="sad"] .eye-clip-r {
+  d: path(
+    "M 110,46 C 118,56 128,64 138,66 C 148,64 158,56 166,46 C 160,72 150,88 138,88 C 126,88 116,72 110,46 Z"
+  );
+}
+
+/* ---- surprised: círculo grande ---- */
+.face[data-expression="surprised"] .eye-shape-l,
+.face[data-expression="surprised"] .eye-bloom-l,
+.face[data-expression="surprised"] .eye-clip-l {
+  d: path(
+    "M 30,60 C 30,40 44,22 62,22 C 80,22 94,40 94,60 C 94,80 80,98 62,98 C 44,98 30,80 30,60 Z"
+  );
+}
+
+.face[data-expression="surprised"] .eye-shape-r,
+.face[data-expression="surprised"] .eye-bloom-r,
+.face[data-expression="surprised"] .eye-clip-r {
+  d: path(
+    "M 106,60 C 106,40 120,22 138,22 C 156,22 170,40 170,60 C 170,80 156,98 138,98 C 120,98 106,80 106,60 Z"
+  );
+}
+
+/* ---- sleepy: linha grossa quase fechada ---- */
+.face[data-expression="sleepy"] .eye-shape-l,
+.face[data-expression="sleepy"] .eye-bloom-l,
+.face[data-expression="sleepy"] .eye-clip-l {
+  d: path(
+    "M 34,58 C 42,50 52,48 62,48 C 72,48 82,50 90,58 C 82,66 72,70 62,70 C 52,70 42,66 34,58 Z"
+  );
+}
+
+.face[data-expression="sleepy"] .eye-shape-r,
+.face[data-expression="sleepy"] .eye-bloom-r,
+.face[data-expression="sleepy"] .eye-clip-r {
+  d: path(
+    "M 110,60 C 118,52 128,50 138,50 C 148,50 158,52 166,60 C 158,68 148,72 138,72 C 128,72 118,68 110,60 Z"
+  );
+}
+
+/* ---- confused: assimétrico ---- */
+.face[data-expression="confused"] .eye-shape-l,
+.face[data-expression="confused"] .eye-bloom-l,
+.face[data-expression="confused"] .eye-clip-l {
+  d: path(
+    "M 34,56 C 34,36 48,24 64,24 C 80,24 92,38 92,58 C 92,78 76,94 58,94 C 44,94 34,76 34,56 Z"
+  );
+}
+
+.face[data-expression="confused"] .eye-shape-r,
+.face[data-expression="confused"] .eye-bloom-r,
+.face[data-expression="confused"] .eye-clip-r {
+  d: path(
+    "M 116,62 C 116,52 126,46 138,46 C 150,46 160,52 160,62 C 160,72 150,80 138,80 C 126,80 116,72 116,62 Z"
+  );
+}
+
+/* ---- wink: esquerdo fechado, direito happy ---- */
+.face[data-expression="wink"] .eye-shape-l,
+.face[data-expression="wink"] .eye-bloom-l,
+.face[data-expression="wink"] .eye-clip-l {
+  d: path(
+    "M 34,60 C 42,56 52,54 62,54 C 72,54 82,56 90,60 C 82,64 72,66 62,66 C 52,66 42,64 34,60 Z"
+  );
+}
+
+.face[data-expression="wink"] .eye-shape-r,
+.face[data-expression="wink"] .eye-bloom-r,
+.face[data-expression="wink"] .eye-clip-r {
+  d: path(
+    "M 110,74 C 116,48 126,34 138,34 C 150,34 160,48 166,74 C 158,64 148,56 138,54 C 128,56 118,64 110,74 Z"
+  );
+}
+
+/* ---- blink: ambos quase fechados (círculo a fechar) ---- */
+.face[data-expression="blink"] .eye-shape-l,
+.face[data-expression="blink"] .eye-bloom-l,
+.face[data-expression="blink"] .eye-clip-l,
+.face.is-blinking .eye-shape-l,
+.face.is-blinking .eye-bloom-l,
+.face.is-blinking .eye-clip-l {
+  /* !important: ganha a qualquer data-expression (senão o piscar automático não fecha) */
+  d: path(
+    "M 34,60 C 42,57 52,56 62,56 C 72,56 82,57 90,60 C 82,63 72,64 62,64 C 52,64 42,63 34,60 Z"
+  ) !important;
+  transition: d 0.12s ease-in !important;
+}
+
+.face[data-expression="blink"] .eye-shape-r,
+.face[data-expression="blink"] .eye-bloom-r,
+.face[data-expression="blink"] .eye-clip-r,
+.face.is-blinking .eye-shape-r,
+.face.is-blinking .eye-bloom-r,
+.face.is-blinking .eye-clip-r {
+  d: path(
+    "M 110,60 C 118,57 128,56 138,56 C 148,56 158,57 166,60 C 158,63 148,64 138,64 C 128,64 118,63 110,60 Z"
+  ) !important;
+  transition: d 0.12s ease-in !important;
+}
+
+.face.is-blinking .eye-shine,
+.face.is-blinking .eye-pupil,
+.face.is-blinking .eye-ring,
+.face[data-expression="blink"] .eye-shine,
+.face[data-expression="blink"] .eye-pupil,
+.face[data-expression="blink"] .eye-ring,
+.face[data-expression="wink"] .eye-wrap-left .eye-shine,
+.face[data-expression="wink"] .eye-wrap-left .eye-pupil,
+.face[data-expression="wink"] .eye-wrap-left .eye-ring,
+.face[data-expression="happy"] .eye-shine,
+.face[data-expression="happy"] .eye-pupil,
+.face[data-expression="happy"] .eye-ring,
+.face[data-expression="sleepy"] .eye-pupil,
+.face[data-expression="sleepy"] .eye-ring,
+.face[data-expression="sleepy"] .eye-shine {
+  opacity: 0 !important;
+}
+
+/* ---- pupil + ring react to expression ---- */
+.face[data-expression="calm"] .eye-pupil {
+  transform: scale(1, 1) translate(0, 0);
+}
+
+.face[data-expression="calm"] .eye-ring {
+  transform: scale(1);
+}
+
+.face[data-expression="curious"] .eye-pupil {
+  transform: scale(1.18, 1.12) translate(0, -1px);
+}
+
+.face[data-expression="curious"] .eye-ring {
+  transform: scale(1.06);
+}
+
+.face[data-expression="think"] .eye-pupil {
+  transform: scale(0.78, 0.62) translate(1px, 2px);
+}
+
+.face[data-expression="think"] .eye-ring {
+  transform: scale(0.92, 0.72);
+}
+
+.face[data-expression="talk"] .eye-pupil {
+  transform: scale(0.96, 0.9) translate(0, 0);
+  animation: pupil-talk 1.3s ease-in-out infinite;
+}
+
+.face[data-expression="talk"] .eye-ring {
+  transform: scale(0.97);
+}
+
+.face[data-expression="alert"] .eye-pupil,
+.face[data-expression="focus"] .eye-pupil {
+  transform: scale(0.72, 0.58) translate(0, -1px);
+}
+
+.face[data-expression="alert"] .eye-pupil-l,
+.face[data-expression="focus"] .eye-pupil-l {
+  transform: scale(0.72, 0.58) translate(2px, 0) rotate(-18deg);
+}
+
+.face[data-expression="alert"] .eye-pupil-r,
+.face[data-expression="focus"] .eye-pupil-r {
+  transform: scale(0.72, 0.58) translate(-2px, 0) rotate(18deg);
+}
+
+.face[data-expression="alert"] .eye-ring,
+.face[data-expression="focus"] .eye-ring {
+  transform: scale(0.88, 0.7);
+  opacity: 0.55;
+}
+
+.face[data-expression="sad"] .eye-pupil {
+  transform: scale(0.82, 0.88) translate(0, 5px);
+}
+
+.face[data-expression="sad"] .eye-ring {
+  transform: scale(0.94, 0.9) translate(0, 2px);
+}
+
+.face[data-expression="surprised"] .eye-pupil {
+  transform: scale(1.42, 1.35) translate(0, 0);
+}
+
+.face[data-expression="surprised"] .eye-ring {
+  transform: scale(1.14);
+}
+
+.face[data-expression="confused"] .eye-pupil-l {
+  transform: scale(1.2, 1.15) translate(-1px, -2px) rotate(-6deg);
+}
+
+.face[data-expression="confused"] .eye-pupil-r {
+  transform: scale(0.7, 0.62) translate(1px, 3px);
+}
+
+.face[data-expression="confused"] .eye-ring-l {
+  transform: scale(1.05);
+}
+
+.face[data-expression="confused"] .eye-ring-r {
+  transform: scale(0.86, 0.72);
+}
+
+.face[data-expression="wink"] .eye-pupil-r {
+  transform: scale(0.92, 0.78) translate(0, 2px);
+}
+
+.face[data-expression="wink"] .eye-ring-r {
+  transform: scale(0.94, 0.82);
+}
+
+@keyframes pupil-talk {
+  0%,
+  100% {
+    transform: scale(0.96, 0.9) translate(0, 0);
+  }
+  50% {
+    transform: scale(1.02, 0.96) translate(0, -0.5px);
+  }
+}
+
+.face[data-expression="talk"] .eye-bloom {
+  animation: talk-glow 1.3s ease-in-out infinite;
+}
+
+.face[data-expression="alert"] .eye-bloom,
+.face[data-expression="focus"] .eye-bloom {
+  animation: alert-soft 1.8s ease-in-out infinite;
+}
+
+.face[data-expression="calm"] .eyes-pair {
+  animation: calm-float 8s ease-in-out infinite;
+}

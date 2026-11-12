@@ -5,13 +5,53 @@ __pycache__/
 venv/
 voz-teste/
 .env
-ric/data/*.db
-ric/data/*.db-*
-# Áudio pessoal (mantém demos .wav e README no git)
-ric/musica/**/*.mp3
-ric/musica/**/*.flac
-ric/musica/**/*.m4a
-ric/musica/**/*.aac
-ric/musica/**/*.ogg
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Runtime data (dev e máquina RIC)
+ric-data/
+*.db
+*.db-*
+
+# Experiências locais / clones acidentais (incham o "Changes")
+voz-teste/
+PAP-RIC/
+inspoImages/
+
+# Áudio pessoal (legado e futuro)
+archive/legacy/ric/musica/**/*.mp3
+archive/legacy/ric/musica/**/*.flac
+archive/legacy/ric/musica/**/*.m4a
+archive/legacy/ric/musica/**/*.aac
+archive/legacy/ric/musica/**/*.ogg
+ric-data/musica/**/*.mp3
+ric-data/musica/**/*.flac
+ric-data/musica/**/*.m4a
+ric-data/musica/**/*.aac
+ric-data/musica/**/*.ogg
+
+# Cursor / ECC harness (manter só as rules do projeto RIC já no git)
+.cursor/.agents/
+.cursor/.pi/
+.cursor/agents/
+.cursor/commands/
+.cursor/hooks/
+.cursor/hooks.json
+.cursor/mcp.json
+.cursor/mcp-configs/
+.cursor/ecc-install-state.json
+.cursor/scripts/
+.cursor/skills/
+.cursor/rules/*
+!.cursor/rules/00-ric-base.mdc
+!.cursor/rules/10-backend-lembretes.mdc
+!.cursor/rules/20-llm-ollama.mdc
+!.cursor/rules/30-ui-tablet.mdc
+!.cursor/rules/40-documentacao-pap.mdc
+!.cursor/rules/50-explicacoes-codigo.mdc
+!.cursor/rules/al-buisnesscentral-development-cursor-rules.mdc
+!.cursor/rules/front-end-cursor-rules.mdc
+
 .DS_Store
 Thumbs.db
