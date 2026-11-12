@@ -27,16 +27,20 @@
 O kiosk **não** inclui editor de layout.  
 Prototipar: [`docs/design/ui-board.html`](../design/ui-board.html) — ver [`docs/design/README.md`](../design/README.md).  
 
-**Layout provisório actual** (JSON em [`docs/design/ric-ui-layout.provisional.json`](../design/ric-ui-layout.provisional.json)):
-- Cara EVE larga / dominante
-- Fila `Próximo` | `Falar` lado a lado
-- Feedback de voz + alerta + formulário por baixo  
-Refinar quando o Pedro fechar a idealização.
+**Ecrã actual:** cara EVE em ecrã inteiro. RIC e relógio ficam por cima. O resto abre com um toque e fecha sozinho ao fim de 8 segundos, ou quando um lembrete está a tocar.
+
+## Ecrã
+
+Em repouso a cara fica ao centro. Por cima, RIC e as horas. Por baixo dos olhos, a frase que o RIC está a dizer.
+
+Um toque abre o resto à volta da cara: o próximo lembrete ao centro em cima, a lista de música à esquerda, e Adicionar em baixo. Outro toque na cara fecha. Sem uso, fecha ao fim de 8 segundos.
+
+Um lembrete a disparar mostra um cartão com o título, a hora e os botões Já fiz e Adiar.
 
 ## Layout (público mais velho)
 
-- **Marca RIC** no topo + relógio  
-- **Botões grandes:** Falar, Já fiz, Adiar  
+- **Marca RIC** e relógio sempre visíveis  
+- **Botões em pastilha:** Falar e Já fiz a azul-claro, Adiar só com contorno, só quando fazem falta  
 - Textos em **pt-PT**; foco visível no teclado  
 
 ## Voz (botão Falar)

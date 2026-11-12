@@ -1,5 +1,9 @@
 (() => {
+  const appEl = document.getElementById("app")
+  const controlsEl = document.getElementById("controls")
   const clockEl = document.getElementById("clock")
+  const CONTROLS_IDLE_MS = 8000
+  let controlsTimer = null
   const faceEl = document.getElementById("face")
   const stateLabelEl = document.getElementById("state-label")
   const nextEl = document.getElementById("next-reminder")
@@ -410,16 +414,41 @@
 
   const showNext = (reminder) => {
     if (!reminder) {
-      nextEl.textContent = "Nenhum lembrete"
+      nextEl.textContent = "Próximo"
       return
     }
-    nextEl.textContent = `${reminder.hora} — ${reminder.titulo}`
+    nextEl.textContent = `Próximo: ${reminder.hora}`
+  }
+
+  const closeControls = () => {
+    window.clearTimeout(controlsTimer)
+    controlsTimer = null
+    controlsEl.hidden = true
+    appEl.classList.remove("is-open")
+    const panel = document.getElementById("create-panel")
+    if (panel) panel.hidden = true
+  }
+
+  const armControlsIdle = () => {
+    window.clearTimeout(controlsTimer)
+    controlsTimer = window.setTimeout(closeControls, CONTROLS_IDLE_MS)
+  }
+
+  const openControls = () => {
+    if (activeAlertId) return
+    controlsEl.hidden = false
+    appEl.classList.add("is-open")
+    armControlsIdle()
   }
 
   const showAlert = (reminder) => {
     activeAlertId = reminder.id
     alertTitle.textContent = reminder.titulo
+    const alertTime = document.getElementById("alert-time")
+    if (alertTime) alertTime.textContent = reminder.hora || ""
     alertPanel.classList.remove("hidden")
+    appEl.classList.add("is-alert")
+    closeControls()
     setFace("alert")
   }
 
@@ -427,6 +456,8 @@
     activeAlertId = null
     stopAlertAudio()
     alertPanel.classList.add("hidden")
+    appEl.classList.remove("is-alert")
+    closeControls()
     setFace("idle")
   }
 
@@ -464,7 +495,7 @@
         if (msg.state === "thinking") {
           const heard = String(heardEl.textContent || "")
           if (!heard.startsWith("Ouvi:") && !heard.startsWith("Ric:")) {
-            heardEl.textContent = "A reconhecer…"
+            heardEl.textContent = "A reconhecer"
           }
         }
       }
@@ -483,12 +514,10 @@
         refreshNext()
       }
       if (msg.type === "transcript" && typeof msg.text === "string") {
-        heardEl.textContent = msg.text
-          ? `Ouvi: ${msg.text}`
-          : "Não percebi. Tenta outra vez."
+        heardEl.textContent = msg.text ? msg.text : "Não percebi"
       }
       if (msg.type === "assistant_reply" && typeof msg.text === "string") {
-        heardEl.textContent = msg.text ? `Ric: ${msg.text}` : heardEl.textContent
+        heardEl.textContent = msg.text || heardEl.textContent
         if (msg.audio_url) {
           playAlertAudio({
             audio_url: msg.audio_url,
@@ -872,6 +901,22 @@
       applyEyeStyle(btn.dataset.eyeStyle || "ring")
     })
   }
+
+  document.getElementById("btn-add").addEventListener("click", () => {
+    const panel = document.getElementById("create-panel")
+    panel.hidden = !panel.hidden
+    if (!panel.hidden) document.getElementById("input-titulo").focus()
+  })
+
+  appEl.addEventListener("click", (event) => {
+    if (activeAlertId) return
+    if (event.target.closest("#controls")) {
+      armControlsIdle()
+      return
+    }
+    if (controlsEl.hidden) openControls()
+    else closeControls()
+  })
 
   applyEyeStyle(readEyeStyle())
   tickClock()

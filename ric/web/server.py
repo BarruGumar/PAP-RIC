@@ -38,6 +38,10 @@ class RicApp:
             piper_bin=settings.piper_bin,
             cache_dir=settings.data_dir / "tts",
             length_scale=settings.piper_length_scale,
+            engine=settings.tts_engine,
+            chatterbox_device=settings.chatterbox_device,
+            chatterbox_audio_prompt=settings.chatterbox_audio_prompt,
+            chatterbox_t3_model=settings.chatterbox_t3_model,
             on_speaking=self._on_speaking,
         )
         self.stt = SpeechToText(

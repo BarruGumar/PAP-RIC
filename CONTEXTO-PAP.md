@@ -222,10 +222,10 @@ Pessoa  ↔  Ecrã tactile kiosk (rosto SVG estilo EVE + lab de expressões; tex
 | Cloud LLM | Não no núcleo |
 | Processo | Um processo Python; UI estática servida pelo mesmo processo |
 | UI Idle | Rosto + relógio + próximo lembrete; mais info sob procura |
-| Rosto no código | Cara **EVE**; estados idle/listening/thinking/speaking/alert/music/story |
-| Corpo físico (2026-11-12) | Gato de cabeça grande e tronco pequeno, parado, sem copiar uma personagem. A cara ocupa o ecrã. Detalhe em `docs/estudos/VISUAL-E-CORPO.md`. Ainda não substitui a EVE no código |
+| Rosto no código | Cara **EVE** no ecrã inteiro. Em repouso só se leem RIC e as horas. Botões ao toque, ou quando um lembrete dispara |
+| Corpo físico (2026-11-12) | Gato de cabeça grande e tronco pequeno, parado, sem copiar uma personagem. Detalhe em `docs/estudos/VISUAL-E-CORPO.md` |
 | Memória | SQLite: lembretes (schema A) + gostos + 80 msgs + 1 resumo + confirmações |
-| Voz | Botão Falar + endpointing ~0,9 s; Whisper local + Piper tugão medium; reply TTS mais rápido que alertas; wake «RIC» ainda por modelo. Roteiro de audição: `docs/ROTEIRO-VOZ.md` |
+| Voz | Botão Falar + endpointing ~0,9 s; Whisper local + Piper tugão medium (default); Chatterbox experimental A/B com ref pt-PT; wake «RIC» ainda por modelo. Roteiro: `docs/ROTEIRO-VOZ.md` |
 | Música | Pastas por género + `catalogo.json` ao arrancar |
 | Histórias | `historias/*.txt` + meta; áudio opcional se existir |
 | Lembretes | Default 3× ~2 min (cuidador altera); pausa/retoma música; críticos → Telegram |
@@ -330,9 +330,11 @@ BackOffice e canal próprio de monitorização **não** entram como produto nest
 - [x] 1.ª fatia: API `:8787` + WS `/ws` + SQLite lembretes + UI Idle (regra 2A)
 - [x] Voz TTS: Piper tugão **medium** (+ SAPI/espeak fallback) nos alertas
 - [x] Voz wake→STT: botão Falar + `VoiceSession` + API `/voice/*` + faster-whisper
-- [x] LLM Ollama `qwen2.5:3b` na conversa por voz (tools: listar/próximo lembrete); openWakeWord «RIC» ainda em falta
+- [x] LLM Ollama `qwen2.5:3b` na conversa por voz (tools: listar/criar/apagar lembretes não médicos); openWakeWord «RIC» ainda em falta
+- [x] Chatterbox experimental (`requirements-chatterbox.txt`, `ric say --engine chatterbox`, A/B `tts-compare`); Piper continua default
 - [ ] Em casa: A/B Piper **tugão quality** vs medium (sem trocar default até decidir)
-- [ ] Wake-word + Whisper + Ollama tools
+- [ ] Decidir Piper vs Chatterbox (e baixar pack pt-PT HF se valer a pena)
+- [ ] Wake-word contínuo «RIC»
 - [ ] PIN cuidador → Telegram/música/histórias
 - [ ] Inventário físico + medições LLM reais
 - [ ] Anexo I no formulário da escola (se ainda pendente)

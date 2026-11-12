@@ -1,39 +1,58 @@
 # `ric/voice/`
 
-## TTS (`tts.py`)
+## TTS (`tts.py` + `chatterbox_engine.py`)
 
-Ordem: **Piper** (modelo PT tugão) → **SAPI** (Windows) → **espeak** (Linux).
+**Default estável: Piper.** Chatterbox é **experimental** e fica separado.
 
-Síntese: API `PiperVoice` → WAV PCM em `ric-data/tts/`.
+Ordem Piper: **Piper** (modelo PT tugão) → **SAPI** (Windows) → **espeak** (Linux).  
+Síntese Piper: API `PiperVoice` → WAV PCM em `ric-data/tts/`.
 
-**Reprodução na UI:** o browser toca o WAV (`audio_url` no evento WS `/ws` ou `GET /api/v1/tts/….wav`). Evita o áudio partido/ininteligível do playback nativo no Windows.
+**Reprodução na UI:** o browser toca o WAV (`audio_url` no evento WS `/ws` ou `GET /api/v1/tts/….wav`).
 
-CLI/`speak()` ainda pode tocar localmente (SoundPlayer / SAPI) como fallback.
-
-Alertas: `Atenção, é a hora de {título}.` (vírgula, **sem** ponto a meio — evita travadinha) · `length_scale` default **1.35**.  
-Respostas de conversa (`stem="reply"`): ritmo mais ágil **1.20** via `length_scale_for_stem`.
-
-Warm-up no arranque: carrega o ONNX e sintetiza «Olá.» uma vez (evita 1.ª resposta fria).
+Alertas: `Atenção, é a hora de {título}.` · `length_scale` default **1.35**.  
+Respostas (`stem="reply"`): ritmo **1.20** via `length_scale_for_stem`.
 
 ```text
 py -m pip install piper-tts
-# ou: .\testar-voz.ps1  (cria voz-teste\.venv com Piper + modelo)
 ```
 
-**Default guardado:** `ric-data/vozes/pt_PT-tugao-medium.onnx` (não substituir por agora).  
+**Default guardado:** `ric-data/vozes/pt_PT-tugao-medium.onnx` (não substituir por agora).
 
-**Backlog (em casa):** o Pedro encontrou **tugão quality** (qualidade superior) na página do Piper. Descarregar para `extras/`, comparar com medium via `say`, e só então decidir se muda o default. Ver [`docs/PLANEAMENTO.md`](../PLANEAMENTO.md).
+### Chatterbox experimental (pt-PT)
 
-**Testar outras:** meter `.onnx` em `ric-data/vozes/extras/` e:
+Pacote opcional — **não** entra no `requirements.txt` principal:
+
+```text
+python -m pip install -r requirements-chatterbox.txt
+py -m ric tts-compare --play
+py -m ric say "Olá, eu sou o RIC." --engine chatterbox
+```
+
+- Objectivo: português de **Portugal** (não BR). O modelo genérico com `language_id=pt` tende a sotaque brasileiro.
+- Por defeito usa referência oficial pt-PT (`ric-data/vozes/extras/pt_pt_ref.wav`, descarregada à primeira).
+- Pack dedicado `ResembleAI/Chatterbox-Multilingual-pt-pt` quando estiver no cache HF; senão fallback: base + referência Portugal.
+- UI experimental: `RIC_TTS_ENGINE=chatterbox` no `.env` (volta a `piper` para o default).
+- Clonagem zero-shot (opção escolhida): `py -m ric record-ref` ou `RIC_CHATTERBOX_AUDIO_PROMPT=…wav`.
+- Fine-tune/LoRA: possível mas fora do caminho crítico da PAP.
+- 1.ª corrida descarrega pesos HF (~GB); GPU ajuda; CPU é lenta.
+- Se aparecer `LlamaModel` / `torchvision::nms`: reinstalar trio alinhado (ver `requirements-chatterbox.txt`).
+
+### Comparar Piper vs Chatterbox
+
+```text
+py -m ric tts-compare "Atenção, é a hora de beber água." --play
+```
+
+WAV em `ric-data/tts/compare/`. Critérios: naturalidade pt-PT, clareza, latência.
+
+**Backlog Piper:** tugão quality em `extras/` (ver [`PLANEAMENTO.md`](../PLANEAMENTO.md)).
 
 ```text
 py -m ric voices
-py -m ric say "Atenção, é a hora de beber água." --model extras/OUTRA.onnx
+py -m ric say "…" --model extras/OUTRA.onnx
 ```
 
-Para a UI usar outra voz só temporariamente: `RIC_PIPER_MODEL=...` no `.env`; para voltar, remove essa linha.
-
-Reinicia `py -m ric ui` depois de instalar. Confirma em `/api/v1/health` → `voice.engine` deve ser `"piper"`.
+Health: `/api/v1/health` → `voice.engine` / `voice.engine_requested` / `voice.chatterbox`.
 
 ## Wake (`wake.py`)
 

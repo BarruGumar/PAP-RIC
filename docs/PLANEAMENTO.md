@@ -64,11 +64,13 @@ Ver [`ARQUITETURA.md`](ARQUITETURA.md) §6.11.
 ### Backlog de voz (quando o Pedro estiver em casa)
 
 - **Agora (não mudar):** default TTS = Piper **tugão medium** (`pt_PT-tugao-medium.onnx`).
-- **A testar:** variante **tugão quality** (ou qualidade superior) que o Pedro viu na página do Piper — descarregar para `ric-data/vozes/extras/`, ouvir lado a lado com `py -m ric say "…" --model extras/…`, e só depois decidir se passa a default.
-- Critérios: naturalidade em pt-PT, latência no PC reciclado, tamanho do modelo.
-- Até essa decisão, **não substituir** o medium na UI / `ric-data/vozes/`.
+- **A testar (Piper):** variante **tugão quality** em `ric-data/vozes/extras/` via `py -m ric say "…" --model extras/…`.
+- **A testar (experimental):** **Chatterbox** pt-PT — `requirements-chatterbox.txt`, `py -m ric tts-compare --play`, `py -m ric say "…" --engine chatterbox`. Referência oficial Portugal; pack HF quando o cache estiver completo.
+- **Voz própria:** clonagem zero-shot (`record-ref` / `--prompt`); fine-tune fora do caminho crítico.
+- Critérios: naturalidade em pt-PT (não BR), clareza para idoso, latência no PC reciclado, tamanho/RAM.
+- Até decisão, **não substituir** o Piper medium na UI.
 
 ### Fatia voz wake→STT→LLM (estado)
 
-- Feito: botão **Falar**, Whisper STT, `VoiceSession`, API `/voice/*`, Ollama `qwen2.5:3b` + tools ler lembretes, resposta em Piper.
-- Em falta: modelo openWakeWord «RIC» + microfone contínuo; mais tools P1 (música/história/gosto); cuidador PIN.
+- Feito: botão **Falar**, Whisper STT, `VoiceSession`, API `/voice/*`, Ollama `qwen2.5:3b` + tools ler/criar/apagar lembretes não médicos, resposta em Piper; A/B Chatterbox experimental.
+- Em falta: modelo openWakeWord «RIC» + microfone contínuo; mais tools P1 (música/história/gosto); cuidador PIN; decisão Piper vs Chatterbox.
