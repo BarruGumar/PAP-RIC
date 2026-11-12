@@ -63,8 +63,30 @@ def test_status_keys() -> None:
     status = voice.status()
     assert "piper" in status
     assert "engine" in status
+    assert "chatterbox" in status
     assert "wake" not in status
     assert "stt" not in status
+
+
+def test_normalize_tts_engine() -> None:
+    from ric.voice.tts import normalize_tts_engine
+
+    assert normalize_tts_engine(None) == "piper"
+    assert normalize_tts_engine("chatterbox") == "chatterbox"
+    assert normalize_tts_engine("experimental") == "chatterbox"
+
+
+def test_synthesize_alert_routes_to_chatterbox(tmp_path, monkeypatch) -> None:
+    class FakeCb:
+        def synthesize_file(self, texto: str, out_path) -> bool:
+            out_path.write_bytes(b"RIFF" + b"\x00" * 60)
+            return True
+
+    voice = VoiceService(backends=[], engine="piper", cache_dir=tmp_path)
+    monkeypatch.setattr(voice, "_ensure_chatterbox", lambda: FakeCb())
+    path = voice.synthesize_alert("Olá", stem="cmp", engine="chatterbox")
+    assert path is not None
+    assert "chatterbox" in path.name
 
 
 def test_length_scale_for_stem_reply_is_faster_than_base() -> None:
