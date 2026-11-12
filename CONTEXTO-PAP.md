@@ -4,7 +4,7 @@
 > No PC do Pedro a pasta do projeto é `C:\Users\pedro\Desktop\PAP`.
 > Atualizar sempre que houver decisões importantes.
 
-**Última atualização:** 2026-11-12 (estudos de visual e corpo em `docs/estudos/VISUAL-E-CORPO.md`)  
+**Última atualização:** 2026-11-12 (corpo: gato de cabeça grande e tronco pequeno, cara no ecrã inteiro)  
 **Aluno:** Pedro Albuquerque  
 **Curso:** Profissional de Técnico/a de Informática — Sistemas (turma 3-TIS)  
 **Orientador:** Gil Ribeiro  
@@ -222,7 +222,7 @@ Ordem de interesse para LLM local + autonomia:
 1. **Raspberry Pi 5 + AI HAT+ 2** (Hailo-10H) — forte para GenAI local  
 2. **Intel NUC / mini-PC usado** (ideal 16 GB RAM)  
 3. **PC reaproveitado** — usar o máximo possível; se for fraco demais para LLM, reutilizar como UI/backend/apoio  
-4. **Tablet antigo** — rosto/interface. Os estudos em [`docs/estudos/VISUAL-E-CORPO.md`](docs/estudos/VISUAL-E-CORPO.md) pedem uma cara redonda e abstrata, à altura de quem está sentado. O corpo, se houver, é um suporte parado. Braços, pernas e um humanoide realista ficam de fora.  
+4. **Tablet antigo** — rosto/interface. A cara ocupa o ecrã. O corpo que o Pedro quer é um gato de cabeça grande e tronco pequeno, parado, em material reaproveitado, sem copiar uma personagem comercial. Detalhe em [`docs/estudos/VISUAL-E-CORPO.md`](docs/estudos/VISUAL-E-CORPO.md).  
 5. **Arduino** — fase extra (motores/sensores/garra)  
 
 Inventário a preencher: `docs/INVENTARIO-HARDWARE.md`

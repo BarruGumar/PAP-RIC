@@ -58,6 +58,19 @@ Critérios mais importantes para os inquiridos: técnicos (76,8 %) e procura da 
 
 O RIC não diagnostica, não mede a saúde, não deteta quedas e não avisa familiares. Essas funções do Rudy ficam de fora. O que se aproveita é o resto: interação, entretenimento, uso simples, e um corpo que não dependa de peças caras. Reaproveitar o tablet e o PC responde ao critério ecológico e ao medo de avarias.
 
+## Corpo escolhido pelo Pedro (2026-11-12)
+
+A referência de proporção é um gato de cabeça enorme e corpo pequeno: orelhas, cachecol, cauda, tronco curto e pernas curtas. As imagens que o Pedro mostrou são de uma personagem comercial. O corpo do RIC não copia essa personagem, o cachecol amarelo nem o cinto. Copia-se a proporção, que encaixa nos estudos: cabeça redonda, corpo que não é humano, leitura de animal de companhia.
+
+Como se monta, parado, com material reaproveitado:
+
+- A cabeça é o tablet na vertical. O ecrã é a cara inteira. À volta, uma moldura escura e redonda, com duas orelhas.
+- O tronco fica por baixo e é mais baixo do que a cabeça. Pode ser espuma, cartão ou tecido, cosido ou colado, sem motores.
+- Os braços, se existirem, são peça fixa. Não agarram nem gesticulam.
+- A cauda é uma curva fixa, para o lado.
+- Um pano ao pescoço usa a cor do RIC, o verde-água do ecrã, para o conjunto ser o companheiro do projeto.
+- A altura do ecrã fica à altura dos olhos de quem está sentado.
+
 ## O que isto muda no visual
 
 O protótipo já tem um rosto redondo, olhos e boca, em `ric/web/index.html` (estados a ouvir, a pensar e a avisar). Os estudos pedem que esse rosto continue a ser o centro, e que o corpo não compita com ele.
@@ -66,7 +79,7 @@ Nesta PAP o corpo, se existir, é um suporte parado:
 
 - O ecrã é a cabeça. Tablet reaproveitado, na vertical, à altura de quem está sentado. O Pepper usa cerca de 120 cm como referência de conversa, não como medida obrigatória.
 - A cara é abstrata: círculo, dois olhos, uma boca. Sem fotografia de pessoa, sem pele, sem dentes.
-- O corpo à volta do ecrã pode ser uma caixa, um candeeiro velho ou um suporte de monitor. Lê-se como objeto de casa, não como manequim.
+- O corpo à volta do ecrã é o gato pequeno descrito acima: cabeça grande, tronco curto, cauda fixa. Lê-se como animal de companhia, não como manequim.
 - Braços, pernas, rodas e dança não entram. O artigo do Rudy mostra que isso existe noutros robôs e que as pessoas temem a complexidade técnica.
 
 O ecrã, quando se trabalhar o visual, mantém texto grande, poucos controlos e o alerta do lembrete por cima da conversa. O rosto muda de estado quando ouve, pensa ou avisa, para se perceber que está presente sem precisar de um corpo que se mexa.
