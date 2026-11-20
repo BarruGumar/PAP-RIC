@@ -64,7 +64,7 @@ A referência de proporção é um gato de cabeça enorme e corpo pequeno: orelh
 
 Como se monta, parado, com material reaproveitado:
 
-- A cabeça é o tablet na vertical. O ecrã é a cara inteira. À volta, uma moldura escura e redonda, com duas orelhas.
+- A cabeça é o **ecrã tactile** do NUC5i3RYH (não um tablet à parte). O ecrã é a cara inteira. À volta, uma moldura escura e redonda, com duas orelhas.
 - O tronco fica por baixo e é mais baixo do que a cabeça. Pode ser espuma, cartão ou tecido, cosido ou colado, sem motores.
 - Os braços, se existirem, são peça fixa. Não agarram nem gesticulam.
 - A cauda é uma curva fixa, para o lado.
@@ -77,7 +77,7 @@ O protótipo já tem um rosto redondo, olhos e boca, em `ric/web/index.html` (es
 
 Nesta PAP o corpo, se existir, é um suporte parado:
 
-- O ecrã é a cabeça. Tablet reaproveitado, na vertical, à altura de quem está sentado. O Pepper usa cerca de 120 cm como referência de conversa, não como medida obrigatória.
+- O ecrã é a cabeça. Ecrã tactile no NUC, na vertical, à altura de quem está sentado. O Pepper usa cerca de 120 cm como referência de conversa, não como medida obrigatória.
 - A cara é abstrata: círculo, dois olhos, uma boca. Sem fotografia de pessoa, sem pele, sem dentes.
 - O corpo à volta do ecrã é o gato pequeno descrito acima: cabeça grande, tronco curto, cauda fixa. Lê-se como animal de companhia, não como manequim.
 - Braços, pernas, rodas e dança não entram. O artigo do Rudy mostra que isso existe noutros robôs e que as pessoas temem a complexidade técnica.

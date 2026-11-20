@@ -1,45 +1,53 @@
 # Orçamento — RIC (PAP)
 
 **Aluno:** Pedro Albuquerque  
-**Data:** 2026-10-09  
-**Inventário:** [`docs/INVENTARIO-HARDWARE.md`](INVENTARIO-HARDWARE.md)
+**Atualizado:** 2026-11-20  
+**Inventário:** [`INVENTARIO-HARDWARE.md`](INVENTARIO-HARDWARE.md)
 
 ## 1. Princípio
 
-Reaproveitar primeiro. Não há compras decididas. O inventário ainda não lista o que existe em casa: a tabela está por preencher. Os valores abaixo são ordens de grandeza de material usado. O Pedro corrige-os quando disser o que já tem.
+Reaproveitar primeiro. A máquina principal (**NUC5i3RYH**) já existe. Compras previstas: expansão de RAM; ecrã tactile, microfone e colunas só se não forem emprestados. Software livre = 0 €.
 
-## 2. Ligação PC–tablet sem Internet
+## 2. Hardware escolhido
 
-A interface é uma página web. O servidor, em `ric/web_server.py`, escuta em `127.0.0.1` na porta `8787`. Essa morada é só o próprio PC: um tablet na rede não a alcança.
+| Peça | Escolha |
+|---|---|
+| Cérebro | Intel NUC5i3RYH (i3-5010U), reaproveitado → 16 GB RAM |
+| Reserva | NUC DN2820FYK — não entra no custo da demo |
+| UI | Ecrã tactile no mesmo NUC (`127.0.0.1:8787`) |
+| Áudio | Microfone + colunas separados |
+| SO | Linux Mint XFCE (livre) |
 
-Processo necessário, ainda por fazer no código:
+Tablet à parte e Raspberry Pi **não** entram neste orçamento.
 
-1. O PC e o tablet ficam na mesma rede local, sem Internet: ponto de acesso do Windows, ou um router sem ligação WAN.
-2. O tablet abre `http://IP-do-PC:8787` no browser.
-3. Para isso o servidor terá de escutar na rede local, e não só em `127.0.0.1`.
+## 3. Tabela C3 (pré-projeto)
 
-Este passo fica descrito. O código não se altera aqui.
+Valores aproximados de material usado / acessórios em Portugal (2026). Mesmo a 0 €, o item aparece na tabela.
 
-## 3. O que dá para usar do tablet nesta etapa
-
-| Parte do tablet | Nesta etapa | Notas |
+| Item | Possui / Adquirir | Custo aprox. (€) |
 |---|---|---|
-| Ecrã | Sim | O browser mostra o rosto, o texto e os botões |
-| Altifalantes, para a música | Sim | A página pede o áudio ao PC e o tablet reproduz |
-| Voz do RIC (TTS) | Continua no PC | Como em [`docs/PLANEAMENTO-ETAPA-1.md`](PLANEAMENTO-ETAPA-1.md). Passar a fala para as colunas do tablet é outro estudo |
-| Microfone | O do PC | O reconhecimento offline (Vosk ou Whisper) corre no PC. O microfone do tablet não chega lá sozinho. Enviar o áudio do tablet pela rede local fica como possibilidade depois, fora do custo e do trabalho de janeiro |
-| Câmara | Fora | O tablet pode tê-la. A etapa 1 não a usa e não entra no orçamento |
+| Intel NUC5i3RYH (cérebro) | Já possui — reaproveitado | 0 |
+| Intel NUC DN2820FYK (reserva) | Já possui — não é cérebro | 0 |
+| RAM 2×8 GB DDR3L-1600 1,35 V SO-DIMM | Adquirir | 35–50 |
+| SSD (se o NUC ainda não tiver) | Verificar; comprar usado se faltar | 0–40 |
+| Ecrã tactile HDMI/DP | Emprestar **ou** comprar usado | 0–80 |
+| Microfone USB | Emprestar **ou** comprar | 0–20 |
+| Colunas / altifalante | Emprestar **ou** comprar | 0–25 |
+| Cabos HDMI/DP + alimentação NUC | Já possui / a confirmar | 0–15 |
+| Materiais corpo mínimo (estrutura parada) | Reaproveitar / baixo custo | 0–30 |
+| Software (Mint, Python, Ollama, Piper, Whisper) | Livre / open source | 0 |
+| **Total se ecrã+áudio forem emprestados** | | **≈ 35–90** |
+| **Total teto (compra do que faltar)** | | **≈ 70–230** |
 
-## 4. Três cenários
+Para o formulário do pré-projeto: usar o **teto ≈ 230 €** como previsão máxima, e notar que o cenário preferido (empréstimos) fica perto de **35–90 €** (essencialmente a RAM).
 
-Euros aproximados de material usado.
+## 4. O que não se compra nesta PAP
 
-| Cenário | O que entra | Ordem de grandeza |
-|---|---|---|
-| Zero euros | PC que já corre o Ollama, tablet antigo com browser, microfone e colunas que já existam. Software sem licença: Python, Ollama, SQLite e voz local | 0 € |
-| Só o que faltar | Tablet usado simples, se não houver nenhum; microfone USB, se o PC não tiver. Teto desta PAP enquanto o reaproveitado chegar | Tablet 40–80 €; microfone 10–20 €; total abaixo de 100 € |
-| Não comprar agora | Raspberry Pi 5 e AI HAT. Só se o PC não aguentar a voz e o modelo ao mesmo tempo, e com justificação no inventário | Fora deste orçamento |
+- Raspberry Pi 5 / AI HAT  
+- Arduino / motores / locomoção  
+- GPU dedicada  
+- Licenças de software comercial para o núcleo  
 
-## 5. Pré-projeto
+## 5. Atualização
 
-O campo de orçamento do pré-projeto Word fica por preencher até o Pedro confirmar o que já tem.
+Corrigir os valores quando o Pedro confirmar: RAM atual no NUC5i3RYH, se há SSD, e se ecrã/mic/colunas são emprestados ou comprados.

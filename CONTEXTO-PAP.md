@@ -4,7 +4,7 @@
 > No PC do Pedro a pasta do projeto é `C:\Users\pedro\Desktop\PAP`.
 > Atualizar sempre que houver decisões importantes.
 
-**Última atualização:** 2026-11-12 (Chatterbox descartado; Piper TTS; UI kiosk com próximo lembrete sempre visível; próximo: wake-word «RIC»)
+**Última atualização:** 2026-11-20 (hardware fechado: NUC5i3RYH; MVP + correções pré-projeto Gil; Chatterbox removido)
 **Aluno:** Pedro Albuquerque  
 **Curso:** Profissional de Técnico/a de Informática — Sistemas (turma 3-TIS)  
 **Orientador:** Gil Ribeiro  
@@ -34,7 +34,7 @@ O RIC usa, sempre que possível, equipamentos eletrónicos e periféricos recicl
 
 ### 2.1 Nesta PAP
 
-O foco é **desenvolver o próprio RIC**: criar e testar o protótipo e as funcionalidades que forem realistas no prazo. Interação, privacidade e reaproveitamento de hardware do próprio projeto vêm primeiro. A locomoção é fase posterior.
+O trabalho desta PAP é **fazer o próprio RIC**: protótipo e funções que caibam no prazo. Vêm primeiro a interação, a privacidade e o hardware reaproveitado do projeto. Locomoção fica para depois.
 
 ### 2.2 Aplicação futura (ainda não existe na escola)
 
@@ -47,17 +47,24 @@ Dois cursos podem ter um papel nesse processo:
 | **TAS** (Técnico Auxiliar de Saúde) | Identificar um utente, avaliar necessidades e indicar soluções ou funcionalidades úteis para esse caso |
 | **TIS** (Técnico de Informática — Sistemas) | Analisar os equipamentos recolhidos, avaliar o estado e decidir o que se reutiliza ou adapta. Os dados dos equipamentos poderão ser registados para facilitar a gestão e a reutilização |
 
-A partir das necessidades e dos equipamentos disponíveis poderão surgir várias soluções tecnológicas. O RIC é **uma** dessas soluções possíveis.
+Com necessidades reais e equipamento disponível, podem aparecer várias soluções. O RIC é **uma** delas.
 
-Este processo **não está implementado**. Não há sistema de recolha com este objetivo, nem utentes integrados no projeto. A colaboração TAS/TIS e o uso do RIC por utentes são visão e aplicação futura, não entregáveis desta PAP.
+Este processo **ainda não existe** na escola: sem recolha com este fim, sem utentes no projeto. TAS/TIS e utentes reais são visão futura, não entregáveis desta PAP.
 
 ---
 
 ## 3. Objetivo geral
 
-Desenvolver e testar o RIC como protótipo de apoio centrado na pessoa e na privacidade, com interação primeiro (companhia + lembretes + memória), autonomia offline sempre que possível, e documentação profissional para a PAP.
+Construir e testar o RIC como protótipo de apoio à pessoa, com privacidade e uso offline sempre que der. A prioridade é interação (companhia, lembretes, memória) e documentação séria para a PAP.
 
-As funcionalidades aprofundam-se uma a uma ao longo do desenvolvimento: como deve funcionar, que recursos precisa e o que cabe no prazo. Não se promete implementar a lista inteira de metas.
+Cada função aprofunda-se à vez: o que faz, o que precisa, o que cabe no prazo. A lista completa de metas não é promessa de entrega.
+
+### 3.1 Skills no Cursor (workflow)
+
+- **Código** (features, bugs, refactors, reviews): usar **Ponytail** (`/ponytail`) — quase sempre. Exceção rara: spike exploratório ou pedido explícito em contrário.
+- **Aprender enquanto faz** (defesa / entender o código): **Learning** (`/learning`) — estilo professor: boilerplate pela IA, decisões e núcleo com `TODO(human)` para o Pedro; uma pergunta de cada vez. Combinar com Ponytail. Desligar com “faz tu” quando quiser velocidade.
+- **Figuras de sistema**: Diagram Design — ver `docs/design/arquitetura-ric.html`.
+- **Prosa** (Anexo, relatório, texto para o orientador): Humanizer. Não reescrever specs técnicas densas (`ARQUITETURA`, tabelas de estado) só por estilo.
 
 ---
 
@@ -65,7 +72,7 @@ As funcionalidades aprofundam-se uma a uma ao longo do desenvolvimento: como dev
 
 Cada meta regista-se em [`docs/metas/`](docs/metas/README.md). A ficha diz o que é, como a pessoa a usa, como o Pedro a idealiza e o que não faz. Conversação e voz, lembretes, gestão de agenda, cantar música (reprodução da biblioteca), contar histórias, leitura de livros, recomendações de entretenimento, meteorologia e notícias, e atualizações e BackOffice já têm ficha. O foco desta PAP é o RIC.
 
-A voz (TTS e STT) é a forma principal de uso, porque a literacia digital de muitos idosos é baixa. Falar e ouvir é uma das melhores formas de interagirem com o RIC. Botões grandes e texto são apoio (quem ouve mal, ou quando o reconhecimento falha). Não substituem a voz.
+Muitos utentes têm pouca literacia digital, por isso a forma principal é falar e ouvir (TTS e STT). Botões grandes e texto são apoio — quem ouve mal, ou quando o reconhecimento falha — e não substituem a voz.
 
 Cantar música (reproduzir da biblioteca local), leitura de livros e recomendações de entretenimento entram nesta PAP até à entrega (18/06/2027). Recolha escolar, Ponto Eletrão, TAS/TIS, utentes, diagnóstico, prescrição, locomoção e braços continuam fora (secção 7). O estado na tabela descreve o protótipo em 2026-10-09.
 
@@ -73,7 +80,7 @@ Cantar música (reproduzir da biblioteca local), leitura de livros e recomendaç
 
 | Meta | Estado no protótipo |
 |---|---|
-| Conversação e voz | Ficha: [`docs/metas/conversacao-e-voz.md`](docs/metas/conversacao-e-voz.md). Fala natural em português de Portugal, como com uma pessoa: o RIC interpreta a intenção e não depende de uma lista de comandos. Protótipo novo (`ric/`): Piper TTS nos alertas; botão **Falar** → STT local (faster-whisper); wake-word openWakeWord «RIC» ainda por modelo; LLM a seguir |
+| Conversação e voz | Ficha: [`docs/metas/conversacao-e-voz.md`](docs/metas/conversacao-e-voz.md). Fala natural em português de Portugal, como com uma pessoa: o RIC interpreta a intenção e não depende de uma lista de comandos. Protótipo novo (`ric/`): Piper TTS; botão **Falar** + wake contínuo openWakeWord (alvo **«ei RIC»**; agora temporário `hey_jarvis`); STT faster-whisper; LLM Ollama |
 | Lembretes | Ficha: [`docs/metas/lembretes.md`](docs/metas/lembretes.md). Ideal (não feito): na entrega já vêm os lembretes importantes, personalizados à pessoa; os auxiliares de saúde alteram-nos pelo BackOffice. Protótipo: criar, disparar, confirmar e adiar. Não dependem da LLM nem da Internet |
 | Gestão de agenda | Ficha: [`docs/metas/gestao-de-agenda.md`](docs/metas/gestao-de-agenda.md). Ideal (não feito): o RIC tem acesso ao tempo e à agenda da pessoa, anota o que ela quiser (consultas, compromissos) e lembra. Hoje só há lembretes com hora, não uma agenda |
 | Reprodução de músicas | Cantar música é o nome desta meta: reproduzir da biblioteca local. Ficha: [`docs/metas/reproducao-e-canto.md`](docs/metas/reproducao-e-canto.md). Ideal (nuvem não feita): grande biblioteca local de vários géneros, gerida e atualizada pela nuvem, baseada no gosto do utente. Protótipo: biblioteca offline por géneros em `ric/musica/` (pausa, continua, recomeço, volume). A busca automática no BackOffice é ideia por avaliar, não está feita |
@@ -176,7 +183,7 @@ Pessoa  ↔  Ecrã tactile kiosk (rosto SVG estilo EVE + lab de expressões; tex
         Um processo RIC (Python) — systemd ric.service
         /home/ric/ric-app  +  /home/ric/ric-data
         - core + reminders + db (SQLite: lembretes, gostos, 80 msgs+resumo, PIN hash)
-        - voice: openWakeWord («RIC») + Whisper + Piper PT (+ fallback TTS)
+        - voice: openWakeWord («ei RIC») + Whisper + Piper PT (+ fallback TTS)
         - llm: Ollama qwen2.5:3b + tools P1 (ler lembretes, música, história, gosto)
         - music (pastas + catalogo.json) + stories (txt/meta ± áudio)
         - caregiver (PIN + sessão timeout) + notify (Telegram D1+D3)
@@ -208,7 +215,11 @@ Pessoa  ↔  Ecrã tactile kiosk (rosto SVG estilo EVE + lab de expressões; tex
 | Utilizadores | Idoso (principal); cuidador (PIN local + aviso em falha crítica) |
 | Prioridade | Interação primeiro; locomoção depois |
 | Foco desta PAP | Protótipo do RIC. Recolha escolar, TAS/TIS e utentes = visão futura |
-| Hardware UI | PC reciclado + **ecrã tactile** HDMI/DP no mesmo PC |
+| Hardware cérebro | **Intel NUC5i3RYH** (i3-5010U) reaproveitado → **16 GB** DDR3L; DN2820FYK só reserva |
+| Hardware UI | Ecrã **tactile** HDMI/DP no mesmo NUC (sem tablet à parte) |
+| Função única júri | **Lembretes offline** (criar → disparar → Já fiz / Adiar) |
+| MVP desta PAP | Voz offline PT + lembretes (sem LLM) + memória mínima + UI kiosk; resto = extra |
+| Pré-projeto (correções Gil) | Textos em [`docs/CORRECOES-PRE-PROJETO.md`](docs/CORRECOES-PRE-PROJETO.md) |
 | SO do protótipo / demo | **Linux Mint XFCE**; validar tactile em live USB |
 | SO de desenvolvimento | Windows (ou outro) opcional; alvo de execução = Linux do RIC |
 | Disco na máquina RIC | `/home/ric/ric-app/` + `/home/ric/ric-data/` |
@@ -225,7 +236,7 @@ Pessoa  ↔  Ecrã tactile kiosk (rosto SVG estilo EVE + lab de expressões; tex
 | Rosto no código | Cara **EVE** no ecrã inteiro. Em repouso: RIC, horas e **próximo lembrete**. Botões ao toque, ou quando um lembrete dispara |
 | Corpo físico (2026-11-12) | Gato de cabeça grande e tronco pequeno, parado, sem copiar uma personagem. Detalhe em `docs/estudos/VISUAL-E-CORPO.md` |
 | Memória | SQLite: lembretes (schema A) + gostos + 80 msgs + 1 resumo + confirmações |
-| Voz | Botão Falar + endpointing ~0,9 s; Whisper local + Piper tugão medium; wake «RIC» ainda por modelo. Roteiro: `docs/ROTEIRO-VOZ.md`. Chatterbox descartado (pesado demais para o hardware da PAP) |
+| Voz | Botão Falar + wake contínuo (openWakeWord; alvo **«ei RIC»**; temporário `hey jarvis`) + endpointing ~0,9 s; Whisper + Piper tugão medium **1.5.0**. Chatterbox descartado |
 | Música | Pastas por género + `catalogo.json` ao arrancar |
 | Histórias | `historias/*.txt` + meta; áudio opcional se existir |
 | Lembretes | Default 3× ~2 min (cuidador altera); pausa/retoma música; críticos → Telegram |
@@ -243,20 +254,16 @@ Detalhe completo nível 5: [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md) secção
 
 ---
 
-## 10. Hardware a explorar
+## 10. Hardware (fechado 2026-11-20)
 
-**Padrão PAP (2026-10-25):** PC/laptop reciclado com **Linux Mint XFCE** + ecrã **tactile** (HDMI/DP) + microfone/colunas. Tudo no mesmo equipamento; UI em `127.0.0.1:8787`. Windows não é o SO da demonstração.
+**Cérebro:** Intel **NUC5i3RYH** (Core i3-5010U), reaproveitado, expansão a **16 GB** DDR3L-1600 SO-DIMM.  
+**Reserva:** NUC **DN2820FYK** (Celeron N2820) — não sustenta LLM + STT juntos; não é a demo.  
+**UI / áudio:** ecrã **tactile** no mesmo NUC + microfone e colunas (emprestar ou comprar).  
+**SO:** **Linux Mint XFCE**; UI em `127.0.0.1:8787`. Windows só no PC de desenvolvimento.  
+**Corpo mínimo:** estrutura parada tipo gato — [`docs/estudos/VISUAL-E-CORPO.md`](docs/estudos/VISUAL-E-CORPO.md).  
+**Fora:** Raspberry Pi / AI HAT (só se o NUC falhar, com justificação); Arduino / locomoção.
 
-Ordem de interesse para o «cérebro» (LLM local):
-
-1. **PC reaproveitado** com Linux leve e RAM suficiente para Ollama 3B + Whisper pequeno  
-2. **Intel NUC / mini-PC usado** (ideal ≥ 16 GB RAM)  
-3. **Raspberry Pi 5 + AI HAT** — só se o PC falhar e houver justificação  
-4. **Arduino** — fora desta PAP (locomoção)  
-
-Tablet separado **não** é o ecrã principal desta PAP (evita depender de Wi‑Fi local). O corpo físico que o Pedro quer é o gato de [`docs/estudos/VISUAL-E-CORPO.md`](docs/estudos/VISUAL-E-CORPO.md): a cara ocupa o ecrã tactile deste PC.
-
-Inventário: `docs/INVENTARIO-HARDWARE.md` · Orçamento: `docs/ORCAMENTO.md` · Arquitetura/SO: `docs/ARQUITETURA.md`
+Inventário + comparação dos NUCs: [`docs/INVENTARIO-HARDWARE.md`](docs/INVENTARIO-HARDWARE.md) · Orçamento C3: [`docs/ORCAMENTO.md`](docs/ORCAMENTO.md) · Correções pré-projeto: [`docs/CORRECOES-PRE-PROJETO.md`](docs/CORRECOES-PRE-PROJETO.md)
 
 ---
 
@@ -328,12 +335,14 @@ BackOffice e canal próprio de monitorização **não** entram como produto nest
 - [ ] Instalar/validar Mint XFCE + tactile no PC do protótipo
 - [x] Arquivar legado (`archive/legacy/`) e reescrita iniciada
 - [x] 1.ª fatia: API `:8787` + WS `/ws` + SQLite lembretes + UI Idle (regra 2A)
-- [x] Voz TTS: Piper tugão **medium** (+ SAPI/espeak fallback) nos alertas
+- [x] Voz TTS: Piper tugão **medium 1.5.0** (+ SAPI/espeak fallback) nos alertas
 - [x] Voz wake→STT: botão Falar + `VoiceSession` + API `/voice/*` + faster-whisper
-- [x] LLM Ollama `qwen2.5:3b` na conversa por voz (tools: listar/criar/apagar lembretes não médicos); openWakeWord «RIC» ainda em falta
+- [x] LLM Ollama `qwen2.5:3b` na conversa por voz (tools: listar/criar/apagar lembretes não médicos)
 - [x] Chatterbox testado e **descartado** (CPU lento / deps pesadas); Piper é o TTS do projeto
-- [ ] Em casa: A/B Piper **tugão quality** vs medium (sem trocar default até decidir)
-- [ ] Wake-word contínuo «RIC»
+- [x] Promovido tugão 1.5.0 a default (A/B vs 1.0.0); sem rotina de updates (cadência irregular)
+- [x] Wake contínuo openWakeWord + sounddevice (loop provado com `hey_jarvis`; botão Falar fallback)
+- [x] Roteiro Colab + `py -m ric wake-install` para «ei RIC» ([`docs/ROTEIRO-WAKE-EI-RIC.md`](docs/ROTEIRO-WAKE-EI-RIC.md))
+- [ ] Correr Colab, instalar `ric.onnx` e validar «ei RIC» no microfone
 - [ ] PIN cuidador → Telegram/música/histórias
 - [ ] Inventário físico + medições LLM reais
 - [ ] Anexo I no formulário da escola (se ainda pendente)
@@ -342,11 +351,10 @@ BackOffice e canal próprio de monitorização **não** entram como produto nest
 
 ## 14. Próximo passo
 
-1. Seguir [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md) (§6) e [`docs/PLANEAMENTO.md`](docs/PLANEAMENTO.md)  
-2. Arquivar `ric/` → `archive/legacy/` e criar esqueleto novo  
-3. 1.ª fatia: lembretes + API `:8787` + UI mínima; depois voz; depois extras  
-4. Atualizar fichas em `docs/metas/` quando o comportamento real mudar  
-5. Relatório PAP (ética, custos, limitações, melhorias)
+1. Seguir [`docs/ROTEIRO-WAKE-EI-RIC.md`](docs/ROTEIRO-WAKE-EI-RIC.md) (Colab → `wake-install` → testar «ei RIC»)
+2. Tools P1 em falta (música/história/gosto) e PIN cuidador
+3. Atualizar fichas em `docs/metas/` quando o comportamento real mudar
+4. Relatório PAP (ética, custos, limitações, melhorias)
 
 ---
 

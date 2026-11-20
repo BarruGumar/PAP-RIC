@@ -25,8 +25,8 @@ O código legado em `ric/` será **arquivado** (`archive/legacy/`) e o sistema *
 | Decisão | Escolha |
 |---|---|
 | Interação | **Voz primeiro**; ecrã = rosto/estados; texto e botões só quando necessário |
-| Ativação | Palavra-chave **«RIC»** + janela de comando; botão como fallback |
-| Hardware | PC/laptop reciclado + **ecrã tactile** (HDMI/DP + USB) no mesmo PC + microfone/colunas |
+| Ativação | Frase **«ei RIC»** + janela de comando; botão como fallback |
+| Hardware | **Intel NUC5i3RYH** (i3, →16 GB RAM) + **ecrã tactile** (HDMI/DP + USB) no mesmo NUC + microfone/colunas; DN2820FYK só reserva |
 | SO alvo (demo / protótipo) | **Linux Mint XFCE** |
 | SO de desenvolvimento | Windows (ou outro) **opcional** no PC de trabalho do aluno; o código deve correr no Linux do RIC |
 | Ligação rosto ↔ cérebro | Browser kiosk em `http://127.0.0.1:8787` — **sem Internet e sem Wi‑Fi no núcleo** |
@@ -62,6 +62,8 @@ O código legado em `ric/` será **arquivado** (`archive/legacy/`) e o sistema *
 
 ### 4.1 Máquina de estados
 
+Diagrama: [`design/estados-ric.html`](design/estados-ric.html).
+
 Estados principais: `Idle` (wake-word) → `Listening` → `Thinking` (LLM/tools) → `Speaking` → `Idle`.
 
 Prioridade de eventos: **alerta de lembrete > fala > música**.
@@ -69,6 +71,8 @@ Prioridade de eventos: **alerta de lembrete > fala > música**.
 O rosto no ecrã **só espelha** o estado atual (ver §6.2).
 
 ### 4.2 Lembretes
+
+Diagrama: [`design/fluxo-lembretes-ric.html`](design/fluxo-lembretes-ric.html).
 
 1. À hora: **pausa música** → rosto `alert` → TTS → **Já fiz** / **Adiar** (voz ou toque).
 2. Se o idoso responder no ciclo do alerta → processa → **retoma música**.
@@ -90,10 +94,12 @@ O rosto no ecrã **só espelha** o estado atual (ver §6.2).
 
 ### 4.5 Música e voz
 
+Pipeline de um turno: [`design/sequencia-voz-ric.html`](design/sequencia-voz-ric.html).
+
 - Música: pastas por género em `musica/`; `catalogo.json` gerado ao arrancar; player `audio` no browser via API.
-- TTS: **Piper PT tugão medium** (default actual); fallback TTS de sistema se Piper falhar (lembretes nunca mudos). **Backlog:** A/B com tugão *quality* (ou qualidade superior) em casa — ver [`PLANEAMENTO.md`](PLANEAMENTO.md).
+- TTS: **Piper PT tugão medium 1.5.0** (default); fallback TTS de sistema se Piper falhar (lembretes nunca mudos). Ver [`PLANEAMENTO.md`](PLANEAMENTO.md).
 - STT: Whisper local (small/base ou faster-whisper).
-- Wake-word: openWakeWord (modelo «RIC») + botão fallback.
+- Wake-word: openWakeWord (modelo **«ei RIC»**) + botão fallback. Temporário em testes: `hey_jarvis`.
 
 ### 4.6 Perfis
 
@@ -104,6 +110,8 @@ Um perfil de idoso por instalação. Cuidador = PIN + contactos, não segundo ut
 ## 5. Nível 4 — Sistema informático
 
 ### 5.1 Topologia
+
+Diagrama: [`design/arquitetura-ric.html`](design/arquitetura-ric.html).
 
 **Um único processo** Python («RIC») no **Mint XFCE** do PC do protótipo. O browser em ecrã cheio (kiosk) é só cliente localhost.
 
@@ -191,8 +199,8 @@ Arquivar o `ric/` atual em `archive/legacy/`. Implementação nova alinhada a es
 
 | Tema | Decisão |
 |---|---|
-| Após «RIC» | ~**6–8 s** de escuta; ~**1,5 s** de silêncio fecha o turno; se vazio → pedido para repetir + botão |
-| Barge-in (must) | Em conversa, «RIC» **corta** TTS → `Listening` |
+| Após «ei RIC» | ~**6–8 s** de escuta; ~**1,5 s** de silêncio fecha o turno; se vazio → pedido para repetir + botão |
+| Barge-in (must) | Em conversa, «ei RIC» **corta** TTS → `Listening` |
 | Barge-in vs alerta | Wake-word **não** cancela lembrete/alerta (só Já fiz / Adiar / fim dos retries) |
 | Barge-in (stretch) | Em fala não crítica, **duck** do TTS + escuta em paralelo — só se o corte seco já estiver estável |
 
@@ -272,7 +280,7 @@ Detalhe de calendário escolar: [`PLANEAMENTO.md`](PLANEAMENTO.md).
 
 Sem Internet (Telegram pode falhar na demo):
 
-1. «RIC» → pedido → resposta em voz com rosto a mudar de estado.
+1. «ei RIC» → pedido → resposta em voz com rosto a mudar de estado.
 2. Lembrete → pausa música se houver → alerta → Já fiz / Adiar → retoma.
 3. Música local; prioridade alerta > fala > música.
 4. História da biblioteca (TTS ou áudio se existir).
