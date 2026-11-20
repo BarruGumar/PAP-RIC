@@ -1,8 +1,8 @@
-"""Wake-word: botão manual sempre; openWakeWord opcional quando houver modelo «RIC»."""
+"""Wake-word: botão manual sempre; openWakeWord opcional quando o detector estiver disponível."""
 
 from __future__ import annotations
 
-from typing import Callable, Protocol
+from typing import Any, Callable, Protocol
 
 
 class WakeDetector(Protocol):
@@ -12,9 +12,15 @@ class WakeDetector(Protocol):
 
     def stop(self) -> None: ...
 
+    def pause(self) -> None: ...
+
+    def resume(self) -> None: ...
+
 
 class WakeWordService:
     """Dispara `on_detect` no wake (modelo) ou no botão «Falar»."""
+
+    _PAUSE_STATES = frozenset({"listening", "thinking", "speaking", "alert"})
 
     def __init__(
         self,
@@ -44,6 +50,24 @@ class WakeWordService:
         if self._detector and self._detector.available:
             self._detector.stop()
 
+    def pause(self) -> None:
+        if self._detector and self._detector.available:
+            self._detector.pause()
+
+    def resume(self) -> None:
+        if not self._listening:
+            return
+        if self._detector and self._detector.available:
+            self._detector.resume()
+
+    def on_state(self, state: str) -> None:
+        """Pausa o microfone contínuo fora de idle (evita eco do TTS / auto-wake)."""
+        if state in self._PAUSE_STATES:
+            self.pause()
+            return
+        if state == "idle":
+            self.resume()
+
     def trigger_manual(self) -> None:
         """Fallback táctil — sempre activo (botão Falar)."""
         self._fire()
@@ -60,11 +84,24 @@ class WakeWordService:
         except Exception as exc:  # noqa: BLE001
             print(f"[RIC] erro no callback wake: {exc}", flush=True)
 
-    def status(self) -> dict:
+    def status(self) -> dict[str, Any]:
         mode = "openwakeword" if self.available else "manual"
+        model_label = None
+        paused = False
+        # Alvo do produto; temporários (hey_jarvis) mostram o nome real do modelo.
+        phrase = "ei RIC"
+        if self._detector is not None:
+            model_label = getattr(self._detector, "model_label", None)
+            paused = bool(getattr(self._detector, "paused", False))
+            label = str(model_label or "").casefold().replace("-", "_")
+            if label and label not in ("ric", "ei_ric", "ei ric"):
+                phrase = str(model_label).replace("_", " ")
         return {
             "available": self.available,
             "mode": mode,
             "listening": self._listening,
-            "word": "RIC",
+            "paused": paused,
+            "word": "ei RIC",
+            "phrase": phrase,
+            "model": model_label,
         }

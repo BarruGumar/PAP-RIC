@@ -3,6 +3,24 @@
 O ecrã **real** do RIC (`py -m ric ui`) fica limpo para a demo.  
 O desenho/layout faz-se no **editor** à parte; quando estiveres satisfeito, colas o JSON no chat e eu aplico no original.
 
+## Diagramas do sistema (PAP)
+
+| Ficheiro | Mostra |
+|---|---|
+| [`arquitetura-ric.html`](arquitetura-ric.html) | Topologia local (kiosk → RIC → dados / Ollama; Telegram opcional) |
+| [`estados-ric.html`](estados-ric.html) | Máquina de estados (Idle→…→Speaking) + Alert |
+| [`sequencia-voz-ric.html`](sequencia-voz-ric.html) | Sequência wake → STT → LLM/tools → TTS |
+| [`fluxo-lembretes-ric.html`](fluxo-lembretes-ric.html) | Disparo, retries, crítico → Telegram |
+
+```powershell
+start docs\design\arquitetura-ric.html
+start docs\design\estados-ric.html
+start docs\design\sequencia-voz-ric.html
+start docs\design\fluxo-lembretes-ric.html
+```
+
+Fonte: `docs/ARQUITETURA.md` (§4–6).
+
 ## Editor visual (Canva simples)
 
 ```powershell

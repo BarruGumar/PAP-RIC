@@ -35,6 +35,10 @@ class Settings:
     ollama_url: str = "http://127.0.0.1:11434"
     llm_model: str = "qwen2.5:3b"
     llm_timeout: float = 90.0
+    wake_enabled: bool = True
+    wake_model: Path | None = None
+    wake_threshold: float = 0.5
+    wake_debounce_s: float = 1.5
 
     @property
     def db_path(self) -> Path:
@@ -63,6 +67,23 @@ class Settings:
         piper_bin = os.environ.get("RIC_PIPER_BIN", "").strip() or None
         length_scale = float(os.environ.get("RIC_PIPER_LENGTH_SCALE", "1.35"))
 
+        wake_raw = os.environ.get("RIC_WAKE_MODEL", "").strip()
+        wake_model: Path | None = None
+        if wake_raw:
+            wake_path = Path(wake_raw)
+            if not wake_path.is_absolute():
+                wake_path = (root / wake_path).resolve()
+            if wake_path.is_file():
+                wake_model = wake_path
+            else:
+                print(
+                    f"[RIC] RIC_WAKE_MODEL não encontrado: {wake_path}",
+                    flush=True,
+                )
+
+        wake_off = os.environ.get("RIC_WAKE_ENABLED", "1").strip().lower()
+        wake_enabled = wake_off not in ("0", "false", "no", "off")
+
         return cls(
             host=os.environ.get("RIC_HOST", "127.0.0.1"),
             port=int(os.environ.get("RIC_PORT", "8787")),
@@ -86,4 +107,8 @@ class Settings:
             ).strip()
             or "qwen2.5:3b",
             llm_timeout=float(os.environ.get("RIC_LLM_TIMEOUT", "90")),
+            wake_enabled=wake_enabled,
+            wake_model=wake_model,
+            wake_threshold=float(os.environ.get("RIC_WAKE_THRESHOLD", "0.5")),
+            wake_debounce_s=float(os.environ.get("RIC_WAKE_DEBOUNCE_S", "1.5")),
         )

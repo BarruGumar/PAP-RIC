@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 import mimetypes
 import threading
+import time
+from datetime import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
@@ -17,6 +19,7 @@ from ric.voice import VoiceService
 from ric.voice.session import VoiceSession
 from ric.voice.stt import SpeechToText, SttUnavailableError
 from ric.voice.tts import format_alert_phrase
+from ric.voice.oww_detector import try_create_detector
 from ric.voice.wake import WakeWordService
 from ric.web.ws import WsHub, accept_key, decode_frames, encode_text
 
@@ -59,11 +62,23 @@ class RicApp:
             llm=self.llm,
             tts=self.voice,
         )
-        self.wake = WakeWordService(on_detect=self.session.on_wake)
+        detector = try_create_detector(settings)
+        self.wake = WakeWordService(
+            on_detect=self.session.on_wake,
+            detector=detector,
+        )
+        self.events.subscribe(self._on_bus_event)
         self._watchdog_stop = threading.Event()
         self._watchdog_thread: threading.Thread | None = None
         self._alert_lock = threading.Lock()
         self._last_alert_key: tuple[int, int] | None = None
+
+    def _on_bus_event(self, event: dict[str, Any]) -> None:
+        if event.get("type") != "state":
+            return
+        state = event.get("state")
+        if isinstance(state, str):
+            self.wake.on_state(state)
 
     def _on_speaking(self, speaking: bool) -> None:
         # Nesta fatia o TTS só corre em alertas — voltar a "alert" para o painel Já fiz.
@@ -103,43 +118,72 @@ class RicApp:
             try:
                 if not self._alert_lock.acquire(blocking=False):
                     continue
+                frase = ""
+                updated = None
+                lag_s = 0.0
                 try:
                     due = self.reminders.due_now()
                     if not due:
                         continue
                     # Um alerta de cada vez — vários em paralelo = eco no browser
                     item = due[0]
+                    try:
+                        due_at = datetime.fromisoformat(item.proximo_em)
+                        lag_s = max(0.0, (datetime.now() - due_at).total_seconds())
+                    except ValueError:
+                        lag_s = 0.0
                     if item.estado != "disparado":
-                        self.reminders.mark_fired(item.id)
+                        fired = self.reminders.mark_fired(item.id)
+                        if fired is None:
+                            continue
                     updated = self.reminders.register_alert(item.id)
+                    if updated is None:
+                        continue
                     key = (updated.id, updated.avisos_feitos)
                     if key == self._last_alert_key:
                         continue
                     self._last_alert_key = key
                     frase = format_alert_phrase(updated.titulo)
-                    wav = self.voice.synthesize_alert(
-                        frase, stem=f"alert-{updated.id}-{updated.avisos_feitos}"
-                    )
-                    audio_url = None
-                    if wav is not None:
-                        audio_url = f"/api/v1/tts/{wav.name}"
-                    self.events.set_state("alert")
-                    payload = {
-                        "type": "alert",
-                        "reminder": updated.to_dict(),
-                        "phrase": frase,
-                        "audio_url": audio_url,
-                        "play_id": f"{updated.id}-{updated.avisos_feitos}",
-                    }
-                    if wav is None:
-                        self.voice.speak(frase, async_=True, with_beep=False)
-                    self.events.publish(payload)
-                    print(
-                        f"[RIC] Alerta lembrete #{updated.id}: {updated.titulo}",
-                        flush=True,
-                    )
                 finally:
                     self._alert_lock.release()
+
+                if updated is None or not frase:
+                    continue
+
+                # TTS fora do lock: não atrasa o próximo tick do watchdog.
+                t_tts = time.perf_counter()
+                wav = self.voice.synthesize_alert(
+                    frase, stem=f"alert-{updated.id}-{updated.avisos_feitos}"
+                )
+                tts_s = time.perf_counter() - t_tts
+
+                # Se confirmaram/adiaram durante o TTS, não publicar o alerta.
+                try:
+                    fresh = self.reminders.get(updated.id)
+                except LookupError:
+                    continue
+                if fresh.estado != "disparado":
+                    continue
+                if fresh.avisos_feitos != updated.avisos_feitos:
+                    continue
+
+                audio_url = f"/api/v1/tts/{wav.name}" if wav is not None else None
+                self.events.set_state("alert")
+                payload = {
+                    "type": "alert",
+                    "reminder": fresh.to_dict(),
+                    "phrase": frase,
+                    "audio_url": audio_url,
+                    "play_id": f"{fresh.id}-{fresh.avisos_feitos}",
+                }
+                if wav is None:
+                    self.voice.speak(frase, async_=True, with_beep=False)
+                self.events.publish(payload)
+                print(
+                    f"[RIC] Alerta lembrete #{fresh.id}: {fresh.titulo} "
+                    f"(lag={lag_s:.1f}s tts={tts_s:.1f}s)",
+                    flush=True,
+                )
             except Exception as exc:  # noqa: BLE001
                 print(f"[RIC] watchdog erro: {exc}", flush=True)
 
@@ -502,8 +546,10 @@ def run_server(settings: Settings | None = None) -> None:
         f"RIC em http://{settings.host}:{settings.port}/  (WS /ws)",
         flush=True,
     )
+    wake_st = app.wake.status()
     print(
-        f"[RIC] wake={app.wake.status()['mode']} "
+        f"[RIC] wake={wake_st['mode']}"
+        f"{' phrase=' + wake_st['phrase'] if wake_st.get('phrase') else ''} "
         f"stt={app.stt.status()['engine']} "
         f"llm={'ok' if app.llm.available else 'off'} ({app.llm.model}) "
         f"timeout={app.llm.timeout:.0f}s",

@@ -130,6 +130,20 @@ def main(argv: list[str] | None = None) -> int:
     p_tune = sub.add_parser("tune", help="Ouvir TTS Piper em sessão interactiva")
     p_tune.add_argument("--model", help="Caminho .onnx opcional")
 
+    sub.add_parser(
+        "wake-setup",
+        help="Descarregar modelos openWakeWord (hey_jarvis temporário)",
+    )
+
+    p_wake_install = sub.add_parser(
+        "wake-install",
+        help="Instalar ONNX «ei RIC» em ric-data/wake/ric.onnx",
+    )
+    p_wake_install.add_argument(
+        "onnx",
+        help="Caminho do .onnx treinado (ex.: Downloads\\ei_ric.onnx)",
+    )
+
     args = parser.parse_args(argv)
     settings = Settings.from_env()
 
@@ -137,6 +151,46 @@ def main(argv: list[str] | None = None) -> int:
         run_server()
         return 0
 
+    if args.cmd == "wake-setup":
+        wake_dir = settings.data_dir / "wake"
+        wake_dir.mkdir(parents=True, exist_ok=True)
+        readme = wake_dir / "README.txt"
+        if not readme.is_file():
+            readme.write_text(
+                "Modelos wake-word do RIC.\n"
+                "- Por agora: built-in temporário hey_jarvis (openWakeWord).\n"
+                "- Alvo: py -m ric wake-install … → ric.onnx («ei RIC»).\n"
+                "- Roteiro: docs/ROTEIRO-WAKE-EI-RIC.md\n"
+                "- Env: RIC_WAKE_MODEL, RIC_WAKE_THRESHOLD, RIC_WAKE_ENABLED.\n",
+                encoding="utf-8",
+            )
+        try:
+            from ric.voice.oww_detector import ensure_wake_models_downloaded
+
+            print("A descarregar modelos openWakeWord…")
+            ensure_wake_models_downloaded()
+        except ImportError:
+            print("Instala deps: py -m pip install openwakeword sounddevice numpy")
+            return 1
+        except Exception as exc:  # noqa: BLE001
+            print(f"Falha no download: {exc}")
+            return 1
+        print(f"OK. Pasta: {wake_dir}")
+        print("Teste: diz «hey jarvis» com py -m ric ui (ou usa o botão Falar).")
+        print("Quando tiveres o modelo «ei RIC»: docs/ROTEIRO-WAKE-EI-RIC.md")
+        return 0
+
+    if args.cmd == "wake-install":
+        from ric.voice.oww_detector import install_wake_model
+
+        try:
+            dest = install_wake_model(Path(args.onnx), data_dir=settings.data_dir)
+        except (FileNotFoundError, ValueError, RuntimeError) as exc:
+            print(f"Erro: {exc}")
+            return 1
+        print(f"OK. Modelo «ei RIC» em: {dest}")
+        print("Teste: py -m ric ui  →  diz «ei RIC»")
+        return 0
     if args.cmd == "voices":
         default = settings.piper_model
         print("Default actual:")

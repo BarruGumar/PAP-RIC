@@ -19,10 +19,33 @@ ChatFn = Callable[[list[dict[str, Any]], list[dict[str, Any]] | None], dict[str,
 RemindersChangedFn = Callable[[dict[str, Any]], None]
 
 _ALLOWED_CREATE_TIPOS = frozenset({"tarefa", "consulta", "outro"})
+_TOOL_NAMES = frozenset(
+    str(t.get("function", {}).get("name") or "").casefold()
+    for t in TOOLS
+    if t.get("function", {}).get("name")
+)
+_SAFE_REPEAT = "Não percebi bem. Podes repetir?"
 
 
 def _log(msg: str) -> None:
     print(f"[RIC] {msg}", flush=True)
+
+
+def sanitize_assistant_reply(text: str) -> str:
+    """Evita mostrar nomes crus de tools (ex.: LISTAR_LEMBRETES) no ecrã/voz."""
+    raw = (text or "").strip()
+    if not raw:
+        return _SAFE_REPEAT
+    lowered = raw.casefold()
+    for name in _TOOL_NAMES:
+        if not name:
+            continue
+        if re.search(rf"(?<![\w]){re.escape(name)}(?![\w])", lowered):
+            return _SAFE_REPEAT
+        spaced = name.replace("_", " ")
+        if spaced and re.search(rf"(?<![\w]){re.escape(spaced)}(?![\w])", lowered):
+            return _SAFE_REPEAT
+    return raw
 
 
 class LlmUnavailableError(RuntimeError):
@@ -127,7 +150,7 @@ class LlmService:
                         )
                     continue
                 if content:
-                    return content
+                    return sanitize_assistant_reply(content)
                 break
         except LlmUnavailableError as exc:
             _log(f"LLM unavailable: {exc}")
@@ -180,10 +203,11 @@ class LlmService:
                 "id": r.id,
                 "titulo": r.titulo,
                 "hora": r.hora,
+                "proximo_em": r.proximo_em,
                 "tipo": r.tipo,
                 "estado": r.estado,
             }
-            for r in self.reminders.list_all()
+            for r in self.reminders.list_active()
         ]
         return json.dumps({"lembretes": items}, ensure_ascii=False)
 

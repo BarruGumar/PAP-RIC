@@ -4,7 +4,7 @@
 **Turma:** 3-TIS  
 **Orientador:** Gil Ribeiro  
 **Trabalho:** RIC — Robô Interativo Companheiro  
-**Atualizado:** 2026-11-12 (Chatterbox descartado; UI: próximo lembrete sempre visível)
+**Atualizado:** 2026-11-14 (tugão medium 1.5.0 como default TTS)
 
 Um aluno, fora das aulas. A voz é a forma principal de uso; o ecrã mostra o rosto e só revela texto/botões quando necessário. SO alvo do protótipo: **Linux Mint XFCE**.
 
@@ -63,14 +63,13 @@ Ver [`ARQUITETURA.md`](ARQUITETURA.md) §6.11.
 
 ### Backlog de voz (quando o Pedro estiver em casa)
 
-- **Agora (não mudar):** default TTS = Piper **tugão medium** (`pt_PT-tugao-medium.onnx`).
-- **A testar (Piper):** variante **tugão quality** em `ric-data/vozes/extras/` via `py -m ric say "…" --model extras/…`.
-- **TTS:** **Piper** tugão medium (default). Chatterbox foi testado e **descartado** (pesado/lento demais para a PAP).
-- **Voz própria / fine-tune:** fora do caminho crítico da PAP (Piper tugão cobre o MVP).
+- **Default UI (2026-11-14):** Piper **tugão medium Piper 1.5.0** (`ric-data/vozes/pt_PT-tugao-medium.onnx`) — retrain HF `main` (base `hifi_tts_92`). Backup antigo: `extras/pt_PT-tugao-medium-v1.0.onnx`.
+- **Sem rotina de updates:** o tugão ficou ~3 anos sem mudança; updates são irregulares — não vale a pena verificar de tempos a tempos.
+- **TTS:** **Piper** tugão medium. Chatterbox **descartado** (pesado/lento demais para a PAP). Não há variante high/quality do tugão no catálogo.
+- **Voz própria / fine-tune:** fora do caminho crítico da PAP.
 - Critérios: naturalidade em pt-PT (não BR), clareza para idoso, latência no PC reciclado, tamanho/RAM.
-- Até decisão, **não substituir** o Piper medium na UI.
 
 ### Fatia voz wake→STT→LLM (estado)
 
-- Feito: botão **Falar**, Whisper STT, `VoiceSession`, API `/voice/*`, Ollama `qwen2.5:3b` + tools ler/criar/apagar lembretes não médicos, resposta em Piper; Chatterbox descartado.
-- Em falta: modelo openWakeWord «RIC» + microfone contínuo; mais tools P1 (música/história/gosto); cuidador PIN.
+- Feito: botão **Falar**, Whisper STT, `VoiceSession`, API `/voice/*`, Ollama `qwen2.5:3b` + tools ler/criar/apagar lembretes não médicos, resposta em Piper; Chatterbox descartado; listagem só activos; diário reagenda ao confirmar; watchdog com `lag=`/`tts=` e TTS fora do lock; **wake contínuo** openWakeWord + `sounddevice` (modelo temporário `hey_jarvis`; UI grava em `wake_detected`).
+- Em falta: correr Colab e instalar `ric.onnx` («ei RIC» — roteiro em `docs/ROTEIRO-WAKE-EI-RIC.md`); mais tools P1 (música/história/gosto); cuidador PIN.

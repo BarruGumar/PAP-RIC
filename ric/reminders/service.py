@@ -167,57 +167,104 @@ class ReminderService:
             ).fetchall()
         return [self._row(r) for r in rows]
 
-    def mark_fired(self, reminder_id: int) -> Reminder:
+    def mark_fired(self, reminder_id: int) -> Reminder | None:
+        """Marca disparado só se ainda estiver devido (evita corrida com confirm)."""
+        agora = datetime.now().isoformat(timespec="seconds")
         with self._db.connect() as conn:
-            conn.execute(
-                "UPDATE lembretes SET estado = 'disparado' WHERE id = ?",
-                (reminder_id,),
+            cur = conn.execute(
+                """
+                UPDATE lembretes
+                SET estado = 'disparado'
+                WHERE id = ?
+                  AND estado IN ('pendente', 'adiado', 'disparado')
+                  AND proximo_em <= ?
+                """,
+                (reminder_id, agora),
             )
             conn.commit()
+            if cur.rowcount == 0:
+                return None
         return self.get(reminder_id)
 
-    def register_alert(self, reminder_id: int) -> Reminder:
+    def register_alert(self, reminder_id: int) -> Reminder | None:
+        """Regista aviso; no-op se o lembrete já foi confirmado/adiado noutro sítio."""
         item = self.get(reminder_id)
+        if item.estado not in ("pendente", "adiado", "disparado"):
+            return None
         avisos = item.avisos_feitos + 1
         max_alerts = self._settings.reminder_max_alerts
         if avisos >= max_alerts:
             estado = "expirado"
-        else:
-            estado = "disparado"
-            retry = datetime.now() + timedelta(
-                minutes=self._settings.reminder_retry_minutes
+            with self._db.connect() as conn:
+                cur = conn.execute(
+                    """
+                    UPDATE lembretes
+                    SET avisos_feitos = ?, estado = ?
+                    WHERE id = ?
+                      AND estado IN ('pendente', 'adiado', 'disparado')
+                    """,
+                    (avisos, estado, reminder_id),
+                )
+                conn.commit()
+                if cur.rowcount == 0:
+                    return None
+            return self.get(reminder_id)
+
+        estado = "disparado"
+        retry = datetime.now() + timedelta(
+            minutes=self._settings.reminder_retry_minutes
+        )
+        with self._db.connect() as conn:
+            cur = conn.execute(
+                """
+                UPDATE lembretes
+                SET avisos_feitos = ?, estado = ?, proximo_em = ?
+                WHERE id = ?
+                  AND estado IN ('pendente', 'adiado', 'disparado')
+                """,
+                (
+                    avisos,
+                    estado,
+                    retry.isoformat(timespec="seconds"),
+                    reminder_id,
+                ),
             )
+            conn.commit()
+            if cur.rowcount == 0:
+                return None
+        return self.get(reminder_id)
+
+    def confirm(
+        self, reminder_id: int, *, agora: datetime | None = None
+    ) -> Reminder:
+        item = self.get(reminder_id)
+        agora = agora or datetime.now()
+        if item.diario:
+            # Diário: volta a pendente na próxima ocorrência da hora.
+            nxt = self._next_for_time(item.hora, agora)
             with self._db.connect() as conn:
                 conn.execute(
                     """
                     UPDATE lembretes
-                    SET avisos_feitos = ?, estado = ?, proximo_em = ?
+                    SET estado = 'pendente', avisos_feitos = 0, proximo_em = ?
                     WHERE id = ?
                     """,
+                    (nxt.isoformat(timespec="seconds"), reminder_id),
+                )
+                conn.execute(
+                    """
+                    INSERT INTO confirmacoes (lembrete_id, titulo, acao, em)
+                    VALUES (?, ?, 'confirmar', ?)
+                    """,
                     (
-                        avisos,
-                        estado,
-                        retry.isoformat(timespec="seconds"),
                         reminder_id,
+                        item.titulo,
+                        agora.isoformat(timespec="seconds"),
                     ),
                 )
                 conn.commit()
             return self.get(reminder_id)
 
-        with self._db.connect() as conn:
-            conn.execute(
-                """
-                UPDATE lembretes
-                SET avisos_feitos = ?, estado = ?
-                WHERE id = ?
-                """,
-                (avisos, estado, reminder_id),
-            )
-            conn.commit()
-        return self.get(reminder_id)
-
-    def confirm(self, reminder_id: int) -> Reminder:
-        item = self.get(reminder_id)
         with self._db.connect() as conn:
             conn.execute(
                 "UPDATE lembretes SET estado = 'confirmado' WHERE id = ?",
@@ -231,7 +278,7 @@ class ReminderService:
                 (
                     reminder_id,
                     item.titulo,
-                    datetime.now().isoformat(timespec="seconds"),
+                    agora.isoformat(timespec="seconds"),
                 ),
             )
             conn.commit()

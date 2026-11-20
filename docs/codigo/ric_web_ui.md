@@ -41,9 +41,11 @@ Prototipar: [`docs/design/ui-board.html`](../design/ui-board.html) — ver [`doc
 - Textos em **pt-PT**; foco visível no teclado  
 - Lab PAP só para demonstração / júri (não é UI do idoso)
 
-## Voz (botão Falar)
+## Voz (wake + botão Falar)
 
-- Microfone abre logo; o wake corre em paralelo.
+- Hint idle: frase do health (`ei RIC` se `ric.onnx` instalado; senão temporário `hey jarvis`).
+- Evento WS `wake_detected` → a UI começa a gravar **sem** novo `POST /voice/wake`.
+- Botão **Falar**: microfone abre logo; `POST /voice/wake` em paralelo.
 - Envia **sozinho** após ~0,9 s de silêncio (mín. ~0,35 s de fala); **Parar** força o envio; máximo ~15 s.
 - PCM a 16 kHz com silêncio à cabeça/cauda cortado antes do STT.
 

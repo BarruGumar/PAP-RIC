@@ -558,6 +558,11 @@
       } catch {
         return
       }
+      if (msg.type === "wake_detected") {
+        if (!recording && !activeAlertId) {
+          startRecording({ fromWake: true })
+        }
+      }
       if (msg.type === "state" && msg.state) {
         if (msg.state !== "alert" || !activeAlertId) {
           setFace(msg.state)
@@ -825,8 +830,9 @@
     }
   }
 
-  const startRecording = async () => {
+  const startRecording = async (opts = {}) => {
     if (recording || activeAlertId) return
+    const fromWake = Boolean(opts.fromWake)
     recording = true
     speechHeard = false
     silenceSamples = 0
@@ -850,7 +856,10 @@
         stopMicHardware()
         return
       }
-      api("/api/v1/voice/wake", { method: "POST", body: "{}" }).catch(() => {})
+      // Wake contínuo já publicou wake_detected; o botão ainda faz POST /wake.
+      if (!fromWake) {
+        api("/api/v1/voice/wake", { method: "POST", body: "{}" }).catch(() => {})
+      }
       // Não forçar 16 kHz no AudioContext (muitos browsers ignoram / distorcem).
       audioContext = new (window.AudioContext || window.webkitAudioContext)()
       sampleRate = audioContext.sampleRate
@@ -886,7 +895,23 @@
   const handleTalkClick = (ev) => {
     ev.preventDefault()
     if (recording) finishRecording()
-    else startRecording()
+    else startRecording({ fromWake: false })
+  }
+
+  const updateWakeHint = async () => {
+    if (!spokenHintEl) return
+    try {
+      const health = await api("/api/v1/health")
+      const wake = health && health.voice && health.voice.wake
+      if (wake && wake.mode === "openwakeword" && wake.phrase) {
+        spokenHintEl.textContent =
+          `(diz «${wake.phrase}» ou toca no ecrã)`
+        return
+      }
+    } catch {
+      /* ignore */
+    }
+    spokenHintEl.textContent = "(diz a palavra de ativação ou toca no ecrã)"
   }
 
   btnTalk.addEventListener("click", handleTalkClick)
@@ -1026,6 +1051,7 @@
     heardEl.textContent = "Bom dia. Estou aqui."
   }
   if (spokenHintEl) spokenHintEl.hidden = false
+  updateWakeHint().catch(() => {})
 
   applyEyeStyle(readEyeStyle())
   tickClock()

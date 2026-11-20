@@ -37,8 +37,8 @@ O nome oficial tem «ã» e o comando curto do Piper pode falhar. Descarrega os 
 
 ```powershell
 New-Item -ItemType Directory -Force -Path .\vozes | Out-Null
-curl.exe -L -o .\vozes\pt_PT-tugao-medium.onnx "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/pt/pt_PT/tug%C3%A3o/medium/pt_PT-tug%C3%A3o-medium.onnx"
-curl.exe -L -o .\vozes\pt_PT-tugao-medium.onnx.json "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/pt/pt_PT/tug%C3%A3o/medium/pt_PT-tug%C3%A3o-medium.onnx.json"
+curl.exe -L -o .\vozes\pt_PT-tugao-medium.onnx "https://huggingface.co/rhasspy/piper-voices/resolve/main/pt/pt_PT/tug%C3%A3o/medium/pt_PT-tug%C3%A3o-medium.onnx"
+curl.exe -L -o .\vozes\pt_PT-tugao-medium.onnx.json "https://huggingface.co/rhasspy/piper-voices/resolve/main/pt/pt_PT/tug%C3%A3o/medium/pt_PT-tug%C3%A3o-medium.onnx.json"
 "são dezasseis horas, hora do comprimido" | py -m piper -m .\vozes\pt_PT-tugao-medium.onnx -f .\aviso-piper.wav
 "A consulta é às 16:54." | py -m piper -m .\vozes\pt_PT-tugao-medium.onnx -f .\hora-piper.wav
 Start-Process .\aviso-piper.wav

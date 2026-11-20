@@ -86,17 +86,39 @@ def test_list_and_next(service: ReminderService) -> None:
     assert nxt is not None
 
 
-def test_confirm_and_snooze(service: ReminderService) -> None:
+def test_confirm_one_shot_stays_confirmed(service: ReminderService) -> None:
     soon = datetime.now() + timedelta(seconds=2)
     item = service.create_at(
         titulo="Teste",
         proximo=soon,
         tipo="tarefa",
+        diario=False,
     )
     service.mark_fired(item.id)
     confirmed = service.confirm(item.id)
     assert confirmed.estado == "confirmado"
 
+
+def test_confirm_daily_reschedules_tomorrow(service: ReminderService) -> None:
+    agora = datetime(2026, 11, 14, 16, 35, 0)
+    item = service.create(
+        titulo="Beber água",
+        hora="16:35",
+        tipo="tarefa",
+        diario=True,
+        agora=agora - timedelta(minutes=5),
+    )
+    service.mark_fired(item.id)
+    service.register_alert(item.id)
+    confirmed = service.confirm(item.id, agora=agora)
+    assert confirmed.estado == "pendente"
+    assert confirmed.avisos_feitos == 0
+    nxt = datetime.fromisoformat(confirmed.proximo_em)
+    assert nxt.date() == (agora + timedelta(days=1)).date()
+    assert nxt.hour == 16 and nxt.minute == 35
+
+
+def test_snooze(service: ReminderService) -> None:
     item2 = service.create_at(
         titulo="Adiar",
         proximo=datetime.now() + timedelta(seconds=2),

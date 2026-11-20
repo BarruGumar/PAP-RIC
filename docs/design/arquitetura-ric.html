@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RIC — arquitetura local (PAP)</title>
+  <style>
+    :root {
+      --paper: #f3f5f7;
+      --ink: #1c2430;
+      --muted: #5a6573;
+      --soft: #8a93a0;
+      --accent: #2f6f6a;
+      --line: #1c2430;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "Segoe UI", "IBM Plex Sans", system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem 3rem;
+    }
+    header {
+      width: min(920px, 100%);
+      margin-bottom: 1.25rem;
+    }
+    header h1 {
+      margin: 0 0 0.35rem;
+      font-size: 1.35rem;
+      font-weight: 650;
+      letter-spacing: -0.02em;
+    }
+    header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.45;
+      max-width: 42rem;
+    }
+    .frame {
+      width: min(920px, 100%);
+      background: #fff;
+      border: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 0 color-mix(in srgb, var(--ink) 4%, transparent);
+    }
+    svg { display: block; width: 100%; height: auto; }
+    footer {
+      width: min(920px, 100%);
+      margin-top: 0.85rem;
+      font-size: 0.8rem;
+      color: var(--soft);
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>RIC — topologia local</h1>
+    <p>
+      Um processo Python no PC do protótipo; o browser em kiosk fala só com
+      <code>127.0.0.1:8787</code>. Lembretes e dados ficam no disco; a LLM é opcional
+      no caminho crítico. Telegram só para falha de crítico, se houver rede.
+    </p>
+  </header>
+
+  <div class="frame" role="img" aria-label="Diagrama de arquitetura do RIC: ecrã tactile, processo RIC, dados locais, Ollama e Telegram opcional">
+    <!--
+      diagram-design: architecture
+      profile: ric-pap (paper #f3f5f7, ink #1c2430, accent #2f6f6a)
+      source: docs/ARQUITETURA.md §5.1
+    -->
+    <svg viewBox="0 0 920 520" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI', 'IBM Plex Sans', system-ui, sans-serif">
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 1.5 L 9 5 L 0 8.5 Z" fill="#1c2430" />
+        </marker>
+        <marker id="arrow-soft" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 1.5 L 9 5 L 0 8.5 Z" fill="#8a93a0" />
+        </marker>
+      </defs>
+
+      <rect width="920" height="520" fill="#ffffff" />
+
+      <!-- Zone: pessoa -->
+      <rect x="40" y="36" width="840" height="100" rx="8" fill="rgba(28,36,48,0.02)" stroke="rgba(28,36,48,0.10)" stroke-width="0.8" />
+      <rect x="392" y="40" width="136" height="12" rx="2" fill="#ffffff" />
+      <text x="460" y="49" fill="#8a93a0" font-size="7" text-anchor="middle" letter-spacing="0.14em">PESSOA · ECRÃ</text>
+
+      <!-- Zone: máquina RIC -->
+      <rect x="40" y="156" width="840" height="248" rx="8" fill="rgba(28,36,48,0.02)" stroke="rgba(28,36,48,0.10)" stroke-width="0.8" />
+      <rect x="368" y="160" width="184" height="12" rx="2" fill="#ffffff" />
+      <text x="460" y="169" fill="#8a93a0" font-size="7" text-anchor="middle" letter-spacing="0.14em">MÁQUINA RIC · OFFLINE-FIRST</text>
+
+      <!-- Zone: opcional -->
+      <rect x="40" y="424" width="840" height="72" rx="8" fill="rgba(28,36,48,0.015)" stroke="rgba(28,36,48,0.08)" stroke-width="0.8" stroke-dasharray="4,3" />
+      <rect x="380" y="428" width="160" height="12" rx="2" fill="#ffffff" />
+      <text x="460" y="437" fill="#8a93a0" font-size="7" text-anchor="middle" letter-spacing="0.14em">OPCIONAL · SE HOUVER REDE</text>
+
+      <!-- Arrows (behind nodes) -->
+      <!-- kiosk → ric -->
+      <path d="M 460 128 V 196" fill="none" stroke="#1c2430" stroke-width="1.2" marker-end="url(#arrow)" />
+      <text x="472" y="168" fill="#5a6573" font-size="10">REST /api/v1 · WS /ws</text>
+
+      <!-- ric → sqlite -->
+      <path d="M 318 278 H 236" fill="none" stroke="#1c2430" stroke-width="1.2" marker-end="url(#arrow)" />
+      <text x="250" y="268" fill="#5a6573" font-size="10">ler / escrever</text>
+
+      <!-- ric → ollama -->
+      <path d="M 602 278 H 684" fill="none" stroke="#1c2430" stroke-width="1.2" marker-end="url(#arrow)" />
+      <text x="618" y="268" fill="#5a6573" font-size="10">tools P1</text>
+
+      <!-- ric → telegram (dashed) -->
+      <path d="M 460 320 V 456" fill="none" stroke="#8a93a0" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow-soft)" />
+      <text x="472" y="400" fill="#8a93a0" font-size="10">crítico sem confirmação</text>
+
+      <!-- Node: kiosk -->
+      <rect x="320" y="68" width="280" height="60" rx="8" fill="#ffffff" stroke="#1c2430" stroke-width="1.2" />
+      <text x="460" y="94" fill="#1c2430" font-size="14" font-weight="600" text-anchor="middle">Browser kiosk</text>
+      <text x="460" y="112" fill="#5a6573" font-size="11" text-anchor="middle">rosto · toque · http://127.0.0.1:8787</text>
+
+      <!-- Node: processo RIC (focal) -->
+      <rect x="318" y="196" width="284" height="124" rx="8" fill="#ffffff" stroke="#2f6f6a" stroke-width="2" />
+      <text x="460" y="228" fill="#2f6f6a" font-size="15" font-weight="650" text-anchor="middle">Processo RIC</text>
+      <text x="460" y="248" fill="#5a6573" font-size="11" text-anchor="middle">ric.service · um processo Python</text>
+      <text x="460" y="274" fill="#1c2430" font-size="11" text-anchor="middle">core · reminders · voice · llm</text>
+      <text x="460" y="292" fill="#1c2430" font-size="11" text-anchor="middle">music · stories · notify · web</text>
+
+      <!-- Node: dados (focal store) -->
+      <rect x="72" y="236" width="164" height="88" rx="8" fill="#ffffff" stroke="#2f6f6a" stroke-width="2" />
+      <text x="154" y="270" fill="#2f6f6a" font-size="13" font-weight="650" text-anchor="middle">ric-data</text>
+      <text x="154" y="290" fill="#1c2430" font-size="11" text-anchor="middle">SQLite · música</text>
+      <text x="154" y="306" fill="#1c2430" font-size="11" text-anchor="middle">histórias · vozes</text>
+
+      <!-- Node: Ollama -->
+      <rect x="684" y="236" width="164" height="88" rx="8" fill="#ffffff" stroke="#1c2430" stroke-width="1.2" />
+      <text x="766" y="270" fill="#1c2430" font-size="13" font-weight="600" text-anchor="middle">Ollama</text>
+      <text x="766" y="290" fill="#5a6573" font-size="11" text-anchor="middle">qwen2.5:3b</text>
+      <text x="766" y="306" fill="#5a6573" font-size="11" text-anchor="middle">local · conversa</text>
+
+      <!-- Node: Telegram -->
+      <rect x="360" y="448" width="200" height="36" rx="8" fill="#ffffff" stroke="#8a93a0" stroke-width="1" stroke-dasharray="4,3" />
+      <text x="460" y="471" fill="#5a6573" font-size="12" text-anchor="middle">Telegram · aviso cuidador</text>
+    </svg>
+  </div>
+
+  <footer>
+    Fonte: <code>docs/ARQUITETURA.md</code> §5.1 · Tokens RIC (papel frio, tinta #1c2430, acento #2f6f6a).
+    Abrir este ficheiro no browser. Para o relatório, exporta PDF/PNG a partir da página.
+  </footer>
+</body>
+</html>

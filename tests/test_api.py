@@ -17,7 +17,13 @@ from ric.web.server import RicApp, make_handler
 
 @pytest.fixture()
 def http_server(tmp_path: Path):
-    settings = Settings(data_dir=tmp_path, host="127.0.0.1", port=0)
+    # wake_enabled=False: testes sem descarregar openWakeWord / abrir microfone
+    settings = Settings(
+        data_dir=tmp_path,
+        host="127.0.0.1",
+        port=0,
+        wake_enabled=False,
+    )
     app = RicApp(settings)
     handler = make_handler(app)
     server = ThreadingHTTPServer(("127.0.0.1", 0), handler)

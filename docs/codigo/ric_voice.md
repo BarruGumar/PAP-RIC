@@ -16,11 +16,10 @@ Respostas (`stem="reply"`): ritmo **1.20** via `length_scale_for_stem`.
 py -m pip install piper-tts
 ```
 
-**Default guardado:** `ric-data/vozes/pt_PT-tugao-medium.onnx`.
+**Default guardado:** `ric-data/vozes/pt_PT-tugao-medium.onnx` (**Piper 1.5.0**, retrain HF 2026-11-13).  
+Backup: `ric-data/vozes/extras/pt_PT-tugao-medium-v1.0.onnx`.
 
 **Nota:** Chatterbox (Resemble AI) foi testado e **descartado** na PAP — demasiado pesado/lento para o hardware alvo.
-
-**Backlog Piper:** tugão quality em `extras/` (ver [`PLANEAMENTO.md`](../PLANEAMENTO.md)).
 
 ```text
 py -m ric voices
@@ -29,11 +28,19 @@ py -m ric say "…" --model extras/OUTRA.onnx
 
 Health: `/api/v1/health` → `voice.engine` / `voice.piper`.
 
-## Wake (`wake.py`)
+## Wake (`wake.py` + `oww_detector.py`)
 
 - `WakeWordService`: callback `on_detect`.
 - **Sempre** disponível: `trigger_manual()` (botão «Falar» / `POST /api/v1/voice/wake`).
-- openWakeWord contínuo: só quando houver detector injectado com modelo «RIC» (`ric-data/wake/` — ainda por treinar/ligar).
+- **Contínuo:** `OpenWakeWordDetector` (`sounddevice` 16 kHz + openWakeWord).
+  - Frase alvo: **«ei RIC»** (`ric-data/wake/ric.onnx` quando instalado).
+  - Modelo: `RIC_WAKE_MODEL` → `ric-data/wake/ric.onnx` → fallback temporário **`hey_jarvis`**.
+  - Pausa em `listening` / `thinking` / `speaking` / `alert` (anti-eco).
+  - Debounce ~1,5 s; limiar `RIC_WAKE_THRESHOLD` (default 0,5).
+  - Desligar: `RIC_WAKE_ENABLED=0`. Sem deps → modo `manual`.
+- Setup base (1×): `py -m pip install openwakeword sounddevice numpy` → `py -m ric wake-setup`.
+- Treino «ei RIC»: roteiro Colab [`docs/ROTEIRO-WAKE-EI-RIC.md`](../ROTEIRO-WAKE-EI-RIC.md) → `py -m ric wake-install CAMINHO\ei_ric.onnx`.
+- Health: `voice.wake.mode` (`openwakeword`|`manual`), `phrase`, `model`.
 
 ## STT (`stt.py`)
 

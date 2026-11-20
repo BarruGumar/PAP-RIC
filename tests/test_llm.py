@@ -45,7 +45,10 @@ def test_greeting_skips_tools() -> None:
 def test_listar_lembretes_tool(tmp_path: Path) -> None:
     svc = _reminders(tmp_path)
     svc.create(titulo="Água", hora="15:00", tipo="tarefa")
+    old = svc.create(titulo="Velho", hora="10:00", tipo="tarefa", diario=False)
+    svc.confirm(old.id)
     seen_tools: list[object] = []
+    listed_payloads: list[str] = []
 
     def chat_fn(messages, tools):
         seen_tools.append(tools)
@@ -65,6 +68,7 @@ def test_listar_lembretes_tool(tmp_path: Path) -> None:
                     ],
                 }
             }
+        listed_payloads.append(user_turns[0].get("content") or "")
         return {
             "message": {
                 "role": "assistant",
@@ -76,6 +80,27 @@ def test_listar_lembretes_tool(tmp_path: Path) -> None:
     reply = llm.chat("Quais são os meus lembretes?")
     assert "Água" in reply
     assert seen_tools[0] is not None
+    assert "Água" in listed_payloads[0]
+    assert "Velho" not in listed_payloads[0]
+
+
+def test_chat_hides_raw_tool_name() -> None:
+    llm = LlmService(
+        reminders=None,
+        chat_fn=lambda _messages, _tools: {
+            "message": {"role": "assistant", "content": "LISTAR_LEMBRETES"}
+        },
+    )
+    reply = llm.chat("Quais são os meus lembretes?")
+    assert "listar" not in reply.lower()
+    assert "lembrete" in reply.lower() or "repetir" in reply.lower()
+
+
+def test_chat_hides_embedded_tool_name() -> None:
+    from ric.llm.service import sanitize_assistant_reply
+
+    assert "listar" not in sanitize_assistant_reply("Usei listar_lembretes agora.").lower()
+    assert "água" in sanitize_assistant_reply("Tens água às 15:00.").lower()
 
 
 def test_criar_lembrete_tool_persists(tmp_path: Path) -> None:

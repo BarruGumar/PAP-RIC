@@ -12,10 +12,12 @@ Cliente **Ollama** local (`qwen2.5:3b` por defeito) + tools P1 mínimas.
 
 ## Tools (esta fatia)
 
-- `listar_lembretes` — leitura
+- `listar_lembretes` — só **activos** (`pendente` / `adiado` / `disparado`), com `proximo_em`
 - `proximo_lembrete` — leitura
 - `criar_lembrete` — cria rotina **não médica** (`tarefa` / `consulta` / `outro`) com `titulo` + `hora` HH:MM
 - `apagar_lembrete` — apaga rotina **autorizada** (não médica / não crítica) por `id` ou `titulo`
+
+`sanitize_assistant_reply` evita vazar nomes crus de tools para a UI/voz (ex.: `LISTAR_LEMBRETES`).
 
 **Proibido:** criar/apagar/editar medicamentos ou críticos (só cuidador com PIN).  
 Após criar/apagar por voz publica `reminders_changed` + `next_reminder` no WebSocket.

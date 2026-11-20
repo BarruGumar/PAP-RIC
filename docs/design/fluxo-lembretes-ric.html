@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RIC — fluxo de lembretes</title>
+  <style>
+    :root {
+      --paper: #f3f5f7;
+      --ink: #1c2430;
+      --muted: #5a6573;
+      --soft: #8a93a0;
+      --accent: #2f6f6a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "Segoe UI", "IBM Plex Sans", system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem 3rem;
+    }
+    header { width: min(920px, 100%); margin-bottom: 1.25rem; }
+    header h1 { margin: 0 0 0.35rem; font-size: 1.35rem; font-weight: 650; letter-spacing: -0.02em; }
+    header p { margin: 0; color: var(--muted); font-size: 0.95rem; line-height: 1.45; max-width: 46rem; }
+    .frame {
+      width: min(920px, 100%);
+      background: #fff;
+      border: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    svg { display: block; width: 100%; height: auto; }
+    footer {
+      width: min(920px, 100%);
+      margin-top: 0.85rem;
+      font-size: 0.8rem;
+      color: var(--soft);
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>RIC — fluxo de lembretes</h1>
+    <p>
+      O disparo é relógio local + SQLite: não depende da LLM nem da Internet.
+      Só o ramo crítico sem confirmação tenta Telegram (se houver rede).
+    </p>
+  </header>
+
+  <div class="frame" role="img" aria-label="Fluxograma do ciclo de lembretes do RIC">
+    <!--
+      diagram-design: flowchart
+      profile: ric-pap
+      source: docs/ARQUITETURA.md §4.2, §4.3, §6.3, §6.10
+    -->
+    <svg viewBox="0 0 920 680" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI', 'IBM Plex Sans', system-ui, sans-serif">
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 1.5 L 9 5 L 0 8.5 Z" fill="#1c2430" />
+        </marker>
+        <marker id="arrow-soft" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 1.5 L 9 5 L 0 8.5 Z" fill="#8a93a0" />
+        </marker>
+      </defs>
+
+      <rect width="920" height="680" fill="#ffffff" />
+
+      <!-- Start -->
+      <rect x="330" y="28" width="260" height="48" rx="24" fill="#ffffff" stroke="#2f6f6a" stroke-width="2" />
+      <text x="460" y="57" fill="#2f6f6a" font-size="14" font-weight="650" text-anchor="middle">Hora do lembrete</text>
+
+      <path d="M 460 76 V 100" fill="none" stroke="#1c2430" stroke-width="1.2" marker-end="url(#arrow)" />
+
+      <!-- Interrupt -->
+      <rect x="300" y="100" width="320" height="56" rx="8" fill="#ffffff" stroke="#1c2430" stroke-width="1.2" />
+      <text x="460" y="124" fill="#1c2430" font-size="13" font-weight="600" text-anchor="middle">Pausa música · rosto alert</text>
+      <text x="460" y="142" fill="#5a6573" font-size="11" text-anchor="middle">TTS (Piper; fallback sistema)</text>
+
+      <path d="M 460 156 V 180" fill="none" stroke="#1c2430" stroke-width="1.2" marker-end="url(#arrow)" />
+
+      <!-- Choice confirm -->
+      <path d="M 460 180 L 580 230 L 460 280 L 340 230 Z" fill="#ffffff" stroke="#1c2430" stroke-width="1.2" />
+      <text x="460" y="226" fill="#1c2430" font-size="12" font-weight="600" text-anchor="middle">Resposta?</text>
+      <text x="460" y="244" fill="#5a6573" font-size="10" text-anchor="middle">Já fiz / Adiar</text>
+
+      <!-- Yes branch left -->
+      <path d="M 340 230 H 160 V 310" fill="none" stroke="#1c2430" stroke-width="1.2" marker-end="url(#arrow)" />
+      <text x="200" y="222" fill="#5a6573" font-size="11">sim</text>
+
+      <rect x="70" y="310" width="180" height="64" rx="8" fill="#ffffff" stroke="#2f6f6a" stroke-width="2" />
+      <text x="160" y="336" fill="#2f6f6a" font-size="13" font-weight="650" text-anchor="middle">Regista · retoma</text>
+      <text x="160" y="356" fill="#5a6573" font-size="11" text-anchor="middle">música se havia</text>
+
+      <!-- No branch down -->
+      <path d="M 460 280 V 320" fill="none" stroke="#1c2430" stroke-width="1.2" marker-end="url(#arrow)" />
+      <text x="472" y="304" fill="#5a6573" font-size="11">não / silêncio</text>
+
+      <!-- Retry diamond -->
+      <path d="M 460 320 L 580 370 L 460 420 L 340 370 Z" fill="#ffffff" stroke="#1c2430" stroke-width="1.2" />
+      <text x="460" y="366" fill="#1c2430" font-size="12" font-weight="600" text-anchor="middle">Retries &lt; N?</text>
+      <text x="460" y="384" fill="#5a6573" font-size="10" text-anchor="middle">N≈3 · ~2 min</text>
+
+      <!-- Retry yes loop -->
+      <path d="M 580 370 H 720 V 128 H 620" fill="none" stroke="#1c2430" stroke-width="1.2" marker-end="url(#arrow)" />
+      <text x="640" y="160" fill="#5a6573" font-size="11">sim → novo aviso</text>
+
+      <!-- Retry no -->
+      <path d="M 460 420 V 456" fill="none" stroke="#1c2430" stroke-width="1.2" marker-end="url(#arrow)" />
+      <text x="472" y="444" fill="#5a6573" font-size="11">não</text>
+
+      <!-- Critical? -->
+      <path d="M 460 456 L 580 506 L 460 556 L 340 506 Z" fill="#ffffff" stroke="#1c2430" stroke-width="1.2" />
+      <text x="460" y="502" fill="#1c2430" font-size="12" font-weight="600" text-anchor="middle">Crítico?</text>
+      <text x="460" y="520" fill="#5a6573" font-size="10" text-anchor="middle">medicação / flag</text>
+
+      <!-- Critical no -->
+      <path d="M 340 506 H 160 V 560" fill="none" stroke="#1c2430" stroke-width="1.2" marker-end="url(#arrow)" />
+      <text x="220" y="498" fill="#5a6573" font-size="11">não</text>
+
+      <rect x="70" y="560" width="180" height="56" rx="8" fill="#ffffff" stroke="#1c2430" stroke-width="1.2" />
+      <text x="160" y="586" fill="#1c2430" font-size="13" font-weight="600" text-anchor="middle">Estado expirado</text>
+      <text x="160" y="604" fill="#5a6573" font-size="11" text-anchor="middle">log local</text>
+
+      <!-- Critical yes -->
+      <path d="M 580 506 H 760 V 560" fill="none" stroke="#2f6f6a" stroke-width="1.4" marker-end="url(#arrow)" />
+      <text x="640" y="498" fill="#2f6f6a" font-size="11">sim</text>
+
+      <rect x="670" y="560" width="180" height="72" rx="8" fill="#ffffff" stroke="#2f6f6a" stroke-width="2" stroke-dasharray="4,3" />
+      <text x="760" y="588" fill="#2f6f6a" font-size="13" font-weight="650" text-anchor="middle">notify Telegram</text>
+      <text x="760" y="608" fill="#5a6573" font-size="11" text-anchor="middle">se net; senão fila</text>
+      <text x="760" y="622" fill="#8a93a0" font-size="10" text-anchor="middle">+ estado expirado</text>
+
+      <!-- Ethics note -->
+      <rect x="300" y="600" width="320" height="48" rx="8" fill="rgba(28,36,48,0.03)" stroke="rgba(28,36,48,0.10)" stroke-width="0.8" />
+      <text x="460" y="620" fill="#1c2430" font-size="11" text-anchor="middle">Críticos: só cuidador (PIN). Sem dose/diagnóstico.</text>
+      <text x="460" y="636" fill="#5a6573" font-size="10" text-anchor="middle">LLM não cria medicação.</text>
+    </svg>
+  </div>
+
+  <footer>
+    Fonte: <code>docs/ARQUITETURA.md</code> §4.2–4.3, §6.3, §6.10 · Tokens RIC.
+  </footer>
+</body>
+</html>

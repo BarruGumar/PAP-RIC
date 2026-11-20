@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RIC — máquina de estados</title>
+  <style>
+    :root {
+      --paper: #f3f5f7;
+      --ink: #1c2430;
+      --muted: #5a6573;
+      --soft: #8a93a0;
+      --accent: #2f6f6a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "Segoe UI", "IBM Plex Sans", system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem 3rem;
+    }
+    header { width: min(920px, 100%); margin-bottom: 1.25rem; }
+    header h1 { margin: 0 0 0.35rem; font-size: 1.35rem; font-weight: 650; letter-spacing: -0.02em; }
+    header p { margin: 0; color: var(--muted); font-size: 0.95rem; line-height: 1.45; max-width: 44rem; }
+    .frame {
+      width: min(920px, 100%);
+      background: #fff;
+      border: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    svg { display: block; width: 100%; height: auto; }
+    footer {
+      width: min(920px, 100%);
+      margin-top: 0.85rem;
+      font-size: 0.8rem;
+      color: var(--soft);
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>RIC — máquina de estados</h1>
+    <p>
+      Ciclo normal de conversa: Idle → Listening → Thinking → Speaking → Idle.
+      Alerta de lembrete tem prioridade sobre fala e música; o rosto no ecrã só espelha o estado.
+    </p>
+  </header>
+
+  <div class="frame" role="img" aria-label="Máquina de estados do RIC com ciclo de voz e interrupção por alerta de lembrete">
+    <!--
+      diagram-design: state machine
+      profile: ric-pap
+      source: docs/ARQUITETURA.md §4.1, §6.2
+    -->
+    <svg viewBox="0 0 920 560" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI', 'IBM Plex Sans', system-ui, sans-serif">
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 1.5 L 9 5 L 0 8.5 Z" fill="#1c2430" />
+        </marker>
+        <marker id="arrow-accent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 1.5 L 9 5 L 0 8.5 Z" fill="#2f6f6a" />
+        </marker>
+        <marker id="arrow-soft" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 1.5 L 9 5 L 0 8.5 Z" fill="#8a93a0" />
+        </marker>
+      </defs>
+
+      <rect width="920" height="560" fill="#ffffff" />
+
+      <!-- Zone: ciclo conversa -->
+      <rect x="40" y="36" width="840" height="300" rx="8" fill="rgba(28,36,48,0.02)" stroke="rgba(28,36,48,0.10)" stroke-width="0.8" />
+      <rect x="360" y="40" width="200" height="12" rx="2" fill="#ffffff" />
+      <text x="460" y="49" fill="#8a93a0" font-size="7" text-anchor="middle" letter-spacing="0.14em">CICLO DE CONVERSA</text>
+
+      <!-- Zone: prioridade -->
+      <rect x="40" y="360" width="840" height="168" rx="8" fill="rgba(47,111,106,0.04)" stroke="rgba(47,111,106,0.25)" stroke-width="0.8" />
+      <rect x="352" y="364" width="216" height="12" rx="2" fill="#ffffff" />
+      <text x="460" y="373" fill="#2f6f6a" font-size="7" text-anchor="middle" letter-spacing="0.14em">PRIORIDADE · LEMBRETE</text>
+
+      <!-- Cycle arrows -->
+      <!-- Idle → Listening -->
+      <path d="M 250 120 H 318" fill="none" stroke="#1c2430" stroke-width="1.2" marker-end="url(#arrow)" />
+      <text x="258" y="110" fill="#5a6573" font-size="10">«ei RIC» / Falar</text>
+
+      <!-- Listening → Thinking -->
+      <path d="M 482 120 H 550" fill="none" stroke="#1c2430" stroke-width="1.2" marker-end="url(#arrow)" />
+      <text x="490" y="110" fill="#5a6573" font-size="10">fim STT</text>
+
+      <!-- Thinking → Speaking -->
+      <path d="M 714 148 V 196" fill="none" stroke="#1c2430" stroke-width="1.2" marker-end="url(#arrow)" />
+      <text x="724" y="178" fill="#5a6573" font-size="10">resposta</text>
+
+      <!-- Speaking → Idle (L path) -->
+      <path d="M 630 236 H 154 Q 146 236 146 228 V 148" fill="none" stroke="#1c2430" stroke-width="1.2" marker-end="url(#arrow)" />
+      <text x="280" y="252" fill="#5a6573" font-size="10">fim TTS → Idle</text>
+
+      <!-- Thinking timeout dashed back -->
+      <path d="M 630 120 H 250" fill="none" stroke="#8a93a0" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow-soft)" />
+      <text x="380" y="92" fill="#8a93a0" font-size="10">timeout LLM ~8–12 s</text>
+
+      <!-- States: Idle (start-ish) -->
+      <rect x="86" y="88" width="164" height="60" rx="30" fill="#ffffff" stroke="#2f6f6a" stroke-width="2" />
+      <text x="168" y="114" fill="#2f6f6a" font-size="14" font-weight="650" text-anchor="middle">Idle</text>
+      <text x="168" y="132" fill="#5a6573" font-size="11" text-anchor="middle">wake · rosto calmo</text>
+
+      <!-- Listening -->
+      <rect x="318" y="88" width="164" height="60" rx="8" fill="#ffffff" stroke="#1c2430" stroke-width="1.2" />
+      <text x="400" y="114" fill="#1c2430" font-size="14" font-weight="600" text-anchor="middle">Listening</text>
+      <text x="400" y="132" fill="#5a6573" font-size="11" text-anchor="middle">STT · Whisper</text>
+
+      <!-- Thinking -->
+      <rect x="550" y="88" width="164" height="60" rx="8" fill="#ffffff" stroke="#1c2430" stroke-width="1.2" />
+      <text x="632" y="114" fill="#1c2430" font-size="14" font-weight="600" text-anchor="middle">Thinking</text>
+      <text x="632" y="132" fill="#5a6573" font-size="11" text-anchor="middle">Ollama + tools</text>
+
+      <!-- Speaking -->
+      <rect x="550" y="206" width="164" height="60" rx="8" fill="#ffffff" stroke="#1c2430" stroke-width="1.2" />
+      <text x="632" y="232" fill="#1c2430" font-size="14" font-weight="600" text-anchor="middle">Speaking</text>
+      <text x="632" y="250" fill="#5a6573" font-size="11" text-anchor="middle">Piper TTS</text>
+
+      <!-- Side states music/story -->
+      <rect x="86" y="206" width="164" height="52" rx="8" fill="#ffffff" stroke="#8a93a0" stroke-width="1" stroke-dasharray="4,3" />
+      <text x="168" y="228" fill="#5a6573" font-size="12" font-weight="600" text-anchor="middle">music / story</text>
+      <text x="168" y="244" fill="#8a93a0" font-size="10" text-anchor="middle">paralelo ao Idle</text>
+
+      <text x="60" y="310" fill="#5a6573" font-size="11">Prioridade de eventos: alerta de lembrete &gt; fala &gt; música</text>
+
+      <!-- Alert node (focal) -->
+      <rect x="318" y="404" width="284" height="88" rx="8" fill="#ffffff" stroke="#2f6f6a" stroke-width="2" />
+      <text x="460" y="436" fill="#2f6f6a" font-size="15" font-weight="650" text-anchor="middle">Alert</text>
+      <text x="460" y="456" fill="#1c2430" font-size="12" text-anchor="middle">pausa música · TTS · Já fiz / Adiar</text>
+      <text x="460" y="474" fill="#5a6573" font-size="11" text-anchor="middle">wake-word não cancela o alerta</text>
+
+      <!-- Into alert from anywhere (conceptual) -->
+      <path d="M 168 148 V 448 H 318" fill="none" stroke="#2f6f6a" stroke-width="1.4" marker-end="url(#arrow-accent)" />
+      <text x="56" y="300" fill="#2f6f6a" font-size="10" transform="rotate(-90 56 300)">hora do lembrete</text>
+    </svg>
+  </div>
+
+  <footer>
+    Fonte: <code>docs/ARQUITETURA.md</code> §4.1, §6.1–6.2 · Tokens RIC.
+  </footer>
+</body>
+</html>
